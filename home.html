@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +8,6 @@
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="container">
             <nav>
@@ -30,19 +30,23 @@
                         <div class="notifications">🔔</div>
                         <div class="user-avatar">JD</div>
                     </div>
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle" class="theme-input">
+                        <div class="slider">
+                            <span class="icon sun">☀️</span>
+                            <span class="icon moon">🌙</span>
+                        </div>
+                    </label>
                     <a href="#" class="btn btn-primary">Join Club</a>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
             <div class="content-layout">
-                <!-- Left Content -->
                 <div class="main-section">
-                    <!-- Welcome Card -->
                     <div class="welcome-card">
                         <div class="welcome-character">
                             <div class="character-avatar">👨‍💻</div>
@@ -54,7 +58,6 @@
                         </div>
                     </div>
 
-                    <!-- Explore More -->
                     <section class="explore-section">
                         <h2>Explore more</h2>
                         <div class="explore-grid">
@@ -65,7 +68,6 @@
                                     <p>Practice what you learned with bite-sized habit challenges.</p>
                                 </div>
                             </div>
-                            
                             <div class="explore-card">
                                 <div class="card-icon tutorial">🚀</div>
                                 <div class="card-content">
@@ -73,7 +75,6 @@
                                     <p>Explore fun, step-by-step projects from beginner to advanced.</p>
                                 </div>
                             </div>
-                            
                             <div class="explore-card">
                                 <div class="card-icon community">🌟</div>
                                 <div class="card-content">
@@ -81,7 +82,6 @@
                                     <p>Commit to 30 days of learning and building while making progress visible.</p>
                                 </div>
                             </div>
-                            
                             <div class="explore-card">
                                 <div class="card-icon builds">🛠️</div>
                                 <div class="card-content">
@@ -92,13 +92,11 @@
                         </div>
                     </section>
 
-                    <!-- New Habit Tutorials -->
                     <section class="tutorials-section">
                         <div class="section-header">
                             <h2>New habit tutorials</h2>
                             <a href="#" class="see-all-link">See all</a>
                         </div>
-                        
                         <div class="tutorials-grid">
                             <div class="tutorial-card">
                                 <div class="tutorial-image fitness-bg">
@@ -113,7 +111,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="tutorial-card">
                                 <div class="tutorial-image coding-bg">
                                     <div class="tutorial-icon-large">💻</div>
@@ -127,7 +124,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="tutorial-card">
                                 <div class="tutorial-image reading-bg">
                                     <div class="tutorial-icon-large">📚</div>
@@ -144,7 +140,6 @@
                         </div>
                     </section>
 
-                    <!-- Invite Section -->
                     <section class="invite-section">
                         <div class="invite-card">
                             <div class="invite-character">
@@ -155,24 +150,26 @@
                                 <p>Having fun? Share the love with a friend for free! Enter an email and we'll send them a personal invite 💌</p>
                                 <div class="invite-form">
                                     <input type="email" placeholder="Your friend's email" class="email-input">
-                                    <button class="btn btn-invite">Send Invite</button>
+                                    <button class="btn btn-primary btn-invite">Send Invite</button>
                                 </div>
                             </div>
                         </div>
                     </section>
                 </div>
 
-                <!-- Right Sidebar -->
                 <div class="sidebar">
-                    <div class="profile-sidebar">
+                    <div class="sidebar-widget profile-sidebar">
                         <div class="profile-card-sidebar">
-                            <div class="profile-avatar">
-                                <div class="avatar-circle">JD</div>
-                            </div>
+                            <div class="avatar-circle">JD</div>
                             <div class="profile-details">
                                 <h3>John Doe</h3>
-                                <div class="level-info">Level 1</div>
-                                <div class="xp-info">0 XP</div>
+                                <div class="level-display">
+                                    <span class="level-text">Level 1</span>
+                                    <span class="xp-count">150 / 500 XP</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 30%;"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -181,7 +178,7 @@
                                 <span class="achievement-icon">🥉</span>
                                 <span class="achievement-text">Bronze</span>
                             </div>
-                            <div class="achievement-item locked">
+                            <div class="achievement-item unlocked">
                                 <span class="achievement-icon">🔥</span>
                                 <span class="achievement-text">3 day streak</span>
                             </div>
@@ -194,58 +191,31 @@
                                 <span class="achievement-text">Gold streak</span>
                             </div>
                         </div>
-
                         <button class="view-profile-sidebar">View profile</button>
                     </div>
 
-                    <!-- Upcoming Events -->
-                    <div class="events-sidebar">
-                        <h4>Upcoming Events</h4>
-                        <div class="events-list">
-                            <div class="event-sidebar">
-                                <div class="event-date-small">
-                                    <span class="day">27</span>
-                                    <span class="month">AUG</span>
-                                </div>
-                                <div class="event-details">
-                                    <div class="event-name">Morning Routine Bootcamp</div>
-                                    <div class="event-time">Wed Aug 27th @ 6:00am ET</div>
-                                </div>
-                            </div>
-                            
-                            <div class="event-sidebar">
-                                <div class="event-date-small">
-                                    <span class="day">10</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="event-details">
-                                    <div class="event-name">30-Day Challenge Kickoff</div>
-                                    <div class="event-time">Wed Sep 10th @ 3:00pm ET</div>
-                                </div>
-                            </div>
-                            
-                            <div class="event-sidebar">
-                                <div class="event-date-small">
-                                    <span class="day">1</span>
-                                    <span class="month">OCT</span>
-                                </div>
-                                <div class="event-details">
-                                    <div class="event-name">Goal Setting Workshop</div>
-                                    <div class="event-time">Wed Oct 1st @ 7:00pm ET</div>
-                                </div>
-                            </div>
+                    <div class="sidebar-widget habit-plant">
+                        <div class="plant-emoji">🌱</div>
+                        <div class="plant-info">
+                            <h4>Your Consistency Plant</h4>
+                            <p>Maintained a <strong>7-day</strong> streak!</p>
                         </div>
                     </div>
 
-                    <!-- Club Promotion -->
-                    <div class="club-sidebar">
+                    <div class="sidebar-widget events-sidebar">
+                        <h4>Upcoming Events</h4>
+                        <div class="event-sidebar">
+                             </div>
+                    </div>
+
+                    <div class="sidebar-widget club-sidebar">
                         <div class="club-header">
                             <h4>CLUB</h4>
                             <button class="close-btn">×</button>
                         </div>
                         <div class="club-content">
-                            <p>Get unlimited access to learning resources, join exclusive communities, get help from habit experts, and more.</p>
-                            <a href="#" class="btn btn-club-sidebar">Learn More</a>
+                            <p>Get unlimited access to learning resources, join exclusive communities, and more.</p>
+                            <a href="#" class="btn btn-primary btn-club-sidebar">Learn More</a>
                         </div>
                     </div>
                 </div>
@@ -253,52 +223,96 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <div class="footer-logo">
+                    <div class="logo">
                         <span class="logo-icon">🎯</span>
                         <span class="logo-text">Aadat</span>
                     </div>
                     <p>The gamified platform for building habits in public with community support.</p>
                 </div>
-                
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Product</h4>
-                        <ul>
-                            <li><a href="#">Features</a></li>
-                            <li><a href="#">Communities</a></li>
-                            <li><a href="#">Tutorials</a></li>
-                            <li><a href="#">Challenges</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-column">
-                        <h4>Company</h4>
-                        <ul>
-                            <li><a href="#">About</a></li>
-                            <li><a href="#">Blog</a></li>
-                            <li><a href="#">Careers</a></li>
-                            <li><a href="#">Contact</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-column">
-                        <h4>Resources</h4>
-                        <ul>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Community Guidelines</a></li>
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Terms</a></li>
-                        </ul>
-                    </div>
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Communities</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Challenges</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Community Guidelines</a></li>
+                        <li><a href="#">Privacy</a></li>
+                        <li><a href="#">Terms</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </footer>
 
+    <div id="toast-container" class="toast-notification">
+        Achievement Unlocked!
+    </div>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+                themeToggle.checked = true;
+            } else {
+                body.classList.remove('light-mode');
+                themeToggle.checked = false;
+            }
+        }
+
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // --- Toast Notification Logic ---
+        const toastContainer = document.getElementById('toast-container');
+
+        function showToast(message) {
+            toastContainer.textContent = message;
+            toastContainer.classList.add('show');
+
+            setTimeout(() => {
+                toastContainer.classList.remove('show');
+            }, 3000);
+        }
+
+        // Apply theme when the page loads
+        document.addEventListener('DOMContentLoaded', applySavedTheme);
+        
+        // Example of how to show the toast - you can trigger this on a real event
+        // setTimeout(() => {
+        //     showToast("🏆 Achievement Unlocked: 3-Day Streak!");
+        // }, 2000);
+
+    </script>
 </body>
 </html>
