@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadat - Build Habits in Public</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Aadat</div>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#communities">Communities</a></li>
+                    <li><a href="#leaderboard">Leaderboard</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-outline">Sign In</a>
+                    <a href="#" class="btn btn-primary">Get Started</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Build Habits in Public</h1>
+                <p>Join a community-driven platform where accountability meets gamification. Track habits, earn XP, compete on leaderboards, and grow with like-minded people.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary btn-large">Start Your Journey</a>
+                    <a href="#" class="btn btn-outline btn-large">Watch Demo</a>
+                </div>
+                
+                <!-- Hero Stats -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="10000">0</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="500000">0</div>
+                        <div class="stat-label">Habits Tracked</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="95">0</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Why Choose Aadat?</h2>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Track & Visualize</h3>
+                    <p>Beautiful progress bars, streak counters, and milestone celebrations keep you motivated on your habit journey.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">👥</div>
+                    <h3>Community Power</h3>
+                    <p>Join focused communities around coding, fitness, reading, and more. Share updates without social media distractions.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Gamified Experience</h3>
+                    <p>Earn XP, unlock achievements, climb leaderboards. Turn habit building into an engaging game.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Analytics</h3>
+                    <p>Get insights into your patterns, identify what works, and optimize your habit-building strategy.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">🔥</div>
+                    <h3>Streak System</h3>
+                    <p>Build unstoppable momentum with our advanced streak tracking and streak-freeze features for consistency.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">🎖️</div>
+                    <h3>Accountability</h3>
+                    <p>Public commitment and peer support create the accountability you need to stick to your goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Dashboard Section -->
+    <section class="demo-dashboard">
+        <div class="container">
+            <h2>Your Habit Dashboard</h2>
+            <div class="dashboard-preview">
+                <div class="dashboard-card">
+                    <div class="dashboard-header">
+                        <div class="user-profile">
+                            <div class="avatar">JD</div>
+                            <div class="user-info">
+                                <h3>John Doe</h3>
+                                <div class="level">Level 12 • 2,340 XP</div>
+                            </div>
+                        </div>
+                        <div class="streak-badge">🔥 15 Day Streak</div>
+                    </div>
+                    
+                    <div class="habits-list">
+                        <div class="habit-item completed">
+                            <div class="habit-info">
+                                <span class="habit-name">Morning Workout</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div class="habit-streak">15🔥</div>
+                        </div>
+                        <div class="habit-item">
+                            <div class="habit-info">
+                                <span class="habit-name">Read 30 Pages</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div class="habit-streak">8🔥</div>
+                        </div>
+                        <div class="habit-item">
+                            <div class="habit-info">
+                                <span class="habit-name">Code for 1 Hour</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="habit-streak">22🔥</div>
+                        </div>
+                    </div>
+
+                    <div class="achievements">
+                        <h4>Recent Achievements</h4>
+                        <div class="achievement-badges">
+                            <div class="badge">🏃 Consistency Master</div>
+                            <div class="badge">📚 Knowledge Seeker</div>
+                            <div class="badge">💻 Code Warrior</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="leaderboard-card">
+                    <h3>Community Leaderboard</h3>
+                    <div class="leaderboard-list">
+                        <div class="leaderboard-item rank-1">
+                            <span class="rank">1</span>
+                            <span class="name">Sarah Chen</span>
+                            <span class="xp">3,240 XP</span>
+                        </div>
+                        <div class="leaderboard-item rank-2">
+                            <span class="rank">2</span>
+                            <span class="name">Mike Johnson</span>
+                            <span class="xp">2,890 XP</span>
+                        </div>
+                        <div class="leaderboard-item rank-3 current-user">
+                            <span class="rank">3</span>
+                            <span class="name">You</span>
+                            <span class="xp">2,340 XP</span>
+                        </div>
+                        <div class="leaderboard-item">
+                            <span class="rank">4</span>
+                            <span class="name">Alex Rivera</span>
+                            <span class="xp">2,100 XP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Communities Section -->
+    <section class="communities" id="communities">
+        <div class="container">
+            <h2>Join Thriving Communities</h2>
+            <div class="communities-grid">
+                <div class="community-card">
+                    <div class="community-header">
+                        <h3>💻 Coding Challenge</h3>
+                        <span class="member-count">2,847 members</span>
+                    </div>
+                    <p>Daily coding practice, algorithm challenges, and project building</p>
+                    <div class="community-stats">
+                        <span>🔥 1,245 active streaks</span>
+                        <span>📈 89% completion rate</span>
+                    </div>
+                </div>
+                <div class="community-card">
+                    <div class="community-header">
+                        <h3>🏃 Fitness Warriors</h3>
+                        <span class="member-count">4,123 members</span>
+                    </div>
+                    <p>Workout routines, running challenges, and healthy lifestyle building</p>
+                    <div class="community-stats">
+                        <span>🔥 2,891 active streaks</span>
+                        <span>📈 92% completion rate</span>
+                    </div>
+                </div>
+                <div class="community-card">
+                    <div class="community-header">
+                        <h3>📚 Reading Circle</h3>
+                        <span class="member-count">1,965 members</span>
+                    </div>
+                    <p>Book recommendations, reading goals, and knowledge sharing</p>
+                    <div class="community-stats">
+                        <span>🔥 987 active streaks</span>
+                        <span>📈 86% completion rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gamification Section -->
+    <section class="gamification">
+        <div class="container">
+            <h2>Level Up Your Life</h2>
+            <div class="gamification-showcase">
+                <div class="xp-system">
+                    <h3>XP & Levels</h3>
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: 65%"></div>
+                        <span class="xp-text">1,625 / 2,500 XP</span>
+                    </div>
+                    <div class="level-info">
+                        <span class="current-level">Level 12</span>
+                        <span class="next-level">→ Level 13</span>
+                    </div>
+                </div>
+                
+                <div class="achievements-showcase">
+                    <h3>Unlock Achievements</h3>
+                    <div class="achievement-grid">
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">🏆</div>
+                            <div class="achievement-name">First Week</div>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">🔥</div>
+                            <div class="achievement-name">Streak Master</div>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">👑</div>
+                            <div class="achievement-name">Community Leader</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">💎</div>
+                            <div class="achievement-name">Diamond Habit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="container">
+            <h2>What Our Community Says</h2>
+            <div class="testimonials">
+                <div class="testimonial">
+                    <p>"Aadat helped me build a consistent coding habit. The community support is incredible!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SC</div>
+                        <div class="author-info">
+                            <div class="author-name">Sarah Chen</div>
+                            <div class="author-title">Software Engineer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <p>"Finally, a platform that keeps me accountable without the social media noise."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MJ</div>
+                        <div class="author-info">
+                            <div class="author-name">Mike Johnson</div>
+                            <div class="author-title">Fitness Enthusiast</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <p>"The gamification makes habit building addictive in the best way possible."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AR</div>
+                        <div class="author-info">
+                            <div class="author-name">Alex Rivera</div>
+                            <div class="author-title">Student</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="final-cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Transform Your Habits?</h2>
+                <p>Join thousands of people building better lives through community accountability and gamification.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary btn-large">Start Building Today</a>
+                    <a href="#" class="btn btn-outline btn-large">Explore Communities</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Aadat</h3>
+                    <p>Building habits, building community, building better lives.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Communities</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Mobile App</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Status</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Aadat. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button class="fab main-fab" id="mainFab">+</button>
+        <button class="fab secondary-fab" id="addHabit" style="display: none;">📝</button>
+        <button class="fab secondary-fab" id="joinCommunity" style="display: none;">👥</button>
+        <button class="fab secondary-fab" id="viewProgress" style="display: none;">📊</button>
+    </div>
+
+</body>
+</html>
