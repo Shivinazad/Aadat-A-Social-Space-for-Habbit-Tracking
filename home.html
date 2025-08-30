@@ -57,6 +57,23 @@
                             <a href="#" class="btn btn-get-started">Get Started</a>
                         </div>
                     </div>
+                    <section class="today-habits">
+    <div class="section-header">
+        <h2>Today's Habits</h2>
+    </div>
+    <div class="habit-list">
+        <div class="habit-item">
+            <span>💪 Morning Workout</span>
+            <span class="streak-count">🔥 12 days</span>
+            <button class="btn btn-primary btn-checkin" data-habit="Morning Workout">Check In</button>
+        </div>
+        <div class="habit-item">
+            <span>💻 Daily Coding</span>
+            <span class="streak-count">🔥 24 days</span>
+            <button class="btn btn-primary btn-checkin" data-habit="Daily Coding">Check In</button>
+        </div>
+    </div>
+</section>
 
                     <section class="explore-section">
                         <h2>Explore more</h2>
@@ -314,5 +331,90 @@
         // }, 2000);
 
     </script>
+    <div id="checkin-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Check-in: Daily Coding</h2>
+            <button id="modal-close-btn" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <textarea id="modal-textarea" placeholder="What did you accomplish today? Share your progress..."></textarea>
+            <div id="char-counter" class="char-counter">280</div>
+        </div>
+        <div class="modal-footer">
+            <button id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+            <button id="modal-post-btn" class="btn btn-primary">Post</button>
+        </div>
+    </div>
+</div>
+<script>
+    // --- Theme Toggle Logic (Existing) ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    function applySavedTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            themeToggle.checked = true;
+        } else {
+            body.classList.remove('light-mode');
+            themeToggle.checked = false;
+        }
+    }
+    themeToggle.addEventListener('change', () => {
+        body.classList.toggle('light-mode');
+        localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+    });
+    document.addEventListener('DOMContentLoaded', applySavedTheme);
+    
+    // --- NEW: Check-in Modal Logic ---
+    const checkinModal = document.getElementById('checkin-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const checkinButtons = document.querySelectorAll('.btn-checkin');
+
+    // Function to open the modal
+    function openModal(habitName) {
+        modalTitle.textContent = `Check-in: ${habitName}`;
+        checkinModal.classList.add('open');
+    }
+
+    // Function to close the modal
+    function closeModal() {
+        checkinModal.classList.remove('open');
+    }
+
+    // Add event listeners to all "Check In" buttons
+    checkinButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const habitName = button.getAttribute('data-habit');
+            openModal(habitName);
+        });
+    });
+
+    // Event listeners to close the modal
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalCancelBtn.addEventListener('click', closeModal);
+    checkinModal.addEventListener('click', (event) => {
+        // Close modal only if the overlay itself is clicked, not the content
+        if (event.target === checkinModal) {
+            closeModal();
+        }
+    });
+
+    // Character counter for textarea
+    const textarea = document.getElementById('modal-textarea');
+    const charCounter = document.getElementById('char-counter');
+    const maxChars = 280;
+
+    textarea.addEventListener('input', () => {
+        const remaining = maxChars - textarea.value.length;
+        charCounter.textContent = remaining;
+        charCounter.style.color = remaining < 20 ? 'orange' : (remaining < 0 ? 'red' : 'var(--text-secondary)');
+    });
+
+</script>
 </body>
 </html>
