@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aadat - Login & Sign Up</title>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="Login.css">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
             </div>
 
             <div id="login-form" class="form-section active">
-                <form>
+                <form action="home.html">
                     <div class="input-group">
                         <label for="login-email">Email</label>
                         <input type="email" id="login-email" name="email" placeholder="you@example.com" required>
@@ -28,12 +28,12 @@
                         <input type="password" id="login-password" name="password" placeholder="••••••••" required>
                         <a href="#" class="forgot-password">Forgot Password?</a>
                     </div>
-                    <a href="home.html"><button type="submit" class="btn primary-btn">Log In</button></a>
+                    <button type="submit" class="btn primary-btn">Log In</button>
                 </form>
             </div>
 
             <div id="signup-form" class="form-section">
-                <form>
+                <form action="community-selection.html">
                     <div class="input-group">
                         <label for="signup-username">Username</label>
                         <input type="text" id="signup-username" name="username" placeholder="johndoe" required>
@@ -46,7 +46,7 @@
                         <label for="signup-password">Password</label>
                         <input type="password" id="signup-password" name="password" placeholder="••••••••" required>
                     </div>
-                    <a href="community-selection.html"><button type="submit" class="btn primary-btn">Sign Up</button></a>
+                    <button type="submit" class="btn primary-btn">Sign Up</button>
                 </form>
             </div>
             
@@ -74,20 +74,17 @@
             const signupForm = document.getElementById('signup-form');
             const loginBtn = document.querySelector('.toggle-btn:nth-child(1)');
             const signupBtn = document.querySelector('.toggle-btn:nth-child(2)');
-            const primaryBtn = document.querySelector('.primary-btn');
 
             if (formId === 'login') {
                 loginForm.classList.add('active');
                 signupForm.classList.remove('active');
                 loginBtn.classList.add('active');
                 signupBtn.classList.remove('active');
-                primaryBtn.textContent = 'Log In';
             } else {
                 loginForm.classList.remove('active');
                 signupForm.classList.add('active');
                 loginBtn.classList.remove('active');
                 signupBtn.classList.add('active');
-                primaryBtn.textContent = 'Sign Up';
             }
         }
     </script>
