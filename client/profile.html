@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadat - My Profile</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span class="logo-icon">🎯</span>
+                    <span class="logo-text">Aadat</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="home.html">Dashboard</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+                <div class="header-actions">
+                    <div class="user-menu">
+                        <div class="notifications">🔔</div>
+                        <div class="user-avatar">JD</div>
+                    </div>
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle" class="theme-input">
+                        <div class="slider"><span class="icon sun">☀️</span><span class="icon moon">🌙</span></div>
+                    </label>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="profile-header">
+                <div class="profile-avatar-large">
+                    <div class="avatar-circle-large">JD</div>
+                </div>
+                <div class="profile-info-main">
+                    <h1>John Doe</h1>
+                    <p class="profile-bio">Building habits in public. Day 25 of #100DaysOfCode. Let's connect and grow together!</p>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">Current Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">56</div>
+                            <div class="stat-label">Longest Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">Level 1</div>
+                            <div class="stat-label">Current Level</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">150</div>
+                            <div class="stat-label">Total XP</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="achievements-gallery">
+                <h2>Achievements</h2>
+                <div class="achievements-grid">
+                    <div class="achievement-badge unlocked">
+                        <div class="badge-icon">🔥</div>
+                        <div class="badge-name">7-Day Streak</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="badge-icon">✍️</div>
+                        <div class="badge-name">First Post</div>
+                    </div>
+                    <div class="achievement-badge unlocked">
+                        <div class="badge-icon">🚀</div>
+                        <div class="badge-name">Level 1</div>
+                    </div>
+                    <div class="achievement-badge locked">
+                        <div class="badge-icon">🗓️</div>
+                        <div class="badge-name">30-Day Streak</div>
+                    </div>
+                    <div class="achievement-badge locked">
+                        <div class="badge-icon">🚀</div>
+                        <div class="badge-name">Level 5</div>
+                    </div>
+                    <div class="achievement-badge locked">
+                        <div class="badge-icon">🏆</div>
+                        <div class="badge-name">Perfect Month</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="activity-feed">
+                <h2>My Journey</h2>
+                <div class="post-card">
+                    <div class="post-header">
+                        <span class="post-habit-tag">Daily Coding</span>
+                        <span class="post-date">August 30, 2025</span>
+                    </div>
+                    <div class="post-content">
+                        <p>Day 25: Finished the main CSS for the profile page! The grid layout for the achievements was tricky but rewarding. Feeling accomplished.</p>
+                    </div>
+                </div>
+                <div class="post-card">
+                    <div class="post-header">
+                        <span class="post-habit-tag">Morning Workout</span>
+                        <span class="post-date">August 30, 2025</span>
+                    </div>
+                    <div class="post-content">
+                        <p>Completed my 30-minute HIIT session. Tough one today but pushed through. Consistency is key!</p>
+                    </div>
+                </div>
+                 <div class="post-card">
+                    <div class="post-header">
+                        <span class="post-habit-tag">Daily Coding</span>
+                        <span class="post-date">August 29, 2025</span>
+                    </div>
+                    <div class="post-content">
+                        <p>Day 24: Worked on the check-in modal logic. The JavaScript to save the theme in localStorage is working perfectly.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer>
+       </footer>
+    
+    <script>
+    // --- Theme Toggle Logic ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    function applySavedTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            if (themeToggle) {
+                themeToggle.checked = true;
+            }
+        } else {
+            body.classList.remove('light-mode');
+            if (themeToggle) {
+                themeToggle.checked = false;
+            }
+        }
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('light-mode');
+            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+    }
+
+    // Apply theme when the page loads
+    document.addEventListener('DOMContentLoaded', applySavedTheme);
+</script>
+</body>
+</html>
