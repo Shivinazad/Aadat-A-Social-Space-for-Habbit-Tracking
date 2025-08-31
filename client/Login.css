@@ -1,0 +1,227 @@
+:root {
+    /* Dark Mode Palette (Default) */
+    --bg-primary: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --btn-primary-bg: #ffffff;
+    --btn-primary-text: #000000;
+    --btn-social-bg: #1a1a1a;
+    --btn-social-text: #ffffff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    transition: background-color 0.3s ease;
+}
+
+/* Light Mode Override */
+body.light-mode {
+    --bg-primary: #f4f4f9;
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --border-color: #e0e0e0;
+    --card-bg: #ffffff;
+    --input-bg: #f0f0f0;
+    --btn-primary-bg: #1a1a1a;
+    --btn-primary-text: #ffffff;
+    --btn-social-bg: #f0f0f0;
+    --btn-social-text: #1a1a1a;
+}
+
+.card-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 2.5em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.toggle-switch {
+    display: flex;
+    justify-content: center;
+    background: var(--input-bg);
+    border-radius: 8px;
+    margin-bottom: 30px;
+    padding: 4px;
+}
+
+.toggle-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.toggle-btn.active {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.form-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.input-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+label {
+    display: block;
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+input {
+    width: calc(100% - 24px);
+    background: var(--input-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    font-size: 1em;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--btn-primary-bg);
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-top: 8px;
+    transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+    color: var(--text-primary);
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.primary-btn {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    margin-top: 10px;
+}
+
+.primary-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    color: var(--text-secondary);
+    position: relative;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    display: inline-block;
+    width: 40%;
+    height: 1px;
+    background-color: var(--border-color);
+    vertical-align: middle;
+}
+
+.divider::before {
+    margin-right: 10px;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+.social-logins {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.social-btn {
+    background-color: var(--btn-social-bg);
+    color: var(--btn-social-text);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-btn .social-icon {
+    height: 20px;
+    width: 20px;
+    filter: invert(var(--social-icon-invert, 1));
+    transition: filter 0.2s ease;
+}
+
+body.light-mode .social-icon {
+    filter: invert(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    .card {
+        padding: 25px;
+    }
+}
