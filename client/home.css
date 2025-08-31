@@ -438,23 +438,6 @@ nav {
     font-size: 0.95rem;
 }
 
-/* Tutorials Section */
-.tutorials-section { margin-bottom: 50px; }
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-.section-header h2 {
-    font-size: 1.8rem;
-    color: var(--text-primary);
-}
-.tutorials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
 
 /* Invite & Club Sections */
 .invite-section { margin-bottom: 50px; }
@@ -541,6 +524,7 @@ nav {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
 }
 .view-profile-sidebar:hover {
     background: var(--input-bg);
