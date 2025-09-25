@@ -18,14 +18,16 @@
             </div>
 
             <div id="login-form" class="form-section active">
-                <form action="home.html">
+                <form id="loginForm" action="home.html" novalidate>
                     <div class="input-group">
                         <label for="login-email">Email</label>
                         <input type="email" id="login-email" name="email" placeholder="you@example.com" required>
+                        <div class="error-message" id="login-email-error"></div>
                     </div>
                     <div class="input-group">
                         <label for="login-password">Password</label>
                         <input type="password" id="login-password" name="password" placeholder="••••••••" required>
+                        <div class="error-message" id="login-password-error"></div>
                         <a href="#" class="forgot-password">Forgot Password?</a>
                     </div>
                     <button type="submit" class="btn primary-btn">Log In</button>
@@ -33,18 +35,21 @@
             </div>
 
             <div id="signup-form" class="form-section">
-                <form action="community-selection.html">
+                <form id="signupForm" action="community-selection.html" novalidate>
                     <div class="input-group">
                         <label for="signup-username">Username</label>
                         <input type="text" id="signup-username" name="username" placeholder="johndoe" required>
+                        <div class="error-message" id="signup-username-error"></div>
                     </div>
                     <div class="input-group">
                         <label for="signup-email">Email</label>
                         <input type="email" id="signup-email" name="email" placeholder="you@example.com" required>
+                        <div class="error-message" id="signup-email-error"></div>
                     </div>
                     <div class="input-group">
                         <label for="signup-password">Password</label>
                         <input type="password" id="signup-password" name="password" placeholder="••••••••" required>
+                        <div class="error-message" id="signup-password-error"></div>
                     </div>
                     <button type="submit" class="btn primary-btn">Sign Up</button>
                 </form>
@@ -87,6 +92,79 @@
                 signupBtn.classList.add('active');
             }
         }
+
+        function validateEmail(email) {
+            const re = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+            return re.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        function validateUsername(username) {
+            return username.trim() !== '';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            let valid = true;
+
+            const emailInput = document.getElementById('login-email');
+            const passwordInput = document.getElementById('login-password');
+            const emailError = document.getElementById('login-email-error');
+            const passwordError = document.getElementById('login-password-error');
+
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            if (!validateEmail(emailInput.value)) {
+                emailError.textContent = 'Please enter a valid email address.';
+                valid = false;
+            }
+
+            if (!validatePassword(passwordInput.value)) {
+                passwordError.textContent = 'Password must be at least 6 characters.';
+                valid = false;
+            }
+
+            if (!valid) {
+                event.preventDefault();
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            let valid = true;
+
+            const usernameInput = document.getElementById('signup-username');
+            const emailInput = document.getElementById('signup-email');
+            const passwordInput = document.getElementById('signup-password');
+            const usernameError = document.getElementById('signup-username-error');
+            const emailError = document.getElementById('signup-email-error');
+            const passwordError = document.getElementById('signup-password-error');
+
+            usernameError.textContent = '';
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            if (!validateUsername(usernameInput.value)) {
+                usernameError.textContent = 'Username cannot be empty.';
+                valid = false;
+            }
+
+            if (!validateEmail(emailInput.value)) {
+                emailError.textContent = 'Please enter a valid email address.';
+                valid = false;
+            }
+
+            if (!validatePassword(passwordInput.value)) {
+                passwordError.textContent = 'Password must be at least 6 characters.';
+                valid = false;
+            }
+
+            if (!valid) {
+                event.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>
