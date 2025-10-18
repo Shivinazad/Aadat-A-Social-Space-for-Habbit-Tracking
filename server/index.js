@@ -1,19 +1,33 @@
+// server/index.js
 
-// 1. Import Express
 const express = require('express');
+const sequelize = require('./db'); // Import the centralized connection
+const User = require('./models/User'); // Import the User model
 
-// 2. Create an Express application
 const app = express();
-
-// 3. Define the port the server will run on
 const PORT = 3000;
 
-// 4. Create a basic API endpoint (a "route")
+// Test the database connection
+async function testDbConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('Successfully connected to the MySQL database! ✅');
+
+    // Sync all defined models to the DB.
+    await sequelize.sync({ alter: true });
+    console.log("All models were synchronized successfully.");
+
+  } catch (error) {
+    console.error('Unable to connect to the database or sync models:', error);
+  }
+}
+
+testDbConnection();
+
 app.get('/', (req, res) => {
   res.json({ message: "Welcome to the Aadat API! 🎉" });
 });
 
-// 5. Start the server and listen for requests
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
