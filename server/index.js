@@ -3,7 +3,9 @@
 const express = require('express');
 const sequelize = require('./db');
 const User = require('./models/User');
-const bcrypt = require('bcrypt'); // Make sure you ran 'npm install bcrypt'
+const Habit = require('./models/Habit');
+const Post = require('./models/Post');   
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = 3000;
