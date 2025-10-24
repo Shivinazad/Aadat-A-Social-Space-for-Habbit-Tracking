@@ -2,6 +2,7 @@
 require('dotenv').config(); 
 
 const express = require('express');
+<<<<<<< HEAD
 const bcrypt = require('bcrypt'); 
 const jwt = require('jsonwebtoken'); 
 const { Sequelize, DataTypes } = require('sequelize'); 
@@ -11,6 +12,13 @@ const { Sequelize, DataTypes } = require('sequelize');
 const UserModel = require('./models/User'); 
 const HabitModel = require('./models/Habit'); 
 const auth = require('./middleware/auth');      
+=======
+const sequelize = require('./db');
+const User = require('./models/User');
+const Habit = require('./models/Habit');
+const Post = require('./models/Post');   
+const bcrypt = require('bcrypt');
+>>>>>>> a639c51cc12d3afa141ffa05c7c5d040017d8e64
 
 const app = express();
 const PORT = process.env.PORT || 3000;
