@@ -74,6 +74,7 @@
     </div>
     
     <script>
+        // --- FORM TOGGLING ---
         function showForm(formId) {
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
@@ -93,20 +94,21 @@
             }
         }
 
+        // --- VALIDATION FUNCTIONS ---
         function validateEmail(email) {
             const re = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
             return re.test(email);
         }
-
         function validatePassword(password) {
             return password.length >= 6;
         }
-
         function validateUsername(username) {
             return username.trim() !== '';
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
+        // --- LOGIN FORM HANDLER ---
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // <-- Always prevent default submission
             let valid = true;
 
             const emailInput = document.getElementById('login-email');
@@ -121,18 +123,44 @@
                 emailError.textContent = 'Please enter a valid email address.';
                 valid = false;
             }
-
             if (!validatePassword(passwordInput.value)) {
                 passwordError.textContent = 'Password must be at least 6 characters.';
                 valid = false;
             }
 
             if (!valid) {
-                event.preventDefault();
+                return; // Stop if validation fails
+            }
+
+            // --- Validation Passed: Call API ---
+            try {
+                const response = await fetch('http://localhost:3000/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to log in');
+                }
+
+                // SUCCESS: Store token and redirect
+                localStorage.setItem('token', data.token);
+                window.location.href = 'community-selection.html'; // Redirect on success
+
+            } catch (error) {
+                console.error('Login Error:', error);
+                alert(`Login failed: ${error.message}`);
             }
         });
 
-        document.getElementById('signupForm').addEventListener('submit', function(event) {
+        // --- SIGNUP FORM HANDLER ---
+        document.getElementById('signupForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // <-- Always prevent default submission
             let valid = true;
 
             const usernameInput = document.getElementById('signup-username');
@@ -150,19 +178,43 @@
                 usernameError.textContent = 'Username cannot be empty.';
                 valid = false;
             }
-
             if (!validateEmail(emailInput.value)) {
                 emailError.textContent = 'Please enter a valid email address.';
                 valid = false;
             }
-
             if (!validatePassword(passwordInput.value)) {
                 passwordError.textContent = 'Password must be at least 6 characters.';
                 valid = false;
             }
 
             if (!valid) {
-                event.preventDefault();
+                return; // Stop if validation fails
+            }
+
+            // --- Validation Passed: Call API ---
+            try {
+                const response = await fetch('http://localhost:3000/api/users/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput.value,
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to register');
+                }
+
+                // SUCCESS: Alert user and switch to login form
+                alert('Registration successful! Please log in.');
+                showForm('login'); // <-- This will switch the form
+
+            } catch (error) {
+                console.error('Registration Error:', error);
+                alert(`Registration failed: ${error.message}`);
             }
         });
     </script>

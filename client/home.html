@@ -59,6 +59,7 @@
                     <section class="today-habits">
     <div class="section-header">
         <h2>Today's Habits</h2>
+        <button id="add-habit-btn" class="btn-add-habit">+</button>
     </div>
     <div class="habit-list">
         <div class="habit-item">
@@ -236,52 +237,6 @@
         Achievement Unlocked!
     </div>
 
-    <script>
-        // --- Theme Toggle Logic ---
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-
-        function applySavedTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                body.classList.add('light-mode');
-                themeToggle.checked = true;
-            } else {
-                body.classList.remove('light-mode');
-                themeToggle.checked = false;
-            }
-        }
-
-        themeToggle.addEventListener('change', () => {
-            body.classList.toggle('light-mode');
-            if (body.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-
-        // --- Toast Notification Logic ---
-        const toastContainer = document.getElementById('toast-container');
-
-        function showToast(message) {
-            toastContainer.textContent = message;
-            toastContainer.classList.add('show');
-
-            setTimeout(() => {
-                showToast("🏆 Achievement Unlocked: 3-Day Streak!");
-            }, 2000);
-        }
-
-        // Apply theme when the page loads
-        document.addEventListener('DOMContentLoaded', applySavedTheme);
-        
-        // Example of how to show the toast - you can trigger this on a real event
-        // setTimeout(() => {
-        //     showToast("🏆 Achievement Unlocked: 3-Day Streak!");
-        // }, 2000);
-
-    </script>
     <div id="checkin-modal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -298,74 +253,30 @@
         </div>
     </div>
 </div>
-<script>
-    // --- Theme Toggle Logic (Existing) ---
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
-
-    function applySavedTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-            themeToggle.checked = true;
-        } else {
-            body.classList.remove('light-mode');
-            themeToggle.checked = false;
-        }
-    }
-    themeToggle.addEventListener('change', () => {
-        body.classList.toggle('light-mode');
-        localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
-    });
-    document.addEventListener('DOMContentLoaded', applySavedTheme);
-    
-    // --- NEW: Check-in Modal Logic ---
-    const checkinModal = document.getElementById('checkin-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    const modalCancelBtn = document.getElementById('modal-cancel-btn');
-    const checkinButtons = document.querySelectorAll('.btn-checkin');
-
-    // Function to open the modal
-    function openModal(habitName) {
-        modalTitle.textContent = `Check-in: ${habitName}`;
-        checkinModal.classList.add('open');
-    }
-
-    // Function to close the modal
-    function closeModal() {
-        checkinModal.classList.remove('open');
-    }
-
-    // Add event listeners to all "Check In" buttons
-    checkinButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const habitName = button.getAttribute('data-habit');
-            openModal(habitName);
-        });
-    });
-
-    // Event listeners to close the modal
-    modalCloseBtn.addEventListener('click', closeModal);
-    modalCancelBtn.addEventListener('click', closeModal);
-    checkinModal.addEventListener('click', (event) => {
-        // Close modal only if the overlay itself is clicked, not the content
-        if (event.target === checkinModal) {
-            closeModal();
-        }
-    });
-
-    // Character counter for textarea
-    const textarea = document.getElementById('modal-textarea');
-    const charCounter = document.getElementById('char-counter');
-    const maxChars = 280;
-
-    textarea.addEventListener('input', () => {
-        const remaining = maxChars - textarea.value.length;
-        charCounter.textContent = remaining;
-        charCounter.style.color = remaining < 20 ? 'orange' : (remaining < 0 ? 'red' : 'var(--text-secondary)');
-    });
-
-</script>
+<div id="add-habit-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="add-modal-title">Create a New Habit</h2>
+            <button id="add-modal-close-btn" class="close-btn">&times;</button>
+        </div>
+        <form id="add-habit-form">
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="habit-title-input">Habit Title</label>
+                    <input type="text" id="habit-title-input" placeholder="e.g., Code for 1 hour" required>
+                </div>
+                <div class="input-group">
+                    <label for="habit-category-input">Category (Optional)</label>
+                    <input type="text" id="habit-category-input" placeholder="e.g., Coding, Fitness">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="add-modal-cancel-btn" type="button" class="btn btn-secondary">Cancel</button>
+                <button id="add-modal-save-btn" type="submit" class="btn btn-primary">Save Habit</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="home.js"></script>
 </body>
 </html>

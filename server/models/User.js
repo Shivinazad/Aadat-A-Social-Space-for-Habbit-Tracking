@@ -34,6 +34,10 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  communities: { // <-- ADD THIS BLOCK
+    type: DataTypes.JSON,
+    allowNull: true,
+  }
 });
 
 module.exports = User;

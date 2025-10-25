@@ -1,46 +1,74 @@
+// client/selection.js
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Selectors are now matched to your HTML
     const communityCards = document.querySelectorAll('.community-card');
-    const continueBtn = document.getElementById('continue-btn');
+    const continueButton = document.getElementById('continue-btn'); // <-- FIXED: Use the ID selector
+    
+    const selectedCommunities = new Set(); // Use a Set to avoid duplicates
 
-    // Function to check how many cards are selected
-    function updateContinueButtonState() {
-        const selectedCards = document.querySelectorAll('.community-card.selected');
-        if (selectedCards.length > 0) {
-            continueBtn.disabled = false;
-        } else {
-            continueBtn.disabled = true;
-        }
-    }
-
-    // Add a click listener to each community card
+    // --- 1. SET INITIAL BUTTON STATE ---
+    // The button is already disabled in the HTML, which is perfect.
+    // We just need to enable it.
+    
+    // --- 2. ADD CLICK LISTENERS ---
     communityCards.forEach(card => {
         card.addEventListener('click', () => {
-            // Toggle the 'selected' class on the card
+            // Toggle the 'selected' class
             card.classList.toggle('selected');
-            // Update the continue button's state
-            updateContinueButtonState();
+            
+            // Get the community name from the data-community attribute
+            const communityName = card.dataset.community; // <-- FIXED: Use the data-community attribute
+
+            if (card.classList.contains('selected')) {
+                selectedCommunities.add(communityName);
+            } else {
+                selectedCommunities.delete(communityName);
+            }
+
+            // --- 3. UPDATE BUTTON STATE ---
+            // Enable the button ONLY if one or more communities are selected
+            continueButton.disabled = (selectedCommunities.size === 0);
         });
     });
 
-    // Add logic for the continue button
-    continueBtn.addEventListener('click', () => {
-        if (!continueBtn.disabled) {
-            const selectedCommunities = [];
-            const selectedCards = document.querySelectorAll('.community-card.selected');
-            
-            selectedCards.forEach(card => {
-                selectedCommunities.push(card.dataset.community);
+    // --- 4. "CONTINUE" BUTTON CLICK HANDLER ---
+    continueButton.addEventListener('click', async () => {
+        // Get the auth token from storage
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You are not logged in. Redirecting to login.');
+            window.location.href = 'Login.html';
+            return;
+        }
+
+        // Convert the Set of communities to an array
+        const communitiesArray = Array.from(selectedCommunities);
+
+        try {
+            const response = await fetch('http://localhost:3000/api/users/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Send the auth token
+                },
+                body: JSON.stringify({
+                    communities: communitiesArray
+                })
             });
 
-            console.log('User selected:', selectedCommunities);
-            // Here you would typically send this data to your backend
-            // and then redirect the user to the home page.
-            
-            // For now, we'll just redirect to home.html
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.msg || 'Failed to save communities');
+            }
+
+            // SUCCESS: Redirect to the main dashboard
             window.location.href = 'home.html';
+
+        } catch (error) {
+            console.error('Error saving communities:', error);
+            alert(`Error: ${error.message}`);
         }
     });
-
-    // Initialize the button state on page load
-    updateContinueButtonState();
 });

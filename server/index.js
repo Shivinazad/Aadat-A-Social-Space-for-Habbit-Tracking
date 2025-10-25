@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 // --- 1. DATABASE & MODEL IMPORTS ---
 // Import the centralized sequelize connection from db.js
@@ -37,6 +38,7 @@ async function initializeDb() {
 // ---------------------------------
 
 // Middleware to parse JSON bodies from requests
+app.use(cors());
 app.use(express.json());
 
 // Initialize DB and then start server
@@ -164,7 +166,7 @@ habitRouter.post('/', auth, async (req, res) => {
         const newHabit = await Habit.create({
             habitTitle,
             habitCategory,
-            UserId: req.user.id
+            userId: req.user.id // <-- FIXED: Changed 'UserId' to 'userId'
         });
 
         return res.status(201).json({
@@ -236,6 +238,55 @@ habitRouter.delete('/:id', auth, async (req, res) => {
     }
 });
 
+app.put('/api/users/profile', auth, async (req, res) => {
+    try {
+        const { communities } = req.body; // Get communities from request body
+        const userId = req.user.id; // Get user from auth token
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found.' });
+        }
+
+        // Update the user's communities field
+        user.communities = communities;
+        await user.save();
+
+        res.status(200).json({
+            message: 'Profile updated successfully!',
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                communities: user.communities
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ msg: 'Server error updating profile.' });
+    }
+});
+
+app.get('/api/users/me', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findByPk(userId, {
+            attributes: ['id', 'username', 'email', 'user_level', 'user_xp', 'communities']
+        }); // We exclude the password
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found.' });
+        }
+
+        res.status(200).json(user);
+
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ msg: 'Server error fetching user profile.' });
+    }
+});
+
 // --- 5. API ROUTES: POSTS (Check-ins) ---
 const postRouter = express.Router();
 // Mount the post router under /api/posts
@@ -245,8 +296,8 @@ app.use('/api/posts', postRouter);
  * POST /api/posts - Create a new post (check-in)
  */
 postRouter.post('/', auth, async (req, res) => {
-    const { content, habitId } = req.body; // Get content and the habit to link
-    const userId = req.user.id; // Get user from auth middleware
+    const { content, habitId } = req.body; 
+    const userId = req.user.id; 
 
     if (!content || !habitId) {
         return res.status(400).json({ msg: 'Post content and habitId are required.' });
@@ -257,28 +308,27 @@ postRouter.post('/', auth, async (req, res) => {
         const newPost = await Post.create({
             content,
             habitId,
-            UserId: userId
+            userId: userId // <-- FIXED: Changed 'UserId' to 'userId'
         });
 
         // 2. Find the habit being checked in
         const habit = await Habit.findByPk(habitId);
 
         // 3. Update the habit's streak (if it belongs to the user)
-        if (habit && habit.UserId === userId) {
-            // We'll add more complex date logic later to prevent multiple check-ins per day
+        if (habit && habit.userId === userId) { // <-- FIXED: Changed 'UserId' to 'userId'
             habit.currentStreak += 1;
-
+            
             if (habit.currentStreak > habit.longestStreak) {
                 habit.longestStreak = habit.currentStreak;
             }
-            habit.lastCheckinDate = new Date(); // Set last check-in to today
+            habit.lastCheckinDate = new Date(); 
             await habit.save();
         }
 
         return res.status(201).json({
             message: 'Check-in successful!',
             post: newPost,
-            habit: habit // Optionally return the updated habit
+            habit: habit 
         });
 
     } catch (error) {
