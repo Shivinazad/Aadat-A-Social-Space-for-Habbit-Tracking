@@ -1,55 +1,37 @@
 // Load environment variables (must be the first line)
-require('dotenv').config(); 
+require('dotenv').config();
 
 const express = require('express');
-const bcrypt = require('bcrypt'); 
-const jwt = require('jsonwebtoken'); 
-const { Sequelize, DataTypes } = require('sequelize'); 
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-// Import the model definitions and middleware
-// IMPORTANT: Ensure these file paths are correct for your project structure
-const UserModel = require('./models/User'); 
-const HabitModel = require('./models/Habit'); 
-const auth = require('./middleware/auth');      
+// --- 1. DATABASE & MODEL IMPORTS ---
+// Import the centralized sequelize connection from db.js
 const sequelize = require('./db');
+
+// Import all models
 const User = require('./models/User');
 const Habit = require('./models/Habit');
-const Post = require('./models/Post');   
-const bcrypt = require('bcrypt');
+const Post = require('./models/Post');
+
+// Import middleware
+const auth = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345'; // Fallback key
 
-// --- 1. DATABASE CONNECTION & MODEL SETUP ---
-
-// Initialize Sequelize connection
-const sequelize = new Sequelize(
-    process.env.DB_NAME || 'aadat_db',
-    process.env.DB_USER || 'root',
-    process.env.DB_PASSWORD || 'password',
-    {
-        host: process.env.DB_HOST || 'localhost',
-        dialect: 'mysql',
-        logging: false, // Set to true for SQL logs
-    }
-);
-
-// Define and register the models
-const User = UserModel(sequelize);
-const Habit = HabitModel(sequelize, User); // Pass the User model to Habit for association
-
+// --- 2. DATABASE INITIALIZATION ---
 async function initializeDb() {
     try {
         await sequelize.authenticate();
         console.log('Successfully connected to the MySQL database! ✅');
-        // This syncs both the User and the new Habit tables
-        await sequelize.sync({ alter: true }); 
+        // This syncs all models defined via require('./models/User'), etc.
+        await sequelize.sync({ alter: true });
         console.log("All models were synchronized successfully.");
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
-        // Exit process if database connection fails
-        process.exit(1); 
+        process.exit(1);
     }
 }
 // ---------------------------------
@@ -64,7 +46,7 @@ initializeDb().then(() => {
     });
 });
 
-// --- 2. API ROUTES: AUTHENTICATION ---
+// --- 3. API ROUTES: AUTHENTICATION ---
 
 app.get('/', (req, res) => {
     res.json({ message: "Welcome to the Aadat API! 🎉" });
@@ -87,7 +69,7 @@ app.post('/api/users/register', async (req, res) => {
         const newUser = await User.create({
             username: username,
             email: email,
-            password: hashedPassword 
+            password: hashedPassword
         });
 
         const userResponse = newUser.toJSON();
@@ -114,20 +96,20 @@ app.post('/api/users/login', async (req, res) => {
 
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials.' }); 
+            return res.status(401).json({ message: 'Invalid credentials.' });
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid credentials.' }); 
+            return res.status(401).json({ message: 'Invalid credentials.' });
         }
 
         // Generate JWT upon successful login
         const token = jwt.sign(
-            { id: user.id, email: user.email }, 
+            { id: user.id, email: user.email }, // Use 'id' to match auth middleware
             JWT_SECRET,
-            { expiresIn: '1d' } 
+            { expiresIn: '1d' }
         );
 
         res.status(200).json({
@@ -142,7 +124,7 @@ app.post('/api/users/login', async (req, res) => {
 });
 
 
-// --- 3. API ROUTES: HABITS (Protected by auth middleware) ---
+// --- 4. API ROUTES: HABITS (Protected by auth middleware) ---
 const habitRouter = express.Router();
 // Mount the habit router under /api/habits
 app.use('/api/habits', habitRouter);
@@ -154,8 +136,9 @@ habitRouter.get('/', auth, async (req, res) => {
     try {
         const habits = await Habit.findAll({
             where: {
-                UserId: req.user.id // Filters by the authenticated user's ID
-            },
+                // Use 'UserId' which Sequelize creates for the foreign key
+                UserId: req.user.id
+            }, // <-- Fixed: Closing brace was misplaced
             order: [['createdAt', 'ASC']]
         });
 
@@ -163,6 +146,7 @@ habitRouter.get('/', auth, async (req, res) => {
     } catch (error) {
         console.error('Error fetching habits:', error);
         return res.status(500).json({ msg: 'Server error fetching habits.' });
+        // Removed stray 'content' word from here
     }
 });
 
@@ -170,18 +154,17 @@ habitRouter.get('/', auth, async (req, res) => {
  * POST /api/habits - Create a new habit
  */
 habitRouter.post('/', auth, async (req, res) => {
-    const { name, description, frequency } = req.body;
+    const { habitTitle, habitCategory } = req.body;
 
-    if (!name) {
-        return res.status(400).json({ msg: 'Habit name is required.' });
+    if (!habitTitle) {
+        return res.status(400).json({ msg: 'Habit title is required.' });
     }
 
     try {
         const newHabit = await Habit.create({
-            name,
-            description,
-            frequency: frequency || 'daily',
-            UserId: req.user.id // Assign the habit to the authenticated user ID from the token
+            habitTitle,
+            habitCategory,
+            UserId: req.user.id
         });
 
         return res.status(201).json({
@@ -199,16 +182,15 @@ habitRouter.post('/', auth, async (req, res) => {
  */
 habitRouter.put('/:id', auth, async (req, res) => {
     const habitId = req.params.id;
-    const { name, description, frequency } = req.body;
+    const { habitTitle, habitCategory } = req.body;
 
     try {
-        // Update, ensuring the habit ID matches AND the owner ID matches req.user.id
         const [updatedRows] = await Habit.update(
-            { name, description, frequency },
+            { habitTitle, habitCategory },
             {
                 where: {
                     id: habitId,
-                    UserId: req.user.id 
+                    UserId: req.user.id
                 }
             }
         );
@@ -236,11 +218,10 @@ habitRouter.delete('/:id', auth, async (req, res) => {
     const habitId = req.params.id;
 
     try {
-        // Destroy, ensuring the habit ID matches AND the owner ID matches req.user.id
         const result = await Habit.destroy({
             where: {
                 id: habitId,
-                UserId: req.user.id 
+                UserId: req.user.id
             }
         });
 
@@ -252,5 +233,83 @@ habitRouter.delete('/:id', auth, async (req, res) => {
     } catch (error) {
         console.error('Error deleting habit:', error);
         return res.status(500).json({ msg: 'Server error deleting habit.' });
+    }
+});
+
+// --- 5. API ROUTES: POSTS (Check-ins) ---
+const postRouter = express.Router();
+// Mount the post router under /api/posts
+app.use('/api/posts', postRouter);
+
+/**
+ * POST /api/posts - Create a new post (check-in)
+ */
+postRouter.post('/', auth, async (req, res) => {
+    const { content, habitId } = req.body; // Get content and the habit to link
+    const userId = req.user.id; // Get user from auth middleware
+
+    if (!content || !habitId) {
+        return res.status(400).json({ msg: 'Post content and habitId are required.' });
+    }
+
+    try {
+        // 1. Create the new post
+        const newPost = await Post.create({
+            content,
+            habitId,
+            UserId: userId
+        });
+
+        // 2. Find the habit being checked in
+        const habit = await Habit.findByPk(habitId);
+
+        // 3. Update the habit's streak (if it belongs to the user)
+        if (habit && habit.UserId === userId) {
+            // We'll add more complex date logic later to prevent multiple check-ins per day
+            habit.currentStreak += 1;
+
+            if (habit.currentStreak > habit.longestStreak) {
+                habit.longestStreak = habit.currentStreak;
+            }
+            habit.lastCheckinDate = new Date(); // Set last check-in to today
+            await habit.save();
+        }
+
+        return res.status(201).json({
+            message: 'Check-in successful!',
+            post: newPost,
+            habit: habit // Optionally return the updated habit
+        });
+
+    } catch (error) {
+        console.error('Error creating post:', error);
+        return res.status(500).json({ msg: 'Server error creating post.' });
+    }
+});
+
+/**
+ * GET /api/posts - Get all posts (for a community feed)
+ */
+postRouter.get('/', auth, async (req, res) => {
+    try {
+        // Fetch all posts, including the User and Habit info
+        const posts = await Post.findAll({
+            order: [['createdAt', 'DESC']], // Show newest first
+            include: [
+                {
+                    model: User,
+                    attributes: ['id', 'username'] // Only include user's ID and username
+                },
+                {
+                    model: Habit,
+                    attributes: ['id', 'habitTitle'] // Only include habit's ID and title
+                }
+            ]
+        });
+        return res.status(200).json(posts);
+
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        return res.status(500).json({ msg: 'Server error fetching posts.' });
     }
 });
