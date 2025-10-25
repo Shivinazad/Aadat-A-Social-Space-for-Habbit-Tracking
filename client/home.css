@@ -210,6 +210,26 @@ nav {
     border-radius: 8px;
     font-weight: 600;
 }
+
+/* Style for the new add habit button */
+#add-habit-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2.2rem;
+    font-weight: 200;
+    cursor: pointer;
+    padding: 0 10px;
+    line-height: 1;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+#add-habit-btn:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
 .btn-get-started:hover {
     opacity: 0.9;
     transform: translateY(-1px);
@@ -240,6 +260,24 @@ nav {
     gap: 30px;
     margin-bottom: 40px;
 }
+
+/* ADD THIS BLOCK */
+.section-header {
+    display: flex;             /* Use flexbox for layout */
+    justify-content: space-between; /* Push title left, button right */
+    align-items: center;      /* Vertically align items */
+    margin-bottom: 1rem;       /* Space below the header */
+    border-bottom: 1px solid var(--border-color); /* Optional line */
+    padding-bottom: 0.5rem;    /* Optional space below line */
+}
+/* END OF BLOCK TO ADD */
+
+.habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 
 /* --- Today's Habits Section --- */
 .today-habits {
@@ -356,6 +394,35 @@ nav {
 .btn-secondary {
     background: var(--input-bg);
     color: var(--text-primary);
+}
+
+/* Styles for the "Add Habit" modal FORM */
+#add-habit-form .input-group {
+    margin-bottom: 1.25rem;
+}
+
+#add-habit-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+#add-habit-form input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+#add-habit-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 .character-avatar {
