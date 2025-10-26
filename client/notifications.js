@@ -2,13 +2,26 @@
 
 function initializeNotifications() {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+        console.log('[Notifications] No token found, skipping initialization');
+        return;
+    }
+
+    console.log('[Notifications] Initializing...');
 
     const notificationBtn = document.getElementById('notification-btn');
     const notificationsDropdown = document.getElementById('notifications-dropdown');
     const notificationsList = document.getElementById('notifications-list');
     const notificationCount = document.getElementById('notification-count');
     const markAllReadBtn = document.getElementById('mark-all-read');
+
+    console.log('[Notifications] Elements found:', {
+        notificationBtn: !!notificationBtn,
+        notificationsDropdown: !!notificationsDropdown,
+        notificationsList: !!notificationsList,
+        notificationCount: !!notificationCount,
+        markAllReadBtn: !!markAllReadBtn
+    });
 
     let notifications = [];
 
@@ -55,6 +68,7 @@ function initializeNotifications() {
             });
             if (response.ok) {
                 notifications = await response.json();
+                console.log('Fetched notifications:', notifications); // Debug log
                 renderNotifications();
                 updateNotificationBadge();
             }
@@ -114,6 +128,7 @@ function initializeNotifications() {
     // Update notification badge
     function updateNotificationBadge() {
         const unreadCount = notifications.filter(n => !n.read).length;
+        console.log('Unread notifications:', unreadCount); // Debug log
         if (notificationCount) {
             if (unreadCount > 0) {
                 notificationCount.textContent = unreadCount > 9 ? '9+' : unreadCount;
@@ -167,8 +182,11 @@ function initializeNotifications() {
     // Initial fetch
     fetchNotifications();
 
-    // Poll for new notifications every 30 seconds
-    setInterval(fetchNotifications, 30000);
+    // Poll for new notifications every 5 seconds (more responsive)
+    setInterval(fetchNotifications, 5000);
+
+    // Expose fetchNotifications globally so other pages can trigger it
+    window.refreshNotifications = fetchNotifications;
 }
 
 // Initialize on DOM ready

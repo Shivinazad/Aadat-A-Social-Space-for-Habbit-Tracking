@@ -158,6 +158,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!habitsList) return;
         habitsList.innerHTML = ''; 
 
+        // Calculate the maximum current streak across all habits
+        const maxStreak = habits.length > 0 
+            ? Math.max(...habits.map(h => h.currentStreak || 0))
+            : 0;
+        
+        // Update the welcome section streak
+        const welcomeStreak = document.getElementById('welcome-streak');
+        if (welcomeStreak) welcomeStreak.textContent = maxStreak;
+        
+        // Update the plant section streak
+        const plantStreak = document.getElementById('plant-streak');
+        if (plantStreak) plantStreak.textContent = maxStreak;
+
         if (habits.length === 0) {
             habitsList.innerHTML = '<p>You haven\'t added any habits yet. Add one to get started!</p>';
             return;

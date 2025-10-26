@@ -163,6 +163,11 @@ function renderFeed(posts) {
                 likeButton.classList.add('btn-liked'); // Add a class for styling liked state
                 // Note: Button remains disabled to prevent unliking for now
 
+                // Refresh notifications to show the recipient's new notification
+                if (window.refreshNotifications) {
+                    window.refreshNotifications();
+                }
+
             } catch (error) {
                 console.error('Like Error:', error);
                 alert(`Error: ${error.message}`);
