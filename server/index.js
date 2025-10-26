@@ -460,3 +460,40 @@ postRouter.get('/', auth, async (req, res) => {
         return res.status(500).json({ msg: 'Server error fetching posts.' });
     }
 });
+
+
+postRouter.post('/:id/like', auth, async (req, res) => {
+    const postId = req.params.id; // Get post ID from URL parameter
+    const likerUserId = req.user.id; // Get the ID of the user clicking 'like'
+
+    try {
+        // 1. Find the post being liked
+        const post = await Post.findByPk(postId);
+        if (!post) {
+            return res.status(404).json({ msg: 'Post not found.' });
+        }
+
+        // Optional: Prevent users from liking their own posts
+        // if (post.userId === likerUserId) {
+        //     return res.status(400).json({ msg: 'You cannot like your own post.' });
+        // }
+
+        // Optional: Implement logic to prevent double-liking (needs a 'Like' model)
+
+        // 2. Find the author of the post
+        const author = await User.findByPk(post.userId); // NOTE: Ensure post model includes userId
+        if (author) {
+            // 3. Award XP to the author
+            author.user_xp += 5; // Award 5 XP per like (adjust as needed)
+            await author.save();
+        }
+
+        return res.status(200).json({
+            message: 'Post liked successfully! Author awarded XP.',
+        });
+
+    } catch (error) {
+        console.error('Error liking post:', error);
+        return res.status(500).json({ msg: 'Server error liking post.' });
+    }
+});
