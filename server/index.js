@@ -298,39 +298,84 @@ app.use('/api/posts', postRouter);
  * POST /api/posts - Create a new post (check-in)
  */
 postRouter.post('/', auth, async (req, res) => {
-    const { content, habitId } = req.body; 
-    const userId = req.user.id; 
+    const { content, habitId } = req.body;
+    const userId = req.user.id;
 
     if (!content || !habitId) {
         return res.status(400).json({ msg: 'Post content and habitId are required.' });
     }
 
+    let awardedAchievements = []; // Keep track of new achievements
+
     try {
         // 1. Create the new post
-        const newPost = await Post.create({
-            content,
-            habitId,
-            userId: userId // <-- FIXED: Changed 'UserId' to 'userId'
-        });
+        const newPost = await Post.create({ content, habitId, userId });
 
         // 2. Find the habit being checked in
         const habit = await Habit.findByPk(habitId);
+        let currentStreak = 0; // Store streak for achievement check
 
-        // 3. Update the habit's streak (if it belongs to the user)
-        if (habit && habit.userId === userId) { // <-- FIXED: Changed 'UserId' to 'userId'
+        // 3. Update the habit's streak
+        if (habit && habit.userId === userId) {
+            // Basic streak logic (can be improved with date checks later)
             habit.currentStreak += 1;
-            
+            currentStreak = habit.currentStreak; // Update for achievement check
             if (habit.currentStreak > habit.longestStreak) {
                 habit.longestStreak = habit.currentStreak;
             }
-            habit.lastCheckinDate = new Date(); 
+            habit.lastCheckinDate = new Date();
             await habit.save();
         }
+
+        // 4. Award XP
+        const user = await User.findByPk(userId);
+        if (user) {
+            user.user_xp += 10; // Award 10 XP per check-in
+            await user.save();
+        }
+
+        // --- 5. NEW: Check & Award Achievements ---
+        try {
+            // Check for "First Post"
+            const firstPostAchievement = await Achievement.findOne({ where: { name: 'first_post' } });
+            if (firstPostAchievement) {
+                // Check if user already has this achievement
+                const existing = await UserAchievement.findOne({
+                    where: { userId: userId, achievementId: firstPostAchievement.id }
+                });
+                if (!existing) {
+                    // Award it!
+                    await UserAchievement.create({ userId: userId, achievementId: firstPostAchievement.id });
+                    awardedAchievements.push(firstPostAchievement); // Add to list
+                }
+            }
+
+            // Check for "3-Day Streak" (using the updated streak from step 3)
+            if (currentStreak >= 3) {
+                const streak3Achievement = await Achievement.findOne({ where: { name: 'streak_3_day' } });
+                if (streak3Achievement) {
+                    const existing = await UserAchievement.findOne({
+                        where: { userId: userId, achievementId: streak3Achievement.id }
+                    });
+                    if (!existing) {
+                        await UserAchievement.create({ userId: userId, achievementId: streak3Achievement.id });
+                        awardedAchievements.push(streak3Achievement); // Add to list
+                    }
+                }
+            }
+             // Add checks for other achievements here later (e.g., streak_7_day)
+
+        } catch (achieveError) {
+            console.error("Error checking/awarding achievements:", achieveError);
+            // Continue even if achievement check fails, don't break the whole request
+        }
+        // ---------------------------------------------
 
         return res.status(201).json({
             message: 'Check-in successful!',
             post: newPost,
-            habit: habit 
+            habit: habit,
+            awardedAchievements: awardedAchievements // Return newly awarded achievements
         });
 
     } catch (error) {
