@@ -321,6 +321,27 @@ const postRouter = express.Router();
 // Mount the post router under /api/posts
 app.use('/api/posts', postRouter);
 
+// --- 6. API ROUTES: LEADERBOARD ---
+/**
+ * GET /api/leaderboard - Get top users by XP
+ */
+app.get('/api/leaderboard', auth, async (req, res) => {
+    try {
+        // Find users, order by user_xp descending, limit to top 10
+        const topUsers = await User.findAll({
+            order: [['user_xp', 'DESC']],
+            limit: 10,
+            attributes: ['id', 'username', 'user_level', 'user_xp'] // Select only needed fields
+        });
+
+        res.status(200).json(topUsers);
+
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ msg: 'Server error fetching leaderboard.' });
+    }
+});
+
 /**
  * POST /api/posts - Create a new post (check-in)
  */
@@ -410,6 +431,8 @@ postRouter.post('/', auth, async (req, res) => {
         return res.status(500).json({ msg: 'Server error creating post.' });
     }
 });
+
+
 
 /**
  * GET /api/posts - Get all posts (for a community feed)

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadat - Leaderboard</title>
+    <link rel="stylesheet" href="home.css"> <style>
+        /* Add some basic table styling */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .leaderboard-table th, .leaderboard-table td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); text-align: left; }
+        .leaderboard-table th { color: var(--text-secondary); font-weight: 600; font-size: 0.9em; text-transform: uppercase; }
+        .leaderboard-table td:first-child { font-weight: bold; width: 50px; text-align: center; } /* Rank */
+        .leaderboard-table td:nth-child(2) { font-weight: 500; } /* Username */
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                 <div class="logo"> <span class="logo-icon">🎯</span> <span class="logo-text">Aadat</span> </div>
+                 <ul class="nav-links">
+                     <li><a href="home.html">Dashboard</a></li>
+                     <li><a href="#">Community</a></li>
+                     <li><a href="leaderboard.html">Leaderboards</a></li> </ul>
+                 <div class="header-actions">
+                     <div class="user-menu">
+                         <div class="notifications">🔔</div>
+                         <div class="user-avatar">SA</div>
+                     </div>
+                     <label class="theme-switch" for="theme-toggle">
+                         <input type="checkbox" id="theme-toggle" class="theme-input">
+                         <div class="slider"><span class="icon sun">☀️</span><span class="icon moon">🌙</span></div>
+                     </label>
+                 </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="leaderboard-section">
+                <h2>Top Habit Builders</h2>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Level</th>
+                            <th>XP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="4">Loading leaderboard...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        </footer>
+
+    <script src="leaderboard.js"></script> <script>
+         // Minimal theme toggle logic (reuse from other pages or a global file)
+         const themeToggle = document.getElementById('theme-toggle');
+         const body = document.body;
+         function applySavedTheme() { const savedTheme = localStorage.getItem('theme'); if (savedTheme === 'light') { body.classList.add('light-mode'); themeToggle.checked = true; } else { body.classList.remove('light-mode'); themeToggle.checked = false; } }
+         themeToggle.addEventListener('change', () => { body.classList.toggle('light-mode'); localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark'); });
+         document.addEventListener('DOMContentLoaded', applySavedTheme);
+     </script>
+</body>
+</html>
