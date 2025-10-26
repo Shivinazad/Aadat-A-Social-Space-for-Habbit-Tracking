@@ -14,6 +14,8 @@ const sequelize = require('./db');
 const User = require('./models/User');
 const Habit = require('./models/Habit');
 const Post = require('./models/Post');
+const Achievement = require('./models/Achievement');     
+const UserAchievement = require('./models/UserAchievement'); 
 
 // Import middleware
 const auth = require('./middleware/auth');
