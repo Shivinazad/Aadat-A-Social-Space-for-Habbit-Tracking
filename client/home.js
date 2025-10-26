@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // User Profile
     const userAvatar = document.querySelector('.user-avatar');
     const sidebarAvatar = document.querySelector('.avatar-circle');
-    const sidebarUsername = document.querySelector('.profile-details h3');
+    const sidebarUsername = document.querySelector('.profile-name');
     const xpCount = document.querySelector('.xp-count');
     const levelText = document.querySelector('.level-text');
     const progressBar = document.querySelector('.progress-bar');
@@ -255,4 +255,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 11. Initial Load ---
     fetchUserData();
     fetchHabits();
+    fetchNotifications();
 });

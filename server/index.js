@@ -14,6 +14,7 @@ const Post = require('./models/Post');
 const Achievement = require('./models/Achievement');
 const UserAchievement = require('./models/UserAchievement');
 const Like = require('./models/Like');
+const Notification = require('./models/Notification');
 
 // Import middleware
 const auth = require('./middleware/auth');
@@ -27,6 +28,11 @@ async function initializeDb() {
     try {
         await sequelize.authenticate();
         console.log('Successfully connected to the MySQL database! ✅');
+        
+        // Set up associations
+        Notification.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
+        Notification.belongsTo(User, { as: 'recipient', foreignKey: 'userId' });
+        
         await sequelize.sync({ alter: true });
         console.log("All models were synchronized successfully.");
     } catch (error) {
@@ -290,6 +296,19 @@ postRouter.post('/:id/like', auth, async (req, res) => {
         if (author) {
             author.user_xp += 5; // Award XP
             await author.save();
+            
+            // Create notification for post author (if not liking own post)
+            if (likerUserId !== post.userId) {
+                const liker = await User.findByPk(likerUserId);
+                await Notification.create({
+                    userId: post.userId,
+                    senderId: likerUserId,
+                    type: 'like',
+                    message: `liked your post`,
+                    postId: postId,
+                    read: false
+                });
+            }
         }
         return res.status(200).json({ message: 'Post liked successfully! Author awarded XP.' });
     } catch (error) {
@@ -311,5 +330,73 @@ app.get('/api/leaderboard', auth, async (req, res) => {
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
         res.status(500).json({ msg: 'Server error fetching leaderboard.' });
+    }
+});
+
+// --- 7. API ROUTES: NOTIFICATIONS ---
+// GET /api/notifications - Get user's notifications
+app.get('/api/notifications', auth, async (req, res) => {
+    try {
+        const notifications = await Notification.findAll({
+            where: { userId: req.user.id },
+            order: [['createdAt', 'DESC']],
+            limit: 50,
+            include: [{
+                model: User,
+                as: 'sender',
+                attributes: ['username']
+            }]
+        });
+
+        // Map to include sender username
+        const notificationsWithSender = notifications.map(notification => ({
+            id: notification.id,
+            type: notification.type,
+            message: notification.message,
+            postId: notification.postId,
+            read: notification.read,
+            createdAt: notification.createdAt,
+            senderUsername: notification.sender ? notification.sender.username : null
+        }));
+
+        res.status(200).json(notificationsWithSender);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ msg: 'Server error fetching notifications.' });
+    }
+});
+
+// PUT /api/notifications/mark-read - Mark all notifications as read
+app.put('/api/notifications/mark-read', auth, async (req, res) => {
+    try {
+        await Notification.update(
+            { read: true },
+            { where: { userId: req.user.id, read: false } }
+        );
+        res.status(200).json({ message: 'All notifications marked as read.' });
+    } catch (error) {
+        console.error('Error marking notifications as read:', error);
+        res.status(500).json({ msg: 'Server error marking notifications as read.' });
+    }
+});
+
+// PUT /api/notifications/:id/read - Mark single notification as read
+app.put('/api/notifications/:id/read', auth, async (req, res) => {
+    try {
+        const notification = await Notification.findOne({
+            where: { id: req.params.id, userId: req.user.id }
+        });
+        
+        if (!notification) {
+            return res.status(404).json({ msg: 'Notification not found.' });
+        }
+
+        notification.read = true;
+        await notification.save();
+        
+        res.status(200).json({ message: 'Notification marked as read.' });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ msg: 'Server error marking notification as read.' });
     }
 });

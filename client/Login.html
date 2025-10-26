@@ -3,112 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aadat - Login & Sign Up</title>
+    <title>Sign in to Aadat</title>
     <link rel="stylesheet" href="Login.css">
 </head>
 <body>
+    <!-- Navigation - Same as landing page -->
+    <nav class="navbar">
+        <a href="index.html" class="brand">
+            Aadat<span class="neon-dot"></span>
+        </a>
+        <a href="index.html" class="back-link">← Back to home</a>
+    </nav>
 
-    <div class="card-container">
-        <div class="card">
-            <h1 class="card-title">Aadat</h1>
+    <!-- Auth Container -->
+    <div class="auth-container">
+        <div class="auth-content">
+            <!-- Left Side - Branding -->
+            <div class="auth-branding">
+                <div class="branding-content">
+                    <div class="brand-logo">
+                        <span class="logo-text">Aadat</span>
+                        <span class="neon-dot-large"></span>
+                    </div>
+                    <h1>Build habits that actually stick</h1>
+                    <p>Join 50,000+ users who are transforming their lives, one habit at a time.</p>
+                    
+                    <!-- Quick Stats -->
+                    <div class="auth-stats">
+                        <div class="auth-stat">
+                            <div class="stat-num">50K+</div>
+                            <div class="stat-txt">Active users</div>
+                        </div>
+                        <div class="auth-stat">
+                            <div class="stat-num">2.1M</div>
+                            <div class="stat-txt">Habits tracked</div>
+                        </div>
+                        <div class="auth-stat">
+                            <div class="stat-num">89%</div>
+                            <div class="stat-txt">Success rate</div>
+                        </div>
+                    </div>
 
-            <div class="toggle-switch">
-                <button class="toggle-btn active" onclick="showForm('login')">Log In</button>
-                <button class="toggle-btn" onclick="showForm('signup')">Sign Up</button>
+                    <!-- Live Indicator -->
+                    <div class="live-activity">
+                        <div class="live-pulse"></div>
+                        <span>127 people started their journey today</span>
+                    </div>
+                </div>
             </div>
 
-            <div id="login-form" class="form-section active">
-                <form id="loginForm" action="home.html" novalidate>
-                    <div class="input-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" name="email" placeholder="you@example.com" required>
-                        <div class="error-message" id="login-email-error"></div>
+            <!-- Right Side - Auth Forms -->
+            <div class="auth-forms">
+                <div class="form-wrapper">
+                    <!-- Tab Toggle -->
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" onclick="showForm('login')">Sign in</button>
+                        <button class="auth-tab" onclick="showForm('signup')">Sign up</button>
                     </div>
-                    <div class="input-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="password" placeholder="••••••••" required>
-                        <div class="error-message" id="login-password-error"></div>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
-                    </div>
-                    <button type="submit" class="btn primary-btn">Log In</button>
-                </form>
-            </div>
 
-            <div id="signup-form" class="form-section">
-                <form id="signupForm" action="community-selection.html" novalidate>
-                    <div class="input-group">
-                        <label for="signup-username">Username</label>
-                        <input type="text" id="signup-username" name="username" placeholder="johndoe" required>
-                        <div class="error-message" id="signup-username-error"></div>
-                    </div>
-                    <div class="input-group">
-                        <label for="signup-email">Email</label>
-                        <input type="email" id="signup-email" name="email" placeholder="you@example.com" required>
-                        <div class="error-message" id="signup-email-error"></div>
-                    </div>
-                    <div class="input-group">
-                        <label for="signup-password">Password</label>
-                        <input type="password" id="signup-password" name="password" placeholder="••••••••" required>
-                        <div class="error-message" id="signup-password-error"></div>
-                    </div>
-                    <button type="submit" class="btn primary-btn">Sign Up</button>
-                </form>
-            </div>
-            
-            <div class="divider">
-                <span>OR</span>
-            </div>
+                    <!-- Login Form -->
+                    <div id="login-form" class="form-section active">
+                        <div class="form-header">
+                            <h2>Welcome back</h2>
+                            <p>Enter your credentials to access your account</p>
+                        </div>
 
-            <div class="social-logins">
-                <button class="btn social-btn">
-                    <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google icon" class="social-icon">
-                    Continue with Google
-                </button>
-                <button class="btn social-btn">
-                    <img src="https://www.svgrepo.com/show/440594/github.svg" alt="GitHub icon" class="social-icon">
-                    Continue with GitHub
-                </button>
-            </div>
+                        <form id="loginForm" action="home.html" novalidate>
+                            <div class="input-group">
+                                <label for="login-email">Email address</label>
+                                <input 
+                                    type="email" 
+                                    id="login-email" 
+                                    name="email" 
+                                    placeholder="you@example.com" 
+                                    required
+                                    autocomplete="email"
+                                >
+                                <div class="error-message" id="login-email-error"></div>
+                            </div>
 
+                            <div class="input-group">
+                                <label for="login-password">Password</label>
+                                <input 
+                                    type="password" 
+                                    id="login-password" 
+                                    name="password" 
+                                    placeholder="••••••••" 
+                                    required
+                                    autocomplete="current-password"
+                                >
+                                <div class="error-message" id="login-password-error"></div>
+                            </div>
+
+                            <div class="form-footer">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="remember">
+                                    <span>Remember me</span>
+                                </label>
+                                <a href="#" class="forgot-link">Forgot password?</a>
+                            </div>
+
+                            <button type="submit" class="btn-submit">
+                                Sign in
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Signup Form -->
+                    <div id="signup-form" class="form-section">
+                        <div class="form-header">
+                            <h2>Create an account</h2>
+                            <p>Start building better habits today</p>
+                        </div>
+
+                        <form id="signupForm" action="community-selection.html" novalidate>
+                            <div class="input-group">
+                                <label for="signup-username">Username</label>
+                                <input 
+                                    type="text" 
+                                    id="signup-username" 
+                                    name="username" 
+                                    placeholder="johndoe" 
+                                    required
+                                    autocomplete="username"
+                                >
+                                <div class="error-message" id="signup-username-error"></div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="signup-email">Email address</label>
+                                <input 
+                                    type="email" 
+                                    id="signup-email" 
+                                    name="email" 
+                                    placeholder="you@example.com" 
+                                    required
+                                    autocomplete="email"
+                                >
+                                <div class="error-message" id="signup-email-error"></div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="signup-password">Password</label>
+                                <input 
+                                    type="password" 
+                                    id="signup-password" 
+                                    name="password" 
+                                    placeholder="••••••••" 
+                                    required
+                                    autocomplete="new-password"
+                                >
+                                <div class="password-hint">At least 8 characters</div>
+                                <div class="error-message" id="signup-password-error"></div>
+                            </div>
+
+                            <button type="submit" class="btn-submit">
+                                Create account
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Social Logins -->
+                    <div class="divider">
+                        <span>Or continue with</span>
+                    </div>
+
+                    <div class="social-buttons">
+                        <button class="social-btn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.2 8.3V12h5.3c-.2 1.2-1.4 3.5-5.3 3.5-3.2 0-5.8-2.6-5.8-5.8s2.6-5.8 5.8-5.8c1.8 0 3 .8 3.7 1.4l2.9-2.8C14.6 1 12.6 0 10.2 0 4.6 0 0 4.6 0 10.2s4.6 10.2 10.2 10.2c5.9 0 9.8-4.1 9.8-9.9 0-.7-.1-1.2-.1-1.7h-9.7z"/>
+                            </svg>
+                            Google
+                        </button>
+                        <button class="social-btn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.165 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
+                            </svg>
+                            GitHub
+                        </button>
+                    </div>
+
+                    <!-- Terms -->
+                    <p class="auth-terms">
+                        By continuing, you agree to our 
+                        <a href="#">Terms of Service</a> and 
+                        <a href="#">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
     
     <script>
-        // --- FORM TOGGLING ---
+        // Form Toggling
         function showForm(formId) {
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
-            const loginBtn = document.querySelector('.toggle-btn:nth-child(1)');
-            const signupBtn = document.querySelector('.toggle-btn:nth-child(2)');
+            const tabs = document.querySelectorAll('.auth-tab');
 
             if (formId === 'login') {
                 loginForm.classList.add('active');
                 signupForm.classList.remove('active');
-                loginBtn.classList.add('active');
-                signupBtn.classList.remove('active');
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
             } else {
                 loginForm.classList.remove('active');
                 signupForm.classList.add('active');
-                loginBtn.classList.remove('active');
-                signupBtn.classList.add('active');
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
             }
         }
 
-        // --- VALIDATION FUNCTIONS ---
+        // Validation
         function validateEmail(email) {
-            const re = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-            return re.test(email);
-        }
-        function validatePassword(password) {
-            return password.length >= 6;
-        }
-        function validateUsername(username) {
-            return username.trim() !== '';
+            return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
         }
 
-        // --- LOGIN FORM HANDLER ---
+        function validatePassword(password) {
+            return password.length >= 8;
+        }
+
+        function validateUsername(username) {
+            return username.trim().length >= 3;
+        }
+
+        // Login Form
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // <-- Always prevent default submission
+            event.preventDefault();
             let valid = true;
 
             const emailInput = document.getElementById('login-email');
@@ -120,19 +247,16 @@
             passwordError.textContent = '';
 
             if (!validateEmail(emailInput.value)) {
-                emailError.textContent = 'Please enter a valid email address.';
+                emailError.textContent = 'Please enter a valid email';
                 valid = false;
             }
             if (!validatePassword(passwordInput.value)) {
-                passwordError.textContent = 'Password must be at least 6 characters.';
+                passwordError.textContent = 'Password must be at least 8 characters';
                 valid = false;
             }
 
-            if (!valid) {
-                return; // Stop if validation fails
-            }
+            if (!valid) return;
 
-            // --- Validation Passed: Call API ---
             try {
                 const response = await fetch('http://localhost:3000/api/users/login', {
                     method: 'POST',
@@ -144,23 +268,20 @@
                 });
 
                 const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to log in');
-                }
+                if (!response.ok) throw new Error(data.message || 'Login failed');
 
-                // SUCCESS: Store token and redirect
                 localStorage.setItem('token', data.token);
-                window.location.href = 'community-selection.html'; // Redirect on success
+                window.location.href = 'home.html';
 
             } catch (error) {
                 console.error('Login Error:', error);
-                alert(`Login failed: ${error.message}`);
+                emailError.textContent = error.message;
             }
         });
 
-        // --- SIGNUP FORM HANDLER ---
+        // Signup Form
         document.getElementById('signupForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // <-- Always prevent default submission
+            event.preventDefault();
             let valid = true;
 
             const usernameInput = document.getElementById('signup-username');
@@ -175,23 +296,20 @@
             passwordError.textContent = '';
 
             if (!validateUsername(usernameInput.value)) {
-                usernameError.textContent = 'Username cannot be empty.';
+                usernameError.textContent = 'Username must be at least 3 characters';
                 valid = false;
             }
             if (!validateEmail(emailInput.value)) {
-                emailError.textContent = 'Please enter a valid email address.';
+                emailError.textContent = 'Please enter a valid email';
                 valid = false;
             }
             if (!validatePassword(passwordInput.value)) {
-                passwordError.textContent = 'Password must be at least 6 characters.';
+                passwordError.textContent = 'Password must be at least 8 characters';
                 valid = false;
             }
 
-            if (!valid) {
-                return; // Stop if validation fails
-            }
+            if (!valid) return;
 
-            // --- Validation Passed: Call API ---
             try {
                 const response = await fetch('http://localhost:3000/api/users/register', {
                     method: 'POST',
@@ -204,17 +322,27 @@
                 });
 
                 const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to register');
-                }
+                if (!response.ok) throw new Error(data.message || 'Registration failed');
 
-                // SUCCESS: Alert user and switch to login form
-                alert('Registration successful! Please log in.');
-                showForm('login'); // <-- This will switch the form
+                // Auto-login after successful registration
+                const loginResponse = await fetch('http://localhost:3000/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    })
+                });
 
+                const loginData = await loginResponse.json();
+                if (!loginResponse.ok) throw new Error('Auto-login failed');
+
+                localStorage.setItem('token', loginData.token);
+                window.location.href = 'community-selection.html';
+                
             } catch (error) {
                 console.error('Registration Error:', error);
-                alert(`Registration failed: ${error.message}`);
+                emailError.textContent = error.message;
             }
         });
     </script>

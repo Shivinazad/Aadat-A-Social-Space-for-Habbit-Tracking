@@ -3,7 +3,7 @@
 const { Sequelize } = require('sequelize');
 
 // IMPORTANT: Replace 'your_password' with your MySQL root password.
-const sequelize = new Sequelize('aadat_db', 'root', 'sambhav.007', {
+const sequelize = new Sequelize('aadat_db', 'root', 'Shivin3366#', {
   host: 'localhost',
   dialect: 'mysql'
 });
