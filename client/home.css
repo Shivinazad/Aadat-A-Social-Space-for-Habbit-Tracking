@@ -1129,6 +1129,11 @@ body.light-mode .habit-item {
     opacity: 1;
 }
 
+.toast-notification.toast-error {
+    background: #ff4444;
+    color: white;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
     .content-wrapper {

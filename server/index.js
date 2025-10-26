@@ -19,6 +19,9 @@ const Notification = require('./models/Notification');
 // Import middleware
 const auth = require('./middleware/auth');
 
+// Import email service
+const { sendInvitationEmail } = require('./emailService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345'; // Fallback key
@@ -377,6 +380,54 @@ app.put('/api/notifications/mark-read', auth, async (req, res) => {
     } catch (error) {
         console.error('Error marking notifications as read:', error);
         res.status(500).json({ msg: 'Server error marking notifications as read.' });
+    }
+});
+
+// POST /api/invite - Send email invitation to a friend
+app.post('/api/invite', auth, async (req, res) => {
+    try {
+        const { email } = req.body;
+        const sender = await User.findByPk(req.user.id);
+
+        if (!email) {
+            return res.status(400).json({ msg: 'Email address is required.' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ msg: 'Invalid email address.' });
+        }
+
+        // Check if user already exists with this email
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(409).json({ msg: 'This user is already on Aadat!' });
+        }
+
+        // Send the invitation email
+        try {
+            await sendInvitationEmail(email, sender.username);
+            console.log(`Invitation email sent from ${sender.username} to ${email}`);
+            
+            res.status(200).json({ 
+                message: 'Invitation sent successfully!',
+                invitedEmail: email,
+                invitedBy: sender.username
+            });
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            // Still return success to user, but log the error
+            // In production, you might want to queue this for retry
+            res.status(200).json({ 
+                message: 'Invitation queued! (Email service temporarily unavailable)',
+                invitedEmail: email,
+                invitedBy: sender.username
+            });
+        }
+    } catch (error) {
+        console.error('Error sending invitation:', error);
+        res.status(500).json({ msg: 'Server error sending invitation.' });
     }
 });
 

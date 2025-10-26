@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const habitTitleInput = document.getElementById('habit-title-input');
     const habitCategoryInput = document.getElementById('habit-category-input');
     
+    // Invite Friends
+    const inviteEmailInput = document.getElementById('invite-email-input');
+    const inviteBtn = document.getElementById('invite-btn');
+    
     // Toast
     const toastContainer = document.getElementById('toast-container');
 
@@ -65,11 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
     applySavedTheme();
 
     // --- 4. Modal & Toast Logic ---
-    function showToast(message) {
+    function showToast(message, type = 'success') {
         toastContainer.textContent = message;
         toastContainer.classList.add('show');
+        
+        // Add error class if type is error
+        if (type === 'error') {
+            toastContainer.classList.add('toast-error');
+        } else {
+            toastContainer.classList.remove('toast-error');
+        }
+        
         setTimeout(() => {
             toastContainer.classList.remove('show');
+            toastContainer.classList.remove('toast-error');
         }, 3000); 
     }
     
@@ -265,7 +278,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 11. Initial Load ---
+    // --- 11. Invite Friends Functionality ---
+    if (inviteBtn && inviteEmailInput) {
+        inviteBtn.addEventListener('click', async () => {
+            const email = inviteEmailInput.value.trim();
+            
+            // Validate email
+            if (!email) {
+                showToast('Please enter an email address', 'error');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            try {
+                inviteBtn.disabled = true;
+                inviteBtn.textContent = 'Sending...';
+
+                const response = await fetch('http://localhost:3000/api/invite', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Failed to send invitation');
+                }
+
+                // SUCCESS
+                showToast('Invitation sent successfully! 📧');
+                inviteEmailInput.value = ''; // Clear the input
+                
+            } catch (error) {
+                console.error('Invite Error:', error);
+                showToast(error.message || 'Failed to send invitation', 'error');
+            } finally {
+                inviteBtn.disabled = false;
+                inviteBtn.textContent = 'Send Invite';
+            }
+        });
+
+        // Allow Enter key to send invite
+        inviteEmailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                inviteBtn.click();
+            }
+        });
+    }
+
+    // --- 12. Initial Load ---
     fetchUserData();
     fetchHabits();
     fetchNotifications();
