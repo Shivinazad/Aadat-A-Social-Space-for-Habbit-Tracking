@@ -897,3 +897,8 @@ footer {
         justify-content: center;
     }
 }
+.post-actions .btn-like.btn-liked {
+    background-color: var(--primary-color); /* Or another highlight color */
+    color: white; /* Or adjust text color as needed */
+    cursor: default; /* Show it's not clickable anymore */
+}

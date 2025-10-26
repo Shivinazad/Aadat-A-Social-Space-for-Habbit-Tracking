@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadat - Community Feed</title>
+    <link rel="stylesheet" href="home.css"> <style>
+        /* Add basic styling for post cards if not already in home.css */
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; /* Use var(--radius-lg) if defined */
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .post-author { font-weight: 600; color: var(--text-primary); }
+        .post-habit-tag { background: var(--input-bg); padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .post-date { font-size: 0.8rem; color: var(--text-secondary); }
+        .post-content p { color: var(--text-secondary); line-height: 1.6; }
+        .post-actions { margin-top: 15px; /* Add space for like button later */ }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container"> <nav> <div class="logo"> <span class="logo-icon">🎯</span> <span class="logo-text">Aadat</span> </div> <ul class="nav-links"> <li><a href="home.html">Dashboard</a></li> <li><a href="community.html">Community</a></li> <li><a href="leaderboard.html">Leaderboards</a></li> </ul> <div class="header-actions"> <div class="user-menu"> <div class="notifications">🔔</div> <div class="user-avatar">SA</div> </div> <label class="theme-switch" for="theme-toggle"> <input type="checkbox" id="theme-toggle" class="theme-input"> <div class="slider"><span class="icon sun">☀️</span><span class="icon moon">🌙</span></div> </label> </div> </nav> </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="community-feed-section">
+                <h2>Live Feed</h2>
+                <div id="feed-posts-container">
+                    <p>Loading feed...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        </footer>
+
+    <script src="community.js"></script> <script> const themeToggle = document.getElementById('theme-toggle'); const body = document.body; function applySavedTheme() { const savedTheme = localStorage.getItem('theme'); if (savedTheme === 'light') { body.classList.add('light-mode'); themeToggle.checked = true; } else { body.classList.remove('light-mode'); themeToggle.checked = false; } } themeToggle.addEventListener('change', () => { body.classList.toggle('light-mode'); localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark'); }); document.addEventListener('DOMContentLoaded', applySavedTheme); </script>
+</body>
+</html>
