@@ -22,46 +22,52 @@ document.addEventListener('DOMContentLoaded', () => {
         try { const response = await fetch('http://localhost:3000/api/posts', { method: 'GET', headers: { 'Authorization': `Bearer ${token}` } }); if (!response.ok) { throw new Error('Could not fetch feed posts'); } const posts = await response.json(); renderFeed(posts); } catch (error) { console.error('Feed Fetch Error:', error); if (feedContainer) { feedContainer.innerHTML = '<p>Error loading feed posts.</p>'; } if (error.message.includes('token') || error.message.includes('401') || error.message.includes('400')) { localStorage.removeItem('token'); window.location.href = 'Login.html'; } }
     }
 
-    // --- 4. Render Feed Posts (UPDATED) ---
-    function renderFeed(posts) {
-        if (!feedContainer) return;
-        feedContainer.innerHTML = ''; // Clear loading message
+    // --- 4. Render Feed Posts (UPDATED AGAIN) ---
+function renderFeed(posts) {
+    if (!feedContainer) return;
+    feedContainer.innerHTML = ''; // Clear loading message
 
-        if (!posts || posts.length === 0) {
-            feedContainer.innerHTML = '<p>The feed is empty. Check in to a habit to start!</p>';
-            return;
-        }
-
-        posts.forEach(post => {
-            const postCard = document.createElement('div');
-            postCard.className = 'post-card';
-            postCard.dataset.postId = post.id; // Add post ID for easy access
-
-            const postDate = new Date(post.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-            const authorUsername = post.User ? post.User.username : 'Unknown User';
-            const habitTitle = post.Habit ? post.Habit.habitTitle : 'General Post';
-
-            // --- ADDED LIKE BUTTON ---
-            postCard.innerHTML = `
-                <div class="post-header">
-                    <div>
-                        <span class="post-author">${authorUsername}</span> checked in:
-                        <span class="post-habit-tag">${habitTitle}</span>
-                    </div>
-                    <span class="post-date">${postDate}</span>
-                </div>
-                <div class="post-content">
-                    <p>${post.content}</p>
-                </div>
-                <div class="post-actions">
-                    <button class="btn btn-secondary btn-like" data-post-id="${post.id}">Like 👍</button>
-                    </div>
-            `;
-            feedContainer.appendChild(postCard);
-        });
+    if (!posts || posts.length === 0) {
+        feedContainer.innerHTML = '<p>The feed is empty. Check in to a habit to start!</p>';
+        return;
     }
+
+    posts.forEach(post => {
+        const postCard = document.createElement('div');
+        postCard.className = 'post-card';
+        postCard.dataset.postId = post.id;
+
+        const postDate = new Date(post.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const authorUsername = post.User ? post.User.username : 'Unknown User';
+        const habitTitle = post.Habit ? post.Habit.habitTitle : 'General Post';
+
+        // --- Determine initial button state based on API response ---
+        const isLiked = post.isLikedByCurrentUser;
+        const buttonText = isLiked ? 'Liked ✓' : 'Like 👍';
+        const buttonClass = isLiked ? 'btn btn-secondary btn-like btn-liked' : 'btn btn-secondary btn-like';
+        const buttonDisabled = isLiked ? 'disabled' : '';
+        // --- End button state logic ---
+
+        postCard.innerHTML = `
+            <div class="post-header">
+                <div>
+                    <span class="post-author">${authorUsername}</span> checked in:
+                    <span class="post-habit-tag">${habitTitle}</span>
+                </div>
+                <span class="post-date">${postDate}</span>
+            </div>
+            <div class="post-content">
+                <p>${post.content}</p>
+            </div>
+            <div class="post-actions">
+                <button class="${buttonClass}" data-post-id="${post.id}" ${buttonDisabled}>${buttonText}</button>
+            </div>
+        `;
+        feedContainer.appendChild(postCard);
+    });
+}
 
     // --- 5. NEW: Event Listener for Like Buttons ---
     feedContainer.addEventListener('click', async (e) => {
