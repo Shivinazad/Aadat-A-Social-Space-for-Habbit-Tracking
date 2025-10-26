@@ -289,6 +289,33 @@ app.get('/api/users/me', auth, async (req, res) => {
     }
 });
 
+app.get('/api/users/me/achievements', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        // Find the user and include their associated achievements
+        const userWithAchievements = await User.findByPk(userId, {
+            include: [{
+                model: Achievement,
+                through: { attributes: ['unlockedAt'] }, // Include unlock date via UserAchievement
+                attributes: ['id', 'name', 'displayName', 'description', 'icon'] // Select achievement fields
+            }]
+        });
+
+        if (!userWithAchievements) {
+            return res.status(404).json({ msg: 'User not found.' });
+        }
+
+        // Extract just the achievements data
+        const achievements = userWithAchievements.Achievements || []; // 'Achievements' is the alias Sequelize creates
+
+        res.status(200).json(achievements);
+
+    } catch (error) {
+        console.error('Error fetching user achievements:', error);
+        res.status(500).json({ msg: 'Server error fetching achievements.' });
+    }
+});
+
 // --- 5. API ROUTES: POSTS (Check-ins) ---
 const postRouter = express.Router();
 // Mount the post router under /api/posts
