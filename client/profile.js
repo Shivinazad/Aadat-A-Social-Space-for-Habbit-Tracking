@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const allPosts = await response.json();
 
             // Filter posts by the current user
-            const userPosts = allPosts.filter(post => post.UserId === userId);
+            const userPosts = allPosts.filter(post => post.userId === userId);
             renderActivityFeed(userPosts);
 
         } catch (error) {
