@@ -129,35 +129,6 @@
     <footer>
        </footer>
     
-    <script>
-    // --- Theme Toggle Logic ---
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
-
-    function applySavedTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-            if (themeToggle) {
-                themeToggle.checked = true;
-            }
-        } else {
-            body.classList.remove('light-mode');
-            if (themeToggle) {
-                themeToggle.checked = false;
-            }
-        }
-    }
-
-    if (themeToggle) {
-        themeToggle.addEventListener('change', () => {
-            body.classList.toggle('light-mode');
-            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
-        });
-    }
-
-    // Apply theme when the page loads
-    document.addEventListener('DOMContentLoaded', applySavedTheme);
-</script>
+<script src="profile.js"></script>
 </body>
 </html>
