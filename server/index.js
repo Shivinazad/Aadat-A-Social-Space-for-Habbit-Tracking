@@ -30,7 +30,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345'
 // --- 2. CORS CONFIGURATION ---
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.CLIENT_URL || 'https://aadat-app.onrender.com']
-  : ['http://localhost:5173', 'http://localhost:3000'];
+  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:3000'];
 
 // --- 3. DATABASE INITIALIZATION ---
 async function initializeDb() {
@@ -43,7 +43,7 @@ async function initializeDb() {
         Notification.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
         Notification.belongsTo(User, { as: 'recipient', foreignKey: 'userId' });
         
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
         console.log("All models were synchronized successfully.");
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
@@ -285,6 +285,56 @@ habitRouter.delete('/:id', auth, async (req, res) => {
 const postRouter = express.Router();
 app.use('/api/posts', postRouter);
 
+// GET /api/posts/stats/community - Get Community Statistics
+postRouter.get('/stats/community', auth, async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Count active members (users with at least one habit)
+        const activeMembers = await User.count({
+            include: [{
+                model: Habit,
+                required: true
+            }],
+            distinct: true
+        });
+        
+        // Count posts created today
+        const postsToday = await Post.count({
+            where: {
+                createdAt: {
+                    [require('sequelize').Op.gte]: today
+                }
+            }
+        });
+        
+        // Calculate completion rate (users who checked in today vs total active users)
+        const usersCheckedInToday = await Post.count({
+            where: {
+                createdAt: {
+                    [require('sequelize').Op.gte]: today
+                }
+            },
+            distinct: true,
+            col: 'userId'
+        });
+        
+        const completionRate = activeMembers > 0 
+            ? Math.round((usersCheckedInToday / activeMembers) * 100)
+            : 0;
+        
+        res.status(200).json({
+            activeMembers,
+            postsToday,
+            completionRate
+        });
+    } catch (error) {
+        console.error('Error fetching community stats:', error);
+        res.status(500).json({ msg: 'Server error fetching community stats.' });
+    }
+});
+
 // POST /api/posts - Create Post (Check-in)
 postRouter.post('/', auth, async (req, res) => {
     const { content, habitId } = req.body;
@@ -342,14 +392,82 @@ postRouter.get('/', auth, async (req, res) => {
         });
         const userLikes = await Like.findAll({ where: { userId: userId }, attributes: ['postId'] });
         const likedPostIds = new Set(userLikes.map(like => like.postId));
-        const postsWithLikeStatus = posts.map(postInstance => {
+        
+        // Get like counts for all posts
+        const postsWithLikeStatus = await Promise.all(posts.map(async (postInstance) => {
             const post = postInstance.get({ plain: true });
-            return { ...post, isLikedByCurrentUser: likedPostIds.has(post.id) };
-        });
+            const likeCount = await Like.count({ where: { postId: post.id } });
+            return { 
+                ...post, 
+                isLikedByCurrentUser: likedPostIds.has(post.id),
+                likeCount 
+            };
+        }));
+        
         return res.status(200).json(postsWithLikeStatus);
     } catch (error) {
         console.error('Error fetching posts:', error);
         return res.status(500).json({ msg: 'Server error fetching posts.' });
+    }
+});
+
+// GET /api/posts/user/:userId - Get Posts for a specific user
+postRouter.get('/user/:userId', auth, async (req, res) => {
+    try {
+        const targetUserId = parseInt(req.params.userId);
+        const currentUserId = req.user.id;
+        
+        console.log('=== FETCHING USER POSTS ===');
+        console.log('Target user ID:', targetUserId);
+        console.log('Current user ID:', currentUserId);
+        
+        // Debug: Check all posts in the database
+        const allPosts = await Post.findAll({
+            attributes: ['id', 'userId', 'habitId', 'content', 'createdAt']
+        });
+        console.log('Total posts in database:', allPosts.length);
+        console.log('All user IDs with posts:', [...new Set(allPosts.map(p => p.userId))]);
+        
+        // Fetch posts for the target user
+        const posts = await Post.findAll({
+            where: { userId: targetUserId },
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, attributes: ['id', 'username'] },
+                { model: Habit, attributes: ['id', 'habitTitle'], required: false }
+            ]
+        });
+        
+        console.log(`Found ${posts.length} posts for user ${targetUserId}`);
+        
+        // Add like information
+        const userLikes = await Like.findAll({ 
+            where: { userId: currentUserId }, 
+            attributes: ['postId'] 
+        });
+        const likedPostIds = new Set(userLikes.map(like => like.postId));
+        
+        // Get like counts for all posts
+        const postsWithLikeStatus = await Promise.all(posts.map(async (postInstance) => {
+            const post = postInstance.get({ plain: true });
+            const likeCount = await Like.count({ where: { postId: post.id } });
+            return { 
+                ...post, 
+                isLikedByCurrentUser: likedPostIds.has(post.id),
+                likeCount 
+            };
+        }));
+        
+        if (postsWithLikeStatus.length > 0) {
+            console.log('Sample post with like status:', JSON.stringify(postsWithLikeStatus[0], null, 2));
+        }
+        
+        console.log('=== RETURNING', postsWithLikeStatus.length, 'POSTS ===');
+        return res.status(200).json(postsWithLikeStatus);
+    } catch (error) {
+        console.error('Error fetching user posts:', error);
+        console.error('Full error:', error);
+        return res.status(500).json({ msg: 'Server error fetching user posts.' });
     }
 });
 

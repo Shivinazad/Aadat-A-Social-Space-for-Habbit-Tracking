@@ -8,16 +8,6 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.body.style.backgroundColor = '#000000';
-    document.body.style.color = '#ffffff';
-    document.body.classList.remove('light-mode');
-    return () => {
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
-    };
-  }, []);
-
-  useEffect(() => {
     fetchLeaderboard();
   }, []);
 

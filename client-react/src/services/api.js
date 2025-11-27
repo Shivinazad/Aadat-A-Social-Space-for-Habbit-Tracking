@@ -47,6 +47,7 @@ export const authAPI = {
   getProfile: () => api.get('/users/me'),
   updateProfile: (data) => api.put('/users/profile', data),
   getAchievements: () => api.get('/users/me/achievements'),
+  getStats: () => api.get('/stats/landing'),
 };
 
 // Achievements API
@@ -65,8 +66,10 @@ export const habitsAPI = {
 // Posts API
 export const postsAPI = {
   getAll: () => api.get('/posts'),
+  getUserPosts: (userId) => api.get(`/posts/user/${userId}`),
   create: (postData) => api.post('/posts', postData),
   like: (postId) => api.post(`/posts/${postId}/like`),
+  getCommunityStats: () => api.get('/posts/stats/community'),
 };
 
 // Leaderboard API

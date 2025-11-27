@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useEffect } from 'react';
 import PrivateRoute from './components/PrivateRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -10,6 +11,12 @@ import Profile from './pages/Profile';
 import './style.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.classList.toggle('light-mode', savedTheme === 'light');
+    document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+  }, []);
+
   return (
     <Router>
       <AuthProvider>

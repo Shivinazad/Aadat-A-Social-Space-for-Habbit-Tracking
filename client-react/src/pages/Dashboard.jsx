@@ -14,15 +14,6 @@ const Dashboard = () => {
     successRate: 0
   });
 
-  useEffect(() => {
-    document.body.style.backgroundColor = '#000000';
-    document.body.style.color = '#ffffff';
-    document.body.classList.remove('light-mode');
-    return () => {
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
-    };
-  }, []);
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showAddHabitModal, setShowAddHabitModal] = useState(false);
   const [currentHabit, setCurrentHabit] = useState(null);
@@ -49,6 +40,11 @@ const Dashboard = () => {
 
   const fetchWeeklyStats = async () => {
     try {
+      if (!user?.id) {
+        console.warn('User not loaded yet, skipping weekly stats fetch');
+        return;
+      }
+
       const response = await postsAPI.getAll();
       const posts = response.data;
       

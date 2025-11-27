@@ -6,19 +6,15 @@ import '../home.css';
 const Community = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    document.body.style.backgroundColor = '#000000';
-    document.body.style.color = '#ffffff';
-    document.body.classList.remove('light-mode');
-    return () => {
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
-    };
-  }, []);
+  const [stats, setStats] = useState({
+    activeMembers: 0,
+    postsToday: 0,
+    completionRate: 0
+  });
 
   useEffect(() => {
     fetchPosts();
+    fetchStats();
   }, []);
 
   const fetchPosts = async () => {
@@ -32,13 +28,26 @@ const Community = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await postsAPI.getCommunityStats();
+      setStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch community stats:', error);
+    }
+  };
+
   const handleLike = async (postId) => {
     try {
       await postsAPI.like(postId);
       // Update the post in the local state
       setPosts(posts.map(post => 
         post.id === postId 
-          ? { ...post, isLikedByCurrentUser: true }
+          ? { 
+              ...post, 
+              isLikedByCurrentUser: true,
+              likeCount: (post.likeCount || 0) + 1
+            }
           : post
       ));
     } catch (error) {
@@ -72,15 +81,15 @@ const Community = () => {
             </div>
             <div className="community-stats">
               <div className="stat-box">
-                <div className="stat-number">12.4K</div>
+                <div className="stat-number">{stats.activeMembers}</div>
                 <div className="stat-label">Active Members</div>
               </div>
               <div className="stat-box">
-                <div className="stat-number">2.8K</div>
+                <div className="stat-number">{stats.postsToday}</div>
                 <div className="stat-label">Posts Today</div>
               </div>
               <div className="stat-box">
-                <div className="stat-number neon">94%</div>
+                <div className="stat-number neon">{stats.completionRate}%</div>
                 <div className="stat-label">Completion Rate</div>
               </div>
             </div>
@@ -143,6 +152,9 @@ const Community = () => {
                           </svg>
                           {isLiked ? 'Liked' : 'Like'}
                         </button>
+                        <span className="post-stat">
+                          ❤️ {post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}
+                        </span>
                       </div>
                     </div>
                   );
