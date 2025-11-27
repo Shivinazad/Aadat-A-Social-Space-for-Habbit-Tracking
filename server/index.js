@@ -212,7 +212,7 @@ app.use('/api/habits', habitRouter);
 // GET /api/habits
 habitRouter.get('/', auth, async (req, res) => {
     try {
-        const habits = await Habit.findAll({ where: { UserId: req.user.id }, order: [['createdAt', 'ASC']] });
+        const habits = await Habit.findAll({ where: { userId: req.user.id }, order: [['createdAt', 'ASC']] });
         return res.status(200).json(habits);
     } catch (error) {
         console.error('Error fetching habits:', error);
@@ -238,7 +238,7 @@ habitRouter.put('/:id', auth, async (req, res) => {
     const habitId = req.params.id;
     const { habitTitle, habitCategory } = req.body;
     try {
-        const [updatedRows] = await Habit.update({ habitTitle, habitCategory }, { where: { id: habitId, UserId: req.user.id } });
+        const [updatedRows] = await Habit.update({ habitTitle, habitCategory }, { where: { id: habitId, userId: req.user.id } });
         if (updatedRows === 0) { return res.status(404).json({ msg: 'Habit not found or not owned by user.' }); }
         const updatedHabit = await Habit.findByPk(habitId);
         return res.status(200).json({ message: 'Habit updated successfully!', habit: updatedHabit });
@@ -252,7 +252,7 @@ habitRouter.put('/:id', auth, async (req, res) => {
 habitRouter.delete('/:id', auth, async (req, res) => {
     const habitId = req.params.id;
     try {
-        const result = await Habit.destroy({ where: { id: habitId, UserId: req.user.id } });
+        const result = await Habit.destroy({ where: { id: habitId, userId: req.user.id } });
         if (result === 0) { return res.status(404).json({ msg: 'Habit not found or not owned by user.' }); }
         return res.status(200).json({ message: 'Habit deleted successfully!' });
     } catch (error) {
