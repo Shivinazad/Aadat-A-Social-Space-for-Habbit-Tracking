@@ -80,12 +80,15 @@ const Dashboard = () => {
     }
 
     try {
-      await habitsAPI.create(newHabit);
+      console.log('Creating habit:', newHabit);
+      const response = await habitsAPI.create(newHabit);
+      console.log('Habit created:', response.data);
       setShowAddHabitModal(false);
       setNewHabit({ habitTitle: '', habitCategory: '' });
       showToast('Habit added successfully! 💪');
-      fetchHabits();
+      await fetchHabits(); // Wait for habits to reload
     } catch (error) {
+      console.error('Failed to create habit:', error);
       showToast('Failed to create habit', 'error');
     }
   };
