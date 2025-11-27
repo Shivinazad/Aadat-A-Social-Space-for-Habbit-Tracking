@@ -5,6 +5,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const path = require('path');
 
 // --- 1. DATABASE & MODEL IMPORTS ---
 const sequelize = require('./db');
@@ -26,11 +27,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345'; // Fallback key
 
-// --- 2. DATABASE INITIALIZATION ---
+// --- 2. CORS CONFIGURATION ---
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.CLIENT_URL || 'https://aadat-app.onrender.com']
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+// --- 3. DATABASE INITIALIZATION ---
 async function initializeDb() {
     try {
         await sequelize.authenticate();
-        console.log('Successfully connected to the MySQL database! ✅');
+        const dbType = process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'MySQL';
+        console.log(`Successfully connected to the ${dbType} database! ✅`);
         
         // Set up associations
         Notification.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
@@ -46,8 +53,12 @@ async function initializeDb() {
 // ---------------------------------
 
 // --- MIDDLEWARE ---
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Initialize DB and then start server
 initializeDb().then(() => {
@@ -56,9 +67,14 @@ initializeDb().then(() => {
     });
 });
 
-// --- 3. API ROUTES: AUTHENTICATION ---
-app.get('/', (req, res) => {
-    res.json({ message: "Welcome to the Aadat API! 🎉" });
+// --- 4. HEALTH CHECK ENDPOINT ---
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// --- 5. API ROUTES: AUTHENTICATION ---
+app.get('/api', (req, res) => {
+    res.json({ message: "Welcome to the Aadat API! 🎉", version: "1.0.0" });
 });
 
 // POST /api/users/register
@@ -133,6 +149,44 @@ app.get('/api/users/me', auth, async (req, res) => {
     } catch (error) {
         console.error('Error fetching user profile:', error);
         res.status(500).json({ msg: 'Server error fetching user profile.' });
+    }
+});
+
+// GET /api/achievements - Get all achievements with locked/unlocked status
+app.get('/api/achievements', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Get all achievements
+        const allAchievements = await Achievement.findAll({
+            attributes: ['id', 'name', 'displayName', 'description', 'icon']
+        });
+        
+        // Get user's unlocked achievements
+        const userAchievements = await UserAchievement.findAll({
+            where: { userId },
+            attributes: ['achievementId', 'unlockedAt']
+        });
+        
+        const unlockedIds = new Set(userAchievements.map(ua => ua.achievementId));
+        
+        // Map achievements with locked/unlocked status
+        const achievementsWithStatus = allAchievements.map(ach => ({
+            id: ach.id,
+            name: ach.name,
+            displayName: ach.displayName,
+            description: ach.description,
+            icon: ach.icon,
+            unlocked: unlockedIds.has(ach.id),
+            unlockedAt: unlockedIds.has(ach.id) 
+                ? userAchievements.find(ua => ua.achievementId === ach.id).unlockedAt 
+                : null
+        }));
+        
+        res.status(200).json(achievementsWithStatus);
+    } catch (error) {
+        console.error('Error fetching achievements:', error);
+        res.status(500).json({ msg: 'Server error fetching achievements.' });
     }
 });
 
@@ -451,3 +505,16 @@ app.put('/api/notifications/:id/read', auth, async (req, res) => {
         res.status(500).json({ msg: 'Server error marking notification as read.' });
     }
 });
+
+// --- SERVE REACT BUILD IN PRODUCTION ---
+if (process.env.NODE_ENV === 'production') {
+    // Serve static files from React build
+    app.use(express.static(path.join(__dirname, '../client-react/dist')));
+    
+    // Handle React routing - send all non-API requests to React app
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../client-react/dist/index.html'));
+    });
+    
+    console.log('📦 Serving React build from /dist');
+}
