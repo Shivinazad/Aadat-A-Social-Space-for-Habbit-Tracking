@@ -1,10 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const Landing = () => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalHabits: 0,
+    totalCheckins: 0
+  });
 
   useEffect(() => {
     // Ensure light mode on landing page
@@ -17,6 +23,20 @@ const Landing = () => {
       document.body.style.backgroundColor = '';
       document.body.style.color = '';
     };
+  }, []);
+
+  useEffect(() => {
+    // Fetch real statistics
+    const fetchStats = async () => {
+      try {
+        const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3000/api';
+        const response = await axios.get(`${API_BASE_URL}/stats/public`);
+        setStats(response.data);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -48,7 +68,7 @@ const Landing = () => {
           <div className="hero-badge-wrapper">
             <span className="hero-badge">
               <span className="live-indicator"></span>
-              50,000+ users building better habits
+              {stats.totalUsers > 0 ? `${stats.totalUsers.toLocaleString()}+ users` : 'Join our community of'} building better habits
             </span>
           </div>
           
@@ -82,18 +102,18 @@ const Landing = () => {
           {/* STATS BAR */}
           <div className="hero-stats">
             <div className="stat-item">
-              <div className="stat-number">127K</div>
+              <div className="stat-number">{stats.totalUsers > 0 ? stats.totalUsers.toLocaleString() : '...'}</div>
+              <div className="stat-label">Active users</div>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.totalHabits > 0 ? stats.totalHabits.toLocaleString() : '...'}</div>
               <div className="stat-label">Habits tracked</div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
-              <div className="stat-number">89%</div>
-              <div className="stat-label">Success rate</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-number">4.9★</div>
-              <div className="stat-label">User rating</div>
+              <div className="stat-number">{stats.totalCheckins > 0 ? stats.totalCheckins.toLocaleString() : '...'}</div>
+              <div className="stat-label">Check-ins completed</div>
             </div>
           </div>
 

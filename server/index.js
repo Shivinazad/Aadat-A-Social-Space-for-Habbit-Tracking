@@ -72,6 +72,25 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// --- PUBLIC STATS ENDPOINT ---
+app.get('/api/stats/public', async (req, res) => {
+    try {
+        const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
+            User.count(),
+            Habit.count(),
+            Post.count()
+        ]);
+        res.json({
+            totalUsers,
+            totalHabits,
+            totalCheckins
+        });
+    } catch (error) {
+        console.error('Error fetching public stats:', error);
+        res.status(500).json({ message: 'Failed to fetch statistics' });
+    }
+});
+
 // --- 5. API ROUTES: AUTHENTICATION ---
 app.get('/api', (req, res) => {
     res.json({ message: "Welcome to the Aadat API! 🎉", version: "1.0.0" });

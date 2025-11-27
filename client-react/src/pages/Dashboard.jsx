@@ -8,6 +8,11 @@ const Dashboard = () => {
   const { user, updateUser, fetchUser } = useAuth();
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [weeklyStats, setWeeklyStats] = useState({
+    completedHabits: 0,
+    totalCheckins: 0,
+    successRate: 0
+  });
 
   useEffect(() => {
     document.body.style.backgroundColor = '#000000';
@@ -28,6 +33,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchHabits();
+    fetchWeeklyStats();
   }, []);
 
   const fetchHabits = async () => {
@@ -38,6 +44,35 @@ const Dashboard = () => {
       console.error('Failed to fetch habits:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWeeklyStats = async () => {
+    try {
+      const response = await postsAPI.getAll();
+      const posts = response.data;
+      
+      // Get posts from the last 7 days
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      const weeklyPosts = posts.filter(post => 
+        new Date(post.createdAt) >= oneWeekAgo && 
+        post.userId === user.id
+      );
+      
+      // Calculate unique habits completed this week
+      const uniqueHabits = new Set(weeklyPosts.map(post => post.habitId));
+      const totalHabits = habits.length || 1;
+      const successRate = Math.round((uniqueHabits.size / totalHabits) * 100);
+      
+      setWeeklyStats({
+        completedHabits: uniqueHabits.size,
+        totalCheckins: weeklyPosts.length,
+        successRate: isNaN(successRate) ? 0 : successRate
+      });
+    } catch (error) {
+      console.error('Failed to fetch weekly stats:', error);
     }
   };
 
@@ -67,6 +102,7 @@ const Dashboard = () => {
       showToast('Check-in successful! 🎉');
       fetchHabits();
       fetchUser();
+      fetchWeeklyStats();
     } catch (error) {
       showToast('Failed to post check-in', 'error');
     }
@@ -308,18 +344,18 @@ const Dashboard = () => {
 
             {/* Quick Stats */}
             <div className="stats-card">
-              <h4>This Week</h4>
+              <h4>This Week's Progress</h4>
               <div className="stat-row">
-                <span className="stat-label">Habits completed</span>
-                <span className="stat-value">12</span>
+                <span className="stat-label">Habits worked on</span>
+                <span className="stat-value">{weeklyStats.completedHabits}</span>
               </div>
               <div className="stat-row">
-                <span className="stat-label">Check-ins</span>
-                <span className="stat-value">18</span>
+                <span className="stat-label">Total check-ins</span>
+                <span className="stat-value">{weeklyStats.totalCheckins}</span>
               </div>
               <div className="stat-row">
-                <span className="stat-label">Success rate</span>
-                <span className="stat-value neon">86%</span>
+                <span className="stat-label">Consistency rate</span>
+                <span className="stat-value neon">{weeklyStats.successRate}%</span>
               </div>
             </div>
           </aside>
