@@ -60,6 +60,26 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- LEVEL CALCULATION HELPER ---
+function calculateLevel(xp) {
+    if (xp < 80) return 1;
+    if (xp < 200) return 2;
+    if (xp < 400) return 3;
+    if (xp < 800) return 4;
+    if (xp < 1600) return 5;
+    if (xp < 3200) return 6;
+    if (xp < 6400) return 7;
+    if (xp < 12800) return 8;
+    if (xp < 25600) return 9;
+    return 10 + Math.floor((xp - 25600) / 51200);
+}
+
+function getXpForNextLevel(currentLevel) {
+    if (currentLevel === 1) return 80;
+    if (currentLevel === 2) return 200;
+    return Math.pow(2, currentLevel + 5); // 2^8=256, 2^9=512, etc.
+}
+
 // Initialize DB and then start server
 initializeDb().then(() => {
     app.listen(PORT, () => {
@@ -244,6 +264,12 @@ habitRouter.post('/', auth, async (req, res) => {
     const { habitTitle, habitCategory } = req.body;
     if (!habitTitle) { return res.status(400).json({ msg: 'Habit title is required.' }); }
     try {
+        // Check if user already has 5 habits (limit)
+        const habitCount = await Habit.count({ where: { userId: req.user.id } });
+        if (habitCount >= 5) {
+            return res.status(400).json({ msg: 'Maximum 5 habits allowed. Delete a habit to add a new one.' });
+        }
+        
         const newHabit = await Habit.create({ habitTitle, habitCategory, userId: req.user.id });
         return res.status(201).json({ message: 'Habit created successfully!', habit: newHabit });
     } catch (error) {
@@ -343,18 +369,63 @@ postRouter.post('/', auth, async (req, res) => {
 
     let awardedAchievements = [];
     try {
+        // Check if user already checked in today for this habit
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const existingCheckin = await Post.findOne({
+            where: {
+                userId: userId,
+                habitId: habitId,
+                createdAt: {
+                    [require('sequelize').Op.gte]: today,
+                    [require('sequelize').Op.lt]: tomorrow
+                }
+            }
+        });
+        
+        if (existingCheckin) {
+            return res.status(400).json({ msg: 'You can only check in once per day for each habit. Come back tomorrow! ⏰' });
+        }
+        
         const newPost = await Post.create({ content, habitId, userId });
         const habit = await Habit.findByPk(habitId);
         let currentStreak = 0;
         if (habit && habit.userId === userId) {
-            habit.currentStreak += 1;
+            // Check if last check-in was yesterday to maintain streak
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (habit.lastCheckinDate) {
+                const lastCheckin = new Date(habit.lastCheckinDate);
+                lastCheckin.setHours(0, 0, 0, 0);
+                
+                if (lastCheckin.getTime() === yesterday.getTime()) {
+                    // Consecutive day - increment streak
+                    habit.currentStreak += 1;
+                } else if (lastCheckin.getTime() < yesterday.getTime()) {
+                    // Missed day(s) - reset streak
+                    habit.currentStreak = 1;
+                }
+                // If lastCheckin is today, this shouldn't happen due to check above
+            } else {
+                // First check-in ever
+                habit.currentStreak = 1;
+            }
+            
             currentStreak = habit.currentStreak;
             if (habit.currentStreak > habit.longestStreak) { habit.longestStreak = habit.currentStreak; }
             habit.lastCheckinDate = new Date();
             await habit.save();
         }
         const user = await User.findByPk(userId);
-        if (user) { user.user_xp += 10; await user.save(); }
+        if (user) { 
+            user.user_xp += 10;
+            user.user_level = calculateLevel(user.user_xp);
+            await user.save();
+        }
 
         // Achievement Check Logic
         try {
@@ -596,29 +667,53 @@ app.post('/api/invite', auth, async (req, res) => {
             return res.status(409).json({ msg: 'This user is already on Aadat!' });
         }
 
-        // Send the invitation email
-        try {
-            await sendInvitationEmail(email, sender.username);
-            console.log(`Invitation email sent from ${sender.username} to ${email}`);
+        // Check if email credentials are configured
+        const emailConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASSWORD;
+        
+        if (emailConfigured) {
+            // Send the invitation email
+            try {
+                await sendInvitationEmail(email, sender.username);
+                console.log(`✅ Invitation email sent from ${sender.username} to ${email}`);
+                
+                res.status(200).json({ 
+                    message: `Invitation sent to ${email}! 📧`,
+                    invitedEmail: email,
+                    invitedBy: sender.username,
+                    emailSent: true
+                });
+            } catch (emailError) {
+                console.error('❌ Email sending failed:', emailError.message || emailError);
+                
+                // Provide fallback with shareable link
+                const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
+                
+                res.status(200).json({ 
+                    message: `Email service unavailable. Here's your invite link for ${email}`,
+                    invitedEmail: email,
+                    invitedBy: sender.username,
+                    inviteLink: `${inviteLink}?invited_by=${encodeURIComponent(sender.username)}`,
+                    emailSent: false
+                });
+            }
+        } else {
+            // Email not configured - provide shareable link
+            console.log(`📋 Invite link generated: ${sender.username} → ${email} (email service not configured)`);
+            
+            const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
             
             res.status(200).json({ 
-                message: 'Invitation sent successfully!',
+                message: `Invite link created for ${email}! 🔗`,
                 invitedEmail: email,
-                invitedBy: sender.username
-            });
-        } catch (emailError) {
-            console.error('Email sending failed:', emailError);
-            // Still return success to user, but log the error
-            // In production, you might want to queue this for retry
-            res.status(200).json({ 
-                message: 'Invitation queued! (Email service temporarily unavailable)',
-                invitedEmail: email,
-                invitedBy: sender.username
+                invitedBy: sender.username,
+                inviteLink: `${inviteLink}?invited_by=${encodeURIComponent(sender.username)}`,
+                emailSent: false,
+                note: 'Share this link with your friend!'
             });
         }
     } catch (error) {
-        console.error('Error sending invitation:', error);
-        res.status(500).json({ msg: 'Server error sending invitation.' });
+        console.error('Error processing invitation:', error);
+        res.status(500).json({ msg: 'Server error processing invitation.' });
     }
 });
 

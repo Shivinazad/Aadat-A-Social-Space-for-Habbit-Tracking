@@ -29,123 +29,281 @@ const sendInvitationEmail = async (toEmail, senderName) => {
                 <html>
                 <head>
                     <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
                         body {
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
                             line-height: 1.6;
-                            color: #333;
+                            color: #1a1a1a;
+                            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                            padding: 40px 20px;
+                        }
+                        .email-wrapper {
                             max-width: 600px;
                             margin: 0 auto;
-                            padding: 20px;
-                        }
-                        .container {
                             background: #ffffff;
-                            border-radius: 12px;
-                            padding: 40px;
-                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                            border-radius: 16px;
+                            overflow: hidden;
+                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
                         }
                         .header {
+                            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+                            padding: 40px 30px;
                             text-align: center;
-                            margin-bottom: 30px;
+                            position: relative;
+                        }
+                        .header::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -2px;
+                            left: 0;
+                            right: 0;
+                            height: 4px;
+                            background: linear-gradient(90deg, #00ff88 0%, #00cc6a 100%);
                         }
                         .logo {
-                            font-size: 32px;
-                            font-weight: 800;
-                            color: #000000;
-                            letter-spacing: -0.02em;
+                            font-size: 42px;
+                            font-weight: 900;
+                            color: #ffffff;
+                            letter-spacing: -0.03em;
+                            text-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
                         }
                         .neon-dot {
                             display: inline-block;
-                            width: 8px;
-                            height: 8px;
+                            width: 10px;
+                            height: 10px;
                             background: #00ff88;
                             border-radius: 50%;
-                            margin-left: 4px;
+                            margin-left: 6px;
+                            box-shadow: 0 0 15px #00ff88, 0 0 30px rgba(0, 255, 136, 0.5);
+                            animation: pulse 2s ease-in-out infinite;
+                        }
+                        @keyframes pulse {
+                            0%, 100% { opacity: 1; transform: scale(1); }
+                            50% { opacity: 0.7; transform: scale(0.95); }
+                        }
+                        .content {
+                            padding: 50px 40px;
+                        }
+                        .invitation-badge {
+                            display: inline-block;
+                            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+                            color: #000000;
+                            padding: 8px 20px;
+                            border-radius: 20px;
+                            font-size: 13px;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            text-transform: uppercase;
+                            margin-bottom: 20px;
                         }
                         h1 {
                             color: #000000;
-                            font-size: 24px;
+                            font-size: 32px;
+                            font-weight: 800;
                             margin: 20px 0;
+                            line-height: 1.3;
+                        }
+                        .sender-highlight {
+                            color: #00cc6a;
+                            font-weight: 800;
+                            position: relative;
+                            display: inline-block;
                         }
                         .invitation-text {
-                            font-size: 16px;
-                            color: #666;
-                            margin: 20px 0;
+                            font-size: 17px;
+                            color: #4a5568;
+                            margin: 25px 0;
+                            line-height: 1.8;
+                        }
+                        .cta-container {
+                            text-align: center;
+                            margin: 40px 0;
                         }
                         .cta-button {
                             display: inline-block;
-                            padding: 14px 32px;
-                            background: #000000;
+                            padding: 18px 45px;
+                            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
                             color: #ffffff;
                             text-decoration: none;
-                            border-radius: 8px;
-                            font-weight: 600;
-                            margin: 20px 0;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            font-size: 16px;
+                            letter-spacing: 0.5px;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+                            transition: all 0.3s ease;
+                            border: 2px solid transparent;
+                        }
+                        .cta-button:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+                            border-color: #00ff88;
                         }
                         .features {
-                            margin: 30px 0;
-                            padding: 20px;
-                            background: #f5f5f5;
-                            border-radius: 8px;
+                            margin: 40px 0;
+                            padding: 30px;
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            border-radius: 12px;
+                            border-left: 4px solid #00ff88;
+                        }
+                        .features h3 {
+                            color: #1a1a1a;
+                            font-size: 20px;
+                            font-weight: 700;
+                            margin-bottom: 20px;
                         }
                         .feature-item {
-                            margin: 10px 0;
-                            padding-left: 25px;
-                            position: relative;
+                            display: flex;
+                            align-items: center;
+                            margin: 15px 0;
+                            color: #2d3748;
+                            font-size: 15px;
                         }
-                        .feature-item:before {
-                            content: "✓";
-                            position: absolute;
-                            left: 0;
-                            color: #00ff88;
-                            font-weight: bold;
+                        .feature-icon {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 28px;
+                            height: 28px;
+                            background: #00ff88;
+                            color: #000000;
+                            border-radius: 50%;
+                            font-weight: 900;
+                            font-size: 14px;
+                            margin-right: 15px;
+                            flex-shrink: 0;
+                        }
+                        .stats-bar {
+                            display: flex;
+                            justify-content: space-around;
+                            margin: 35px 0;
+                            padding: 25px;
+                            background: #ffffff;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                        }
+                        .stat-item {
+                            text-align: center;
+                        }
+                        .stat-number {
+                            font-size: 28px;
+                            font-weight: 900;
+                            color: #00cc6a;
+                            display: block;
+                        }
+                        .stat-label {
+                            font-size: 12px;
+                            color: #718096;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-top: 5px;
                         }
                         .footer {
-                            margin-top: 40px;
-                            padding-top: 20px;
-                            border-top: 1px solid #e5e5e5;
+                            background: #f8f9fa;
+                            padding: 30px 40px;
                             text-align: center;
+                            border-top: 1px solid #e2e8f0;
+                        }
+                        .footer-text {
+                            color: #718096;
                             font-size: 14px;
-                            color: #999;
+                            margin: 8px 0;
+                        }
+                        .footer-brand {
+                            color: #1a1a1a;
+                            font-weight: 700;
+                            font-size: 15px;
+                            margin-top: 15px;
+                        }
+                        .emoji {
+                            font-size: 24px;
+                            display: inline-block;
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="container">
+                    <div class="email-wrapper">
+                        <!-- Header -->
                         <div class="header">
                             <div class="logo">
                                 Aadat<span class="neon-dot"></span>
                             </div>
                         </div>
                         
-                        <h1>You're invited to join Aadat!</h1>
-                        
-                        <p class="invitation-text">
-                            <strong>${senderName}</strong> thinks you'd be great at building better habits together on Aadat - 
-                            a social platform designed to help you track habits, stay accountable, and celebrate progress with friends.
-                        </p>
-                        
-                        <div style="text-align: center;">
-                            <a href="http://localhost:3000" class="cta-button">
-                                Join Aadat Now
-                            </a>
+                        <!-- Main Content -->
+                        <div class="content">
+                            <div class="invitation-badge">🎯 Personal Invitation</div>
+                            
+                            <h1>
+                                <span class="sender-highlight">${senderName}</span> invited you to join Aadat!
+                            </h1>
+                            
+                            <p class="invitation-text">
+                                Your friend <strong>${senderName}</strong> thinks you'd be perfect for building better habits together! 
+                                Aadat is a social platform where you can track habits, stay accountable, and celebrate progress with friends.
+                            </p>
+                            
+                            <!-- CTA Button -->
+                            <div class="cta-container">
+                                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}?invited_by=${encodeURIComponent(senderName)}" class="cta-button">
+                                    🚀 Join Aadat Now
+                                </a>
+                            </div>
+                            
+                            <!-- Stats Bar -->
+                            <div class="stats-bar">
+                                <div class="stat-item">
+                                    <span class="stat-number">12K+</span>
+                                    <span class="stat-label">Active Users</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">500K+</span>
+                                    <span class="stat-label">Habits Tracked</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">94%</span>
+                                    <span class="stat-label">Success Rate</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Features -->
+                            <div class="features">
+                                <h3>✨ What you can do on Aadat:</h3>
+                                <div class="feature-item">
+                                    <span class="feature-icon">📊</span>
+                                    <span>Track your daily habits and build impressive streaks</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">🤝</span>
+                                    <span>Share progress and motivate your friends</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">🏆</span>
+                                    <span>Compete on the leaderboard and climb the ranks</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">🎖️</span>
+                                    <span>Unlock achievements and celebrate milestones</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">💪</span>
+                                    <span>Get motivated by a supportive community</span>
+                                </div>
+                            </div>
+                            
+                            <p style="color: #718096; font-size: 15px; text-align: center; margin-top: 30px;">
+                                <span class="emoji">⚡</span> Start building better habits today. It's <strong>free</strong> and takes less than a minute!
+                            </p>
                         </div>
                         
-                        <div class="features">
-                            <h3 style="margin-top: 0;">What you can do on Aadat:</h3>
-                            <div class="feature-item">Track your daily habits and build streaks</div>
-                            <div class="feature-item">Share progress with your friends</div>
-                            <div class="feature-item">Compete on the leaderboard</div>
-                            <div class="feature-item">Unlock achievements as you progress</div>
-                            <div class="feature-item">Get motivated by a supportive community</div>
-                        </div>
-                        
-                        <p style="color: #666; font-size: 14px;">
-                            Start building better habits today. It's free and takes less than a minute to sign up!
-                        </p>
-                        
+                        <!-- Footer -->
                         <div class="footer">
-                            <p>This invitation was sent by ${senderName}</p>
-                            <p>Aadat - Build Better Habits Together</p>
+                            <p class="footer-text">This invitation was personally sent by <strong>${senderName}</strong></p>
+                            <p class="footer-text">They're waiting for you to join them on their habit-building journey!</p>
+                            <p class="footer-brand">Aadat · Build Better Habits Together</p>
                         </div>
                     </div>
                 </body>

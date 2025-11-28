@@ -21,6 +21,9 @@ const Dashboard = () => {
   const [newHabit, setNewHabit] = useState({ habitTitle: '', habitCategory: '' });
   const [inviteEmail, setInviteEmail] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(null);
+  const [showEditHabitModal, setShowEditHabitModal] = useState(false);
+  const [editHabit, setEditHabit] = useState(null);
 
   useEffect(() => {
     fetchHabits();
@@ -131,17 +134,115 @@ const Dashboard = () => {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail.trim())) {
+      showToast('Please enter a valid email address', 'error');
+      return;
+    }
+
     try {
-      await inviteAPI.sendInvite(inviteEmail);
+      const response = await inviteAPI.sendInvite(inviteEmail);
+      const data = response.data;
       setInviteEmail('');
-      showToast('Invitation sent successfully! 📧');
+      
+      // Check if email was actually sent or if we got a fallback link
+      if (data.inviteLink) {
+        // Email service not available - copy link to clipboard
+        try {
+          await navigator.clipboard.writeText(data.inviteLink);
+          showToast(`${data.message} (Link copied! 📋)`);
+        } catch (clipboardError) {
+          // Clipboard failed - show link in toast
+          showToast(`${data.message}: ${data.inviteLink}`);
+        }
+      } else if (data.emailSent) {
+        // Email successfully sent
+        showToast(data.message || 'Invitation email sent successfully! 📧');
+      } else {
+        // Generic success
+        showToast(data.message || 'Invitation processed! ✨');
+      }
     } catch (error) {
-      showToast(error.response?.data?.msg || 'Failed to send invitation', 'error');
+      const errorMsg = error.response?.data?.msg || 'Failed to send invitation';
+      showToast(errorMsg, 'error');
     }
   };
 
+  const handleDeleteHabit = async (habitId) => {
+    if (!window.confirm('Are you sure you want to delete this habit? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await habitsAPI.delete(habitId);
+      setSettingsMenuOpen(null);
+      showToast('Habit deleted successfully');
+      fetchHabits();
+    } catch (error) {
+      showToast('Failed to delete habit', 'error');
+    }
+  };
+
+  const openEditModal = (habit) => {
+    setEditHabit({ habitTitle: habit.habitTitle, habitCategory: habit.habitCategory || '', id: habit.id });
+    setShowEditHabitModal(true);
+    setSettingsMenuOpen(null);
+  };
+
+  const handleEditHabit = async (e) => {
+    e.preventDefault();
+    if (!editHabit.habitTitle.trim()) {
+      showToast('Habit title is required', 'error');
+      return;
+    }
+
+    try {
+      await habitsAPI.update(editHabit.id, { 
+        habitTitle: editHabit.habitTitle, 
+        habitCategory: editHabit.habitCategory 
+      });
+      setShowEditHabitModal(false);
+      setEditHabit(null);
+      showToast('Habit updated successfully! ✏️');
+      fetchHabits();
+    } catch (error) {
+      showToast('Failed to update habit', 'error');
+    }
+  };
+
+  const toggleSettingsMenu = (habitId) => {
+    setSettingsMenuOpen(settingsMenuOpen === habitId ? null : habitId);
+  };
+
+  // Close settings menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setSettingsMenuOpen(null);
+    if (settingsMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [settingsMenuOpen]);
+
   const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.currentStreak || 0)) : 0;
-  const xpPercentage = user ? (user.user_xp / 500) * 100 : 0;
+  
+  // Calculate XP for next level dynamically
+  const getXpForNextLevel = (level) => {
+    if (level === 1) return 80;
+    if (level === 2) return 200;
+    if (level === 3) return 400;
+    if (level === 4) return 800;
+    if (level === 5) return 1600;
+    if (level === 6) return 3200;
+    if (level === 7) return 6400;
+    if (level === 8) return 12800;
+    if (level === 9) return 25600;
+    return 51200 * (level - 9);
+  };
+  
+  const currentLevel = user?.user_level || 1;
+  const xpForNextLevel = getXpForNextLevel(currentLevel);
+  const xpPercentage = user ? ((user.user_xp % xpForNextLevel) / xpForNextLevel) * 100 : 0;
   const initials = user?.username?.substring(0, 2).toUpperCase() || 'U';
 
   if (loading) {
@@ -210,6 +311,43 @@ const Dashboard = () => {
                       >
                         Check In
                       </button>
+                      <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                          className="settings-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSettingsMenu(habit.id);
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="4" r="1.5"/>
+                            <circle cx="10" cy="10" r="1.5"/>
+                            <circle cx="10" cy="16" r="1.5"/>
+                          </svg>
+                        </button>
+                        {settingsMenuOpen === habit.id && (
+                          <div className="settings-menu">
+                            <button 
+                              className="settings-menu-item"
+                              onClick={() => openEditModal(habit)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.333 2L14 4.667l-9.333 9.333H2v-2.667L11.333 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Edit Habit
+                            </button>
+                            <button 
+                              className="settings-menu-item delete"
+                              onClick={() => handleDeleteHabit(habit.id)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Delete Habit
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -304,7 +442,7 @@ const Dashboard = () => {
               <div className="level-section">
                 <div className="level-header">
                   <span className="level-text">Level {user?.user_level}</span>
-                  <span className="xp-count">{user?.user_xp} / 500 XP</span>
+                  <span className="xp-count">{user?.user_xp} / {xpForNextLevel} XP</span>
                 </div>
                 <div className="progress-bar-container">
                   <div className="progress-bar" style={{ width: `${xpPercentage}%` }}></div>
@@ -430,6 +568,51 @@ const Dashboard = () => {
               <div className="modal-footer">
                 <button type="button" onClick={() => setShowAddHabitModal(false)} className="btn-secondary">Cancel</button>
                 <button type="submit" className="btn-primary">Create Habit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Habit Modal */}
+      {showEditHabitModal && editHabit && (
+        <div className="modal-overlay open" onClick={() => setShowEditHabitModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Habit</h2>
+              <button onClick={() => setShowEditHabitModal(false)} className="modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleEditHabit}>
+              <div className="modal-body">
+                <div className="input-group">
+                  <label htmlFor="edit-habit-title-input">Habit Title</label>
+                  <input 
+                    type="text" 
+                    id="edit-habit-title-input"
+                    placeholder="e.g., Morning workout" 
+                    value={editHabit.habitTitle}
+                    onChange={(e) => setEditHabit({ ...editHabit, habitTitle: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="input-group">
+                  <label htmlFor="edit-habit-category-input">Category <span className="optional">(Optional)</span></label>
+                  <input 
+                    type="text" 
+                    id="edit-habit-category-input"
+                    placeholder="e.g., Fitness, Learning"
+                    value={editHabit.habitCategory}
+                    onChange={(e) => setEditHabit({ ...editHabit, habitCategory: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" onClick={() => setShowEditHabitModal(false)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Update Habit</button>
               </div>
             </form>
           </div>

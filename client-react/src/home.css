@@ -686,12 +686,113 @@ body.light-mode .btn-add {
     gap: 16px;
     transition: var(--transition);
     margin-bottom: 12px;
+    position: relative;
 }
 
 .habit-item:hover {
     background: var(--gray-800) !important;
     border-color: var(--gray-700) !important;
     border-bottom-color: var(--gray-600) !important;
+}
+
+/* Habit Settings Menu */
+.habit-settings {
+    position: relative;
+    margin-left: 8px;
+}
+
+.settings-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--gray-400);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.settings-btn:hover {
+    background: var(--gray-800);
+    color: var(--white);
+}
+
+body.light-mode .settings-btn:hover {
+    background: var(--gray-100);
+    color: var(--black);
+}
+
+.settings-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: var(--gray-900);
+    border: 1px solid var(--gray-800);
+    border-radius: 8px;
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    overflow: hidden;
+    animation: slideDown 0.2s ease-out;
+}
+
+body.light-mode .settings-menu {
+    background: var(--white);
+    border-color: var(--gray-200);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-menu-item {
+    width: 100%;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.settings-menu-item:hover {
+    background: var(--gray-800);
+}
+
+body.light-mode .settings-menu-item:hover {
+    background: var(--gray-50);
+}
+
+.settings-menu-item svg {
+    flex-shrink: 0;
+}
+
+.settings-menu-item.delete {
+    color: #ff4444;
+}
+
+.settings-menu-item.delete:hover {
+    background: rgba(255, 68, 68, 0.1);
+}
+
+body.light-mode .settings-menu-item.delete:hover {
+    background: rgba(255, 68, 68, 0.1);
 }
 
 body.light-mode .habit-item {
