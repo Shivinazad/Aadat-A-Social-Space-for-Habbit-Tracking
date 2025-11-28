@@ -32,7 +32,7 @@ const Landing = () => {
     // Fetch real statistics
     const fetchStats = async () => {
       try {
-        const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3000/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api');
         const response = await axios.get(`${API_BASE_URL}/stats/public`);
         setStats(response.data);
       } catch (error) {
@@ -58,7 +58,7 @@ const Landing = () => {
 
   return (
     <div className="landing-page">
-      <motion.nav 
+      <motion.nav
         className="navbar"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -73,7 +73,7 @@ const Landing = () => {
       {/* HERO SECTION */}
       <section className="hero">
         <div className="hero-container">
-          <motion.div 
+          <motion.div
             className="hero-badge-wrapper"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -84,8 +84,8 @@ const Landing = () => {
               {stats.totalUsers > 0 ? `${stats.totalUsers.toLocaleString()}+ users` : 'Join our community'} building better habits
             </span>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             className="hero-title"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -95,8 +95,8 @@ const Landing = () => {
             <br />
             <span className="neon-text">actually stick</span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             className="hero-subtitle"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -105,8 +105,8 @@ const Landing = () => {
             The habit tracker designed for people who are tired of broken streaks.<br />
             Simple. Powerful. Built for consistency.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             className="hero-actions"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -123,7 +123,7 @@ const Landing = () => {
           </motion.div>
 
           {/* STATS BAR */}
-          <motion.div 
+          <motion.div
             className="hero-stats"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -207,7 +207,7 @@ const Landing = () => {
           </div>
 
           <div className="features-grid">
-            <motion.div 
+            <motion.div
               className="feature-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -219,7 +219,7 @@ const Landing = () => {
               <h3>Streak Tracking</h3>
               <p>Watch your consistency grow with visual streak counters that motivate you daily.</p>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="feature-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -231,7 +231,7 @@ const Landing = () => {
               <h3>Community Support</h3>
               <p>Join a supportive community of habit builders who celebrate your wins.</p>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="feature-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -243,7 +243,7 @@ const Landing = () => {
               <h3>Progress Analytics</h3>
               <p>Get detailed insights into your habit patterns with beautiful charts.</p>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="feature-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -261,7 +261,7 @@ const Landing = () => {
 
       {/* FINAL CTA */}
       <section className="final-cta-section">
-        <motion.div 
+        <motion.div
           className="final-cta-container"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -289,7 +289,7 @@ const Landing = () => {
       {/* FOOTER */}
       <footer className="footer-new">
         <div className="footer-container">
-          <motion.div 
+          <motion.div
             className="footer-brand"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -299,7 +299,7 @@ const Landing = () => {
             <div className="brand-footer">Aadat<span className="neon-dot"></span></div>
             <p>Build habits that actually stick</p>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="footer-links"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -312,7 +312,7 @@ const Landing = () => {
             <a href="#">Blog</a>
             <a href="#">Support</a>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="footer-bottom"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
