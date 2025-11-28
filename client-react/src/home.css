@@ -2174,15 +2174,56 @@ body.light-mode .profile-stat-card .stat-label {
     margin-bottom: 32px;
 }
 
+.achievements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .profile-achievements-section h2 {
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin: 0;
     color: var(--text-primary);
 }
 
 body.light-mode .profile-achievements-section h2 {
     color: var(--black);
+}
+
+.achievements-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--neon);
+    padding: 6px 14px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+}
+
+body.light-mode .achievements-count {
+    color: #00a050;
+    background: rgba(0, 200, 100, 0.1);
+    border-color: rgba(0, 200, 100, 0.3);
+}
+
+.unlocked-badge {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--neon);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.achievement-badge-scroll:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+body.light-mode .achievement-badge-scroll:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .achievements-grid-profile {
@@ -2359,3 +2400,545 @@ body:not(.landing-page) .nav-link:hover {
     color: #ffffff !important;
 }
 
+/* ================================
+   QUICK WINS ENHANCEMENTS
+   ================================ */
+
+/* Empty State for Habits */
+.empty-state-habits {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    margin: 20px 0;
+}
+
+.empty-icon-large {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.empty-state-habits h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.empty-state-habits p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Enhanced Habit Items */
+.habit-main-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.habit-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.habit-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.01em;
+}
+
+body.light-mode .habit-title {
+    color: var(--black);
+}
+
+.habit-category-badge {
+    display: inline-flex;
+    padding: 4px 12px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--neon);
+    text-transform: capitalize;
+}
+
+body.light-mode .habit-category-badge {
+    background: rgba(0, 200, 100, 0.1);
+    border-color: rgba(0, 200, 100, 0.3);
+    color: #00a050;
+}
+
+.last-checkin-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-checkin.checked-in {
+    background: var(--gray-700) !important;
+    color: var(--gray-400) !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+body.light-mode .btn-checkin.checked-in {
+    background: var(--gray-200) !important;
+    color: var(--gray-500) !important;
+}
+
+/* Celebration Animation */
+.celebration-emoji {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 120px;
+    z-index: 10001;
+    animation: celebrate 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes celebrate {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -150%) scale(1);
+    }
+}
+
+.confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    opacity: 0;
+    animation: confetti-fall linear forwards;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+@keyframes confetti-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(720deg);
+    }
+}
+
+/* Loading Skeleton */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--gray-800) 25%,
+        var(--gray-700) 50%,
+        var(--gray-800) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+body.light-mode .skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--gray-200) 25%,
+        var(--gray-100) 50%,
+        var(--gray-200) 75%
+    );
+    background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 60%;
+    margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+/* ================================
+   MOBILE RESPONSIVENESS
+   ================================ */
+
+/* Tablets and below */
+@media (max-width: 1024px) {
+    .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .sidebar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .welcome-section {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .streak-display {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .podium-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .podium-card {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 768px) {
+    /* Navigation */
+    .nav-container {
+        padding: 0 16px;
+    }
+    
+    .nav-left {
+        gap: 24px;
+    }
+    
+    .nav-links {
+        gap: 16px;
+    }
+    
+    .search-wrapper {
+        display: none;
+    }
+    
+    .nav-actions {
+        gap: 8px;
+    }
+    
+    .theme-toggle {
+        width: 40px;
+    }
+    
+    .btn-logout {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    /* Main Container */
+    .main-container {
+        margin-top: 73px;
+        padding: 20px 16px;
+    }
+    
+    /* Welcome Section */
+    .welcome-section {
+        padding: 24px 20px;
+    }
+    
+    .welcome-badge {
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 24px;
+    }
+    
+    .welcome-content p {
+        font-size: 14px;
+    }
+    
+    .streak-display {
+        padding: 20px;
+    }
+    
+    .streak-number {
+        font-size: 48px;
+    }
+    
+    /* Habits Section */
+    .section-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .section-header h2 {
+        font-size: 20px;
+    }
+    
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .habit-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px !important;
+        gap: 12px;
+    }
+    
+    .habit-main-info {
+        width: 100%;
+    }
+    
+    .habit-title-row {
+        width: 100%;
+    }
+    
+    .streak-count {
+        margin-right: 0;
+    }
+    
+    .btn-checkin {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .habit-settings {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        margin-left: 0;
+    }
+    
+    /* Community Stats */
+    .community-stats {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .stat-box {
+        width: 100%;
+        text-align: left;
+    }
+    
+    /* Profile Stats Grid */
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .profile-stat-card {
+        padding: 16px;
+    }
+    
+    .profile-stat-card .stat-number {
+        font-size: 24px;
+    }
+    
+    /* Achievements */
+    .achievements-scroll-container {
+        gap: 12px;
+    }
+    
+    .achievement-badge-scroll {
+        min-width: 150px;
+        padding: 16px;
+    }
+    
+    .achievement-icon-large {
+        font-size: 36px;
+    }
+    
+    /* Modals */
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+    }
+    
+    /* Invite Section */
+    .invite-section {
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .invite-form {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .invite-input {
+        width: 100%;
+    }
+    
+    .btn-invite {
+        width: 100%;
+    }
+    
+    /* Leaderboard Table */
+    .leaderboard-table {
+        font-size: 14px;
+    }
+    
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 12px 8px;
+    }
+    
+    .user-avatar-small {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    /* Notifications Dropdown */
+    .notifications-dropdown {
+        right: -100px;
+        left: auto;
+        width: 320px;
+        max-width: calc(100vw - 32px);
+    }
+    
+    /* Empty States */
+    .empty-state-habits {
+        padding: 40px 16px;
+    }
+    
+    .empty-icon-large {
+        font-size: 60px;
+    }
+    
+    .empty-state-habits h3 {
+        font-size: 20px;
+    }
+    
+    .empty-cta {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Small mobile phones */
+@media (max-width: 480px) {
+    .brand {
+        font-size: 18px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 20px;
+    }
+    
+    .section-header h2 {
+        font-size: 18px;
+    }
+    
+    .habit-title {
+        font-size: 15px;
+    }
+    
+    .habit-category-badge {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+    
+    .modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .profile-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .notifications-dropdown {
+        right: 0;
+        left: 0;
+        margin: 0 16px;
+        width: calc(100% - 32px);
+    }
+    
+    .celebration-emoji {
+        font-size: 80px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+    .main-container {
+        margin-top: 60px;
+    }
+    
+    .navbar {
+        padding: 8px 0;
+    }
+    
+    .welcome-section {
+        flex-direction: row;
+        padding: 20px;
+    }
+    
+    .streak-display {
+        padding: 16px;
+    }
+}

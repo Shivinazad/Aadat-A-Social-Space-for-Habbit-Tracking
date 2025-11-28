@@ -598,6 +598,53 @@ app.get('/api/leaderboard', auth, async (req, res) => {
     }
 });
 
+// GET /api/users/stats - Get user habit statistics
+app.get('/api/users/stats', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const habits = await Habit.findAll({ where: { userId } });
+        
+        // Calculate current streak (max streak across all habits)
+        const currentStreak = habits.length > 0 
+            ? Math.max(...habits.map(h => h.currentStreak || 0))
+            : 0;
+        
+        // Calculate longest streak
+        const longestStreak = habits.length > 0
+            ? Math.max(...habits.map(h => h.longestStreak || 0))
+            : 0;
+        
+        // Calculate weekly completion rate
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const totalPossibleCheckins = habits.length * 7; // 7 days * number of habits
+        const actualCheckins = await Post.count({
+            where: {
+                userId,
+                createdAt: {
+                    [require('sequelize').Op.gte]: oneWeekAgo
+                }
+            }
+        });
+        
+        const completionRate = totalPossibleCheckins > 0
+            ? Math.round((actualCheckins / totalPossibleCheckins) * 100)
+            : 0;
+        
+        res.status(200).json({
+            currentStreak,
+            longestStreak,
+            completionRate,
+            totalHabits: habits.length,
+            totalCheckins: actualCheckins
+        });
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        res.status(500).json({ msg: 'Server error fetching user stats.' });
+    }
+});
+
 // --- 7. API ROUTES: NOTIFICATIONS ---
 // GET /api/notifications - Get user's notifications
 app.get('/api/notifications', auth, async (req, res) => {

@@ -9,13 +9,30 @@ const Profile = () => {
   const [achievements, setAchievements] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    currentStreak: 0,
+    longestStreak: 0,
+    completionRate: 0,
+    totalHabits: 0,
+    totalCheckins: 0
+  });
 
   useEffect(() => {
     if (user?.id) {
       fetchAchievements();
       fetchPosts();
+      fetchStats();
     }
   }, [user]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await authAPI.getUserStats();
+      setStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error);
+    }
+  };
 
   const fetchAchievements = async () => {
     try {
@@ -136,11 +153,11 @@ const Profile = () => {
             {/* Stats Grid */}
             <div className="profile-stats-grid">
               <div className="profile-stat-card">
-                <div className="stat-number">0</div>
+                <div className="stat-number">🔥 {stats.currentStreak}</div>
                 <div className="stat-label">Current Streak</div>
               </div>
               <div className="profile-stat-card">
-                <div className="stat-number">0</div>
+                <div className="stat-number">⭐ {stats.longestStreak}</div>
                 <div className="stat-label">Longest Streak</div>
               </div>
               <div className="profile-stat-card">
@@ -151,12 +168,25 @@ const Profile = () => {
                 <div className="stat-number neon">{user?.user_xp || 0}</div>
                 <div className="stat-label">Total XP</div>
               </div>
+              <div className="profile-stat-card">
+                <div className="stat-number">📊 {stats.completionRate}%</div>
+                <div className="stat-label">Weekly Completion</div>
+              </div>
+              <div className="profile-stat-card">
+                <div className="stat-number">✅ {stats.totalCheckins}</div>
+                <div className="stat-label">Check-ins (7 days)</div>
+              </div>
             </div>
           </section>
 
           {/* Achievements Section */}
           <section className="profile-achievements-section">
-            <h2>Achievements</h2>
+            <div className="achievements-header">
+              <h2>Achievements</h2>
+              <span className="achievements-count">
+                {achievements.filter(a => a.unlocked).length} / {achievements.length} unlocked
+              </span>
+            </div>
             <div className="achievements-scroll-container">
               {achievements.length === 0 ? (
                 <p>No achievements available yet.</p>
@@ -165,6 +195,7 @@ const Profile = () => {
                   <div 
                     key={achievement.id} 
                     className={`achievement-badge-scroll ${achievement.unlocked ? 'unlocked' : 'locked'}`}
+                    title={achievement.unlocked ? `Unlocked!` : `Keep going to unlock this!`}
                   >
                     <div className="achievement-icon-large">
                       {getAchievementIcon(achievement)}
@@ -175,6 +206,9 @@ const Profile = () => {
                     <div className="achievement-description">
                       {achievement.description}
                     </div>
+                    {achievement.unlocked && (
+                      <div className="unlocked-badge">✓ Unlocked</div>
+                    )}
                   </div>
                 ))
               )}

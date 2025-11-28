@@ -48,6 +48,7 @@ export const authAPI = {
   updateProfile: (data) => api.put('/users/profile', data),
   getAchievements: () => api.get('/users/me/achievements'),
   getStats: () => api.get('/stats/landing'),
+  getUserStats: () => api.get('/users/stats'),
 };
 
 // Achievements API

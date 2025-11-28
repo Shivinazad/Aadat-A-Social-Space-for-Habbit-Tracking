@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { habitsAPI, postsAPI, inviteAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { celebrateCheckIn } from '../utils/confetti';
 import '../home.css';
 
 const Dashboard = () => {
@@ -98,12 +99,14 @@ const Dashboard = () => {
         habitId: currentHabit.id,
       });
       setShowCheckinModal(false);
+      celebrateCheckIn(); // Trigger celebration animation
       showToast('Check-in successful! 🎉');
       fetchHabits();
       fetchUser();
       fetchWeeklyStats();
     } catch (error) {
-      showToast('Failed to post check-in', 'error');
+      const errorMsg = error.response?.data?.msg || 'Failed to post check-in';
+      showToast(errorMsg, 'error');
     }
   };
 
@@ -299,17 +302,52 @@ const Dashboard = () => {
               
               <div className="habit-list">
                 {habits.length === 0 ? (
-                  <p>You haven't added any habits yet. Add one to get started!</p>
+                  <div className="empty-state-habits">
+                    <div className="empty-icon-large">🎯</div>
+                    <h3>No habits yet!</h3>
+                    <p>Start building better habits today. Add your first habit to get started.</p>
+                    <button onClick={() => setShowAddHabitModal(true)} className="btn-primary empty-cta">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 4v12m-6-6h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      Add Your First Habit
+                    </button>
+                  </div>
                 ) : (
-                  habits.map(habit => (
+                  habits.map(habit => {
+                    const lastCheckin = habit.lastCheckinDate ? new Date(habit.lastCheckinDate) : null;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const lastCheckinDate = lastCheckin ? new Date(lastCheckin) : null;
+                    if (lastCheckinDate) lastCheckinDate.setHours(0, 0, 0, 0);
+                    
+                    const isCheckedInToday = lastCheckinDate && lastCheckinDate.getTime() === today.getTime();
+                    const daysSinceLastCheckin = lastCheckin ? Math.floor((Date.now() - lastCheckin) / (1000 * 60 * 60 * 24)) : null;
+                    
+                    return (
                     <div key={habit.id} className="habit-item">
-                      <span>{habit.habitTitle}</span>
+                      <div className="habit-main-info">
+                        <div className="habit-title-row">
+                          <span className="habit-title">{habit.habitTitle}</span>
+                          {habit.habitCategory && (
+                            <span className="habit-category-badge">{habit.habitCategory}</span>
+                          )}
+                        </div>
+                        {lastCheckin && (
+                          <span className="last-checkin-text">
+                            {isCheckedInToday ? '✅ Checked in today' : 
+                             daysSinceLastCheckin === 1 ? '📅 Last check-in: Yesterday' :
+                             `📅 Last check-in: ${daysSinceLastCheckin} days ago`}
+                          </span>
+                        )}
+                      </div>
                       <span className="streak-count">🔥 {habit.currentStreak} days</span>
                       <button 
-                        className="btn btn-primary btn-checkin"
+                        className={`btn btn-primary btn-checkin ${isCheckedInToday ? 'checked-in' : ''}`}
                         onClick={() => openCheckinModal(habit)}
+                        disabled={isCheckedInToday}
                       >
-                        Check In
+                        {isCheckedInToday ? '✓ Done' : 'Check In'}
                       </button>
                       <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
                         <button 
@@ -349,7 +387,8 @@ const Dashboard = () => {
                         )}
                       </div>
                     </div>
-                  ))
+                  );
+                  })
                 )}
               </div>
             </section>
