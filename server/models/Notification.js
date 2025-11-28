@@ -51,4 +51,8 @@ const Notification = sequelize.define('Notification', {
     timestamps: true
 });
 
+const User = require('./User');
+Notification.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
+Notification.belongsTo(User, { as: 'recipient', foreignKey: 'userId' });
+
 module.exports = Notification;
