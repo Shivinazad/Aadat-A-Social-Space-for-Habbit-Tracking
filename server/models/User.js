@@ -34,9 +34,17 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
-  communities: { // <-- ADD THIS BLOCK
+  communities: {
     type: DataTypes.JSON,
     allowNull: true,
+  },
+  avatar: {
+    type: DataTypes.STRING,
+    defaultValue: '👤',
+  },
+  bio: {
+    type: DataTypes.STRING(150),
+    defaultValue: 'Building habits in public.',
   }
 });
 

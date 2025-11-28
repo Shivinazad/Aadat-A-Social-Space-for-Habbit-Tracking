@@ -44,6 +44,30 @@ async function initializeDb() {
         Notification.belongsTo(User, { as: 'recipient', foreignKey: 'userId' });
         
         await sequelize.sync({ alter: false });
+        
+        // Manually add avatar and bio columns if they don't exist
+        try {
+            await sequelize.query(`ALTER TABLE Users ADD COLUMN avatar VARCHAR(255) DEFAULT '👤'`);
+            console.log("Added avatar column to Users table");
+        } catch (error) {
+            if (error.original?.errno === 1060) {
+                console.log("Avatar column already exists");
+            } else {
+                console.log("Error adding avatar column:", error.message);
+            }
+        }
+        
+        try {
+            await sequelize.query(`ALTER TABLE Users ADD COLUMN bio VARCHAR(150) DEFAULT 'Building habits in public.'`);
+            console.log("Added bio column to Users table");
+        } catch (error) {
+            if (error.original?.errno === 1060) {
+                console.log("Bio column already exists");
+            } else {
+                console.log("Error adding bio column:", error.message);
+            }
+        }
+        
         console.log("All models were synchronized successfully.");
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
@@ -165,13 +189,27 @@ app.post('/api/users/login', async (req, res) => {
 // PUT /api/users/profile
 app.put('/api/users/profile', auth, async (req, res) => {
     try {
-        const { communities } = req.body;
+        const { communities, avatar, bio } = req.body;
         const userId = req.user.id;
         const user = await User.findByPk(userId);
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
-        user.communities = communities;
+        
+        if (communities !== undefined) user.communities = communities;
+        if (avatar !== undefined) user.avatar = avatar;
+        if (bio !== undefined) user.bio = bio;
+        
         await user.save();
-        res.status(200).json({ message: 'Profile updated successfully!', user: { id: user.id, username: user.username, email: user.email, communities: user.communities } });
+        res.status(200).json({ 
+            message: 'Profile updated successfully!', 
+            id: user.id, 
+            username: user.username, 
+            email: user.email, 
+            communities: user.communities,
+            avatar: user.avatar,
+            bio: user.bio,
+            user_level: user.user_level,
+            user_xp: user.user_xp
+        });
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).json({ msg: 'Server error updating profile.' });
@@ -182,7 +220,7 @@ app.put('/api/users/profile', auth, async (req, res) => {
 app.get('/api/users/me', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findByPk(userId, { attributes: ['id', 'username', 'email', 'user_level', 'user_xp', 'communities'] });
+        const user = await User.findByPk(userId, { attributes: ['id', 'username', 'email', 'user_level', 'user_xp', 'communities', 'avatar', 'bio'] });
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
         res.status(200).json(user);
     } catch (error) {
@@ -457,7 +495,7 @@ postRouter.get('/', auth, async (req, res) => {
         const posts = await Post.findAll({
             order: [['createdAt', 'DESC']],
             include: [
-                { model: User, attributes: ['id', 'username'] },
+                { model: User, attributes: ['id', 'username', 'avatar'] },
                 { model: Habit, attributes: ['id', 'habitTitle'] }
             ]
         });
@@ -504,7 +542,7 @@ postRouter.get('/user/:userId', auth, async (req, res) => {
             where: { userId: targetUserId },
             order: [['createdAt', 'DESC']],
             include: [
-                { model: User, attributes: ['id', 'username'] },
+                { model: User, attributes: ['id', 'username', 'avatar'] },
                 { model: Habit, attributes: ['id', 'habitTitle'], required: false }
             ]
         });
@@ -590,7 +628,7 @@ postRouter.post('/:id/like', auth, async (req, res) => {
 // GET /api/leaderboard
 app.get('/api/leaderboard', auth, async (req, res) => {
     try {
-        const topUsers = await User.findAll({ order: [['user_xp', 'DESC']], limit: 10, attributes: ['id', 'username', 'user_level', 'user_xp'] });
+        const topUsers = await User.findAll({ order: [['user_xp', 'DESC']], limit: 10, attributes: ['id', 'username', 'user_level', 'user_xp', 'avatar'] });
         res.status(200).json(topUsers);
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
@@ -619,10 +657,10 @@ app.get('/api/users/stats', auth, async (req, res) => {
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         
         const totalPossibleCheckins = habits.length * 7; // 7 days * number of habits
-        const actualCheckins = await Post.count({
+        const actualCheckins = await Completion.count({
             where: {
                 userId,
-                createdAt: {
+                completedAt: {
                     [require('sequelize').Op.gte]: oneWeekAgo
                 }
             }
@@ -632,13 +670,16 @@ app.get('/api/users/stats', auth, async (req, res) => {
             ? Math.round((actualCheckins / totalPossibleCheckins) * 100)
             : 0;
         
-        res.status(200).json({
+        const statsData = {
             currentStreak,
             longestStreak,
             completionRate,
             totalHabits: habits.length,
             totalCheckins: actualCheckins
-        });
+        };
+        
+        console.log('User stats for', userId, ':', statsData);
+        res.status(200).json(statsData);
     } catch (error) {
         console.error('Error fetching user stats:', error);
         res.status(500).json({ msg: 'Server error fetching user stats.' });

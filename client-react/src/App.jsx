@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Community from './pages/Community';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 import './style.css';
 
 function App() {
@@ -52,6 +53,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/profile/edit" 
+            element={
+              <PrivateRoute>
+                <EditProfile />
               </PrivateRoute>
             } 
           />

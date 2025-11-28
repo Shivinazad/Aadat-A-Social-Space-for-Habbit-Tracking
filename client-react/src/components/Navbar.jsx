@@ -1,11 +1,10 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { notificationsAPI } from '../services/api';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -62,14 +61,9 @@ const Navbar = () => {
     localStorage.setItem('theme', newTheme);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   if (!user) return null;
 
-  const initials = user.username?.substring(0, 2).toUpperCase() || 'U';
+  const avatar = user.avatar || '👤';
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
@@ -140,7 +134,7 @@ const Navbar = () => {
           </div>
 
           <Link to="/profile" className="user-avatar">
-            {initials}
+            {avatar}
           </Link>
 
           <label className="theme-toggle">
@@ -151,10 +145,6 @@ const Navbar = () => {
             />
             <div className="toggle-slider"></div>
           </label>
-
-          <button onClick={handleLogout} className="btn-logout">
-            Logout
-          </button>
         </div>
       </div>
     </nav>

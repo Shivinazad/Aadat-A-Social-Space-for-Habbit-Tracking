@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { achievementsAPI, postsAPI, authAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import '../home.css';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const navigate = useNavigate();
   const [achievements, setAchievements] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   const [stats, setStats] = useState({
     currentStreak: 0,
     longestStreak: 0,
@@ -16,6 +19,8 @@ const Profile = () => {
     totalHabits: 0,
     totalCheckins: 0
   });
+
+  const avatarOptions = ['👤', '😀', '😎', '🤓', '🥳', '🤠', '🧑‍💻', '🧑‍🎨', '🧑‍🚀', '🧑‍🔬', '🦸', '🧙', '🧚', '🧛', '🐱', '🐶', '🦊', '🐻', '🐼', '🐨', '🦁', '🐯', '🦄', '🐧', '🦉', '🦋', '🌟', '⚡', '🔥', '💎'];
 
   useEffect(() => {
     if (user?.id) {
@@ -102,8 +107,35 @@ const Profile = () => {
     }
   };
 
-  const getInitials = () => {
-    return user?.username?.substring(0, 2).toUpperCase() || 'U';
+  const getAvatar = () => {
+    return user?.avatar || '👤';
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleSaveAvatar = async () => {
+    try {
+      const response = await authAPI.updateProfile({ avatar: selectedAvatar });
+      updateUser(response.data);
+      setShowAvatarModal(false);
+    } catch (error) {
+      console.error('Failed to update avatar:', error);
+      alert('Failed to update avatar');
+    }
+  };
+
+  const handleSaveBio = async () => {
+    try {
+      const response = await authAPI.updateProfile({ bio });
+      updateUser(response.data);
+      setShowBioModal(false);
+    } catch (error) {
+      console.error('Failed to update bio:', error);
+      alert('Failed to update bio');
+    }
   };
 
   const getAchievementIcon = (achievement) => {
@@ -142,11 +174,42 @@ const Profile = () => {
           <section className="profile-header-section">
             <div className="profile-header-card">
               <div className="profile-avatar-large">
-                <div className="avatar-circle-large">{getInitials()}</div>
+                <div className="avatar-circle-large">{user?.avatar || '👤'}</div>
               </div>
               <div className="profile-header-info">
                 <h1 className="profile-username">{user?.username}</h1>
-                <p className="profile-bio">Building habits in public.</p>
+                <p className="profile-bio">{user?.bio || 'Building habits in public.'}</p>
+              </div>
+              <div className="profile-settings-container">
+                <button 
+                  className="settings-btn" 
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
+                    <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                    <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
+                  </svg>
+                </button>
+                {showSettings && (
+                  <div className="settings-dropdown">
+                    <button 
+                      className="settings-item" 
+                      onClick={() => {
+                        setShowSettings(false);
+                        navigate('/profile/edit');
+                      }}
+                    >
+                      <span>✏️</span> Edit Profile
+                    </button>
+                    <button 
+                      className="settings-item danger" 
+                      onClick={handleLogout}
+                    >
+                      <span>🚪</span> Logout
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -233,7 +296,7 @@ const Profile = () => {
                   <div key={post.id} className="post-card">
                     <div className="post-header">
                       <div className="post-author-info">
-                        <div className="post-avatar">{getInitials()}</div>
+                        <div className="post-avatar">{getAvatar()}</div>
                         <div className="post-meta">
                           <div className="post-author-name">{user.username}</div>
                           <div className="post-date">
@@ -285,6 +348,8 @@ const Profile = () => {
           </section>
         </div>
       </main>
+
+
     </div>
   );
 };

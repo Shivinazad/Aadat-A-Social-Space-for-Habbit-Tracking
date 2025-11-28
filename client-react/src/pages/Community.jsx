@@ -112,7 +112,7 @@ const Community = () => {
               ) : (
                 posts.map(post => {
                   const authorUsername = post.User?.username || 'Unknown User';
-                  const authorInitials = authorUsername.substring(0, 2).toUpperCase();
+                  const authorAvatar = post.User?.avatar || '👤';
                   const habitTitle = post.Habit?.habitTitle || 'General Post';
                   const isLiked = post.isLikedByCurrentUser;
 
@@ -120,7 +120,7 @@ const Community = () => {
                     <div key={post.id} className="post-card">
                       <div className="post-header">
                         <div className="post-author-info">
-                          <div className="post-avatar">{authorInitials}</div>
+                          <div className="post-avatar">{authorAvatar}</div>
                           <div className="post-meta">
                             <div className="post-author-name">{authorUsername}</div>
                             <div className="post-date">{formatDate(post.createdAt)}</div>

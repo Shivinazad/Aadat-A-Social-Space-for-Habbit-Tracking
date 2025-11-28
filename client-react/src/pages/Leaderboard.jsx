@@ -26,8 +26,8 @@ const Leaderboard = () => {
     return leaderboard[rank - 1] || null;
   };
 
-  const getInitials = (username) => {
-    return username?.substring(0, 2).toUpperCase() || '--';
+  const getAvatar = (user) => {
+    return user?.avatar || '👤';
   };
 
   return (
@@ -59,7 +59,7 @@ const Leaderboard = () => {
                   <div className="podium-rank">
                     <div className="rank-number">2</div>
                   </div>
-                  <div className="podium-avatar">{getInitials(getPodiumUser(2)?.username)}</div>
+                  <div className="podium-avatar">{getAvatar(getPodiumUser(2))}</div>
                   <div className="podium-info">
                     <div className="podium-name">{getPodiumUser(2)?.username || 'Loading...'}</div>
                     <div className="podium-stats">
@@ -76,7 +76,7 @@ const Leaderboard = () => {
                       <path d="M12 2l3 6 6.5.75-4.75 4.5 1.25 6.75L12 17l-6 3.75 1.25-6.75L2.5 9.75 9 9z" fill="currentColor"/>
                     </svg>
                   </div>
-                  <div className="podium-avatar">{getInitials(getPodiumUser(1)?.username)}</div>
+                  <div className="podium-avatar">{getAvatar(getPodiumUser(1))}</div>
                   <div className="podium-info">
                     <div className="podium-name">{getPodiumUser(1)?.username || 'Loading...'}</div>
                     <div className="podium-stats">
@@ -91,7 +91,7 @@ const Leaderboard = () => {
                   <div className="podium-rank">
                     <div className="rank-number">3</div>
                   </div>
-                  <div className="podium-avatar">{getInitials(getPodiumUser(3)?.username)}</div>
+                  <div className="podium-avatar">{getAvatar(getPodiumUser(3))}</div>
                   <div className="podium-info">
                     <div className="podium-name">{getPodiumUser(3)?.username || 'Loading...'}</div>
                     <div className="podium-stats">
@@ -147,7 +147,7 @@ const Leaderboard = () => {
                         </td>
                         <td>
                           <div className="user-cell">
-                            <div className="user-avatar-small">{getInitials(user.username)}</div>
+                            <div className="user-avatar-small">{getAvatar(user)}</div>
                             <span>{user.username}</span>
                           </div>
                         </td>
