@@ -181,6 +181,84 @@ body.dark-mode .footer-bottom {
   color: var(--gray-500) !important;
 }
 
+/* Light Mode Overrides */
+body.light-mode {
+  background: var(--white) !important;
+  color: var(--black) !important;
+}
+
+body.light-mode .hero {
+  background: linear-gradient(to bottom, var(--white) 0%, var(--gray-50) 100%) !important;
+}
+
+body.light-mode .hero-title {
+  color: var(--black) !important;
+}
+
+body.light-mode .hero-subtitle {
+  color: var(--gray-600) !important;
+}
+
+body.light-mode .btn-primary-new {
+  background: var(--black) !important;
+  color: var(--white) !important;
+}
+
+body.light-mode .btn-primary-new:hover {
+  background: var(--gray-900) !important;
+}
+
+body.light-mode .btn-secondary-new {
+  color: var(--black) !important;
+  border-color: var(--gray-300) !important;
+}
+
+body.light-mode .btn-secondary-new:hover {
+  border-color: var(--black) !important;
+}
+
+body.light-mode .section-title {
+  color: var(--black) !important;
+}
+
+body.light-mode .section-subtitle {
+  color: var(--gray-600) !important;
+}
+
+body.light-mode .cta-content-new h2 {
+  color: var(--black) !important;
+}
+
+body.light-mode .cta-content-new p {
+  color: var(--gray-600) !important;
+}
+
+body.light-mode .footer-new {
+  background: var(--white) !important;
+  color: var(--black) !important;
+  border-top: 1px solid var(--gray-200) !important;
+}
+
+body.light-mode .footer-brand p {
+  color: var(--gray-600) !important;
+}
+
+body.light-mode .footer-links a {
+  color: var(--gray-700) !important;
+}
+
+body.light-mode .footer-links a:hover {
+  color: var(--neon) !important;
+}
+
+body.light-mode .footer-bottom {
+  color: var(--gray-600) !important;
+}
+
+body.light-mode .brand-footer {
+  color: var(--black) !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -334,7 +412,7 @@ body {
   letter-spacing: -0.03em;
   line-height: 1.1;
   margin: 0 0 1.5rem 0;
-  color: var(--black);
+  color: var(--white);
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
@@ -361,7 +439,7 @@ body {
 
 .hero-subtitle {
   font-size: 1.25rem;
-  color: var(--gray-600);
+  color: var(--gray-400);
   max-width: 700px;
   margin: 0 auto 3rem;
   line-height: 1.7;
@@ -379,8 +457,8 @@ body {
 
 .btn-primary-new {
   padding: 1rem 2rem;
-  background: var(--black);
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
   border: none;
   border-radius: var(--border-radius);
   font-weight: 600;
@@ -416,7 +494,7 @@ body {
 }
 
 .btn-primary-new:hover {
-  background: var(--gray-900);
+  background: var(--gray-200);
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
@@ -432,8 +510,8 @@ body {
 .btn-secondary-new {
   padding: 1rem 2rem;
   background: transparent;
-  color: var(--black);
-  border: 1.5px solid var(--gray-300);
+  color: var(--white);
+  border: 1.5px solid var(--gray-700);
   border-radius: var(--border-radius);
   font-weight: 600;
   font-size: 1rem;
@@ -446,7 +524,7 @@ body {
 }
 
 .btn-secondary-new:hover {
-  border-color: var(--black);
+  border-color: var(--gray-500);
   transform: translateY(-2px);
 }
 
@@ -1176,13 +1254,13 @@ body {
   font-weight: 900;
   letter-spacing: -0.03em;
   margin-bottom: 1.5rem;
-  color: var(--black);
+  color: var(--white);
   line-height: 1.1;
 }
 
 .cta-content-new p {
   font-size: 1.25rem;
-  color: var(--gray-600);
+  color: var(--gray-400);
   margin-bottom: 3rem;
   line-height: 1.6;
   font-weight: 500;
@@ -1241,6 +1319,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: var(--white);
 }
 
 .footer-brand p {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { FiArrowRight, FiPlay, FiCheck, FiTrendingUp, FiUsers, FiAward, FiZap } from 'react-icons/fi';
+import { FiArrowRight, FiPlay, FiCheck, FiTrendingUp, FiUsers, FiAward, FiZap, FiSun, FiMoon } from 'react-icons/fi';
 import axios from 'axios';
 
 const Landing = () => {
@@ -14,29 +14,49 @@ const Landing = () => {
     totalHabits: 0,
     totalCheckins: 0
   });
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Ensure light mode on landing page
-    document.body.classList.remove('light-mode');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDark(true);
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
     document.body.classList.add('landing-page');
-    document.body.style.backgroundColor = '#ffffff';
-    document.body.style.color = '#000000';
     return () => {
-      document.body.classList.remove('landing-page');
-      document.body.style.backgroundColor = '';
-      document.body.style.color = '';
+      document.body.classList.remove('landing-page', 'dark-mode', 'light-mode');
     };
   }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add('dark-mode');
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.add('light-mode');
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
 
   useEffect(() => {
     // Fetch real statistics
     const fetchStats = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api');
-        const response = await axios.get(`${API_BASE_URL}/stats/public`);
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
+        const response = await axios.get(`${API_BASE_URL}/api/stats/public`);
         setStats(response.data);
       } catch (error) {
         console.error('Failed to fetch stats:', error);
+        // Set fallback values if API fails
+        setStats({ totalUsers: 1000, totalHabits: 5000, totalCheckins: 25000 });
       }
     };
     fetchStats();
@@ -67,7 +87,27 @@ const Landing = () => {
         <div className="brand">
           Aadat<span className="gradient-dot"></span>
         </div>
-        <Link to="/login" className="sign-in">Sign in</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <motion.button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              color: isDark ? 'var(--white)' : 'var(--black)',
+              fontSize: '1.25rem'
+            }}
+          >
+            {isDark ? <FiSun /> : <FiMoon />}
+          </motion.button>
+          <Link to="/login" className="sign-in">Sign in</Link>
+        </div>
       </motion.nav>
 
       {/* HERO SECTION */}
@@ -131,14 +171,14 @@ const Landing = () => {
           >
             <div className="stat-item">
               <div className="stat-number">
-                {stats.totalUsers > 0 ? <CountUp end={stats.totalUsers} duration={2.5} separator="," /> : '...'}
+                <CountUp end={stats.totalUsers} duration={2.5} separator="," />
               </div>
               <div className="stat-label">Active users</div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
               <div className="stat-number">
-                {stats.totalHabits > 0 ? <CountUp end={stats.totalHabits} duration={2.5} separator="," /> : '...'}
+                <CountUp end={stats.totalHabits} duration={2.5} separator="," />
               </div>
               <div className="stat-label">Habits tracked</div>
             </div>

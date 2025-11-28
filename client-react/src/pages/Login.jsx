@@ -17,6 +17,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ totalUsers: 0, totalHabits: 0, totalCheckins: 0 });
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const { login, register, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -34,9 +35,9 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    // Ensure dark mode on mount
-    document.body.classList.remove('light-mode');
-  }, []);
+    document.body.classList.toggle('light-mode', theme === 'light');
+    document.body.classList.toggle('dark-mode', theme === 'dark');
+  }, [theme]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -74,6 +75,12 @@ const Login = () => {
       return false;
     }
     return true;
+  };
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
   };
 
   const handleSubmit = async (e) => {
@@ -118,7 +125,17 @@ const Login = () => {
         <Link to="/" className="brand">
           Aadat<span className="neon-dot"></span>
         </Link>
-        <Link to="/" className="back-link">← Back to home</Link>
+        <div className="nav-actions">
+          <label className="theme-toggle">
+            <input 
+              type="checkbox" 
+              checked={theme === 'light'}
+              onChange={toggleTheme}
+            />
+            <div className="toggle-slider"></div>
+          </label>
+          <Link to="/" className="back-link">← Back to home</Link>
+        </div>
       </motion.nav>
 
       <div className="auth-container">
