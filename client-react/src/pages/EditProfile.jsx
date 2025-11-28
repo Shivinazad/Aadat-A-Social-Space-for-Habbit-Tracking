@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import '../home.css';
 
 const EditProfile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, fetchUser } = useAuth();
   const navigate = useNavigate();
   const [selectedAvatar, setSelectedAvatar] = useState('👤');
   const [bio, setBio] = useState('');
@@ -35,18 +35,14 @@ const EditProfile = () => {
     setSavingAvatar(true);
     setAvatarSaved(false);
     try {
-      const response = await authAPI.updateProfile({
+      await authAPI.updateProfile({
         avatar: selectedAvatar
       });
 
-      if (response.success) {
-        updateUser({
-          ...user,
-          avatar: selectedAvatar
-        });
-        setAvatarSaved(true);
-        setTimeout(() => setAvatarSaved(false), 3000);
-      }
+      // Refetch user data to update UI everywhere
+      await fetchUser();
+      setAvatarSaved(true);
+      setTimeout(() => setAvatarSaved(false), 3000);
     } catch (error) {
       console.error('Error updating avatar:', error);
       alert('Failed to update avatar. Please try again.');
@@ -59,18 +55,14 @@ const EditProfile = () => {
     setSavingBio(true);
     setBioSaved(false);
     try {
-      const response = await authAPI.updateProfile({
+      await authAPI.updateProfile({
         bio: bio
       });
 
-      if (response.success) {
-        updateUser({
-          ...user,
-          bio: bio
-        });
-        setBioSaved(true);
-        setTimeout(() => setBioSaved(false), 3000);
-      }
+      // Refetch user data to update UI everywhere
+      await fetchUser();
+      setBioSaved(true);
+      setTimeout(() => setBioSaved(false), 3000);
     } catch (error) {
       console.error('Error updating bio:', error);
       alert('Failed to update bio. Please try again.');
