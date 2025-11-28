@@ -128,9 +128,13 @@ router.get('/stats', auth, async (req, res) => {
 
         const totalPossibleCheckins = habits.length * 7; // 7 days * number of habits
         const actualCheckins = await Completion.count({
+            include: [{
+                model: Habit,
+                where: { userId },
+                required: true
+            }],
             where: {
-                userId,
-                completedAt: {
+                date: {
                     [Op.gte]: oneWeekAgo
                 }
             }
