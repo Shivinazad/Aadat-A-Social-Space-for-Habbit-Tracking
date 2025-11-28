@@ -43,32 +43,12 @@ async function initializeDb() {
         Notification.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
         Notification.belongsTo(User, { as: 'recipient', foreignKey: 'userId' });
         
-        await sequelize.sync({ alter: false });
-        
-        // Manually add avatar and bio columns if they don't exist
-        try {
-            await sequelize.query(`ALTER TABLE Users ADD COLUMN avatar VARCHAR(255) DEFAULT '👤'`);
-            console.log("Added avatar column to Users table");
-        } catch (error) {
-            if (error.original?.errno === 1060) {
-                console.log("Avatar column already exists");
-            } else {
-                console.log("Error adding avatar column:", error.message);
-            }
-        }
-        
-        try {
-            await sequelize.query(`ALTER TABLE Users ADD COLUMN bio VARCHAR(150) DEFAULT 'Building habits in public.'`);
-            console.log("Added bio column to Users table");
-        } catch (error) {
-            if (error.original?.errno === 1060) {
-                console.log("Bio column already exists");
-            } else {
-                console.log("Error adding bio column:", error.message);
-            }
-        }
+        // Use alter: true in production to update schema, false in development
+        const syncOptions = process.env.NODE_ENV === 'production' ? { alter: true } : { alter: false };
+        await sequelize.sync(syncOptions);
         
         console.log("All models were synchronized successfully.");
+        console.log(`Sync mode: ${syncOptions.alter ? 'ALTER TABLE' : 'NO ALTER'}`);
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
         process.exit(1);
@@ -167,22 +147,28 @@ app.post('/api/users/register', async (req, res) => {
 app.post('/api/users/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Login attempt for email:', email);
+        
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required.' });
         }
         const user = await User.findOne({ where: { email } });
         if (!user) {
+            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            console.log('Invalid password for user:', email);
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
+        console.log('Login successful for user:', email);
         res.status(200).json({ message: 'Login successful!', token: token });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Server error during login.' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: 'Server error during login.', error: error.message });
     }
 });
 

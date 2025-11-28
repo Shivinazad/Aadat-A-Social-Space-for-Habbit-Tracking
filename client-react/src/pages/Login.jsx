@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import CountUp from 'react-countup';
+import { FiArrowRight, FiMail, FiLock, FiUser, FiCheck, FiAlertCircle } from 'react-icons/fi';
+import axios from 'axios';
 import '../Login.css';
 
 const Login = () => {
@@ -12,8 +16,22 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({ totalUsers: 0, totalHabits: 0, totalCheckins: 0 });
   const { login, register, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+        const response = await axios.get(`${API_BASE_URL}/api/stats/public`);
+        setStats(response.data);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     // Ensure dark mode on mount
@@ -91,63 +109,109 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <nav className="navbar">
+      <motion.nav 
+        className="navbar"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Link to="/" className="brand">
           Aadat<span className="neon-dot"></span>
         </Link>
         <Link to="/" className="back-link">← Back to home</Link>
-      </nav>
+      </motion.nav>
 
       <div className="auth-container">
         <div className="auth-content">
           {/* Left Side - Branding */}
-          <div className="auth-branding">
+          <motion.div 
+            className="auth-branding"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
             <div className="branding-content">
-              <div className="brand-logo">
+              <motion.div 
+                className="brand-logo"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
                 <span className="logo-text">Aadat</span>
                 <span className="neon-dot-large"></span>
-              </div>
-              <h1>Build habits that actually stick</h1>
-              <p>Join 50,000+ users who are transforming their lives, one habit at a time.</p>
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                Build habits that actually stick
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                Join {stats.totalUsers > 0 && <CountUp end={stats.totalUsers} duration={2} separator="," />}{stats.totalUsers > 0 && '+'} users who are transforming their lives, one habit at a time.
+              </motion.p>
               
-              <div className="auth-stats">
+              <motion.div 
+                className="auth-stats"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
                 <div className="auth-stat">
-                  <div className="stat-num">50K+</div>
+                  <div className="stat-num">{stats.totalUsers > 0 ? <CountUp end={stats.totalUsers} duration={2.5} separator="," /> : '...'}</div>
                   <div className="stat-txt">Active users</div>
                 </div>
                 <div className="auth-stat">
-                  <div className="stat-num">2.1M</div>
+                  <div className="stat-num">{stats.totalHabits > 0 ? <CountUp end={stats.totalHabits} duration={2.5} separator="," /> : '...'}</div>
                   <div className="stat-txt">Habits tracked</div>
                 </div>
                 <div className="auth-stat">
-                  <div className="stat-num">89%</div>
-                  <div className="stat-txt">Success rate</div>
+                  <div className="stat-num">{stats.totalCheckins > 0 ? <CountUp end={stats.totalCheckins} duration={2.5} separator="," /> : '...'}</div>
+                  <div className="stat-txt">Check-ins</div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="live-activity">
+              <motion.div 
+                className="live-activity"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+              >
                 <div className="live-pulse"></div>
-                <span>127 people started their journey today</span>
-              </div>
+                <span>{Math.floor(stats.totalUsers / 50)} people started their journey today</span>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Side - Auth Forms */}
-          <div className="auth-forms">
+          <motion.div 
+            className="auth-forms"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+          >
             <div className="form-wrapper">
               <div className="auth-tabs">
-                <button 
+                <motion.button 
                   className={`auth-tab ${isLogin ? 'active' : ''}`}
                   onClick={() => setIsLogin(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Sign in
-                </button>
-                <button 
+                </motion.button>
+                <motion.button 
                   className={`auth-tab ${!isLogin ? 'active' : ''}`}
                   onClick={() => setIsLogin(false)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Sign up
-                </button>
+                </motion.button>
               </div>
 
               <div className="form-section active">
@@ -161,23 +225,36 @@ const Login = () => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  {!isLogin && (
-                    <div className="input-group">
-                      <label htmlFor="username">Username</label>
-                      <input 
-                        type="text" 
-                        id="username" 
-                        name="username" 
-                        placeholder="johndoe" 
-                        value={formData.username}
-                        onChange={handleChange}
-                        required={!isLogin}
-                      />
-                    </div>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {!isLogin && (
+                      <motion.div 
+                        className="input-group"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <label htmlFor="username"><FiUser /> Username</label>
+                        <input 
+                          type="text" 
+                          id="username" 
+                          name="username" 
+                          placeholder="johndoe" 
+                          value={formData.username}
+                          onChange={handleChange}
+                          required={!isLogin}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                  <div className="input-group">
-                    <label htmlFor="email">Email address</label>
+                  <motion.div 
+                    className="input-group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <label htmlFor="email"><FiMail /> Email address</label>
                     <input 
                       type="email" 
                       id="email" 
@@ -187,10 +264,15 @@ const Login = () => {
                       onChange={handleChange}
                       required
                     />
-                  </div>
+                  </motion.div>
 
-                  <div className="input-group">
-                    <label htmlFor="password">Password</label>
+                  <motion.div 
+                    className="input-group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <label htmlFor="password"><FiLock /> Password</label>
                     <input 
                       type="password" 
                       id="password" 
@@ -203,20 +285,32 @@ const Login = () => {
                     {!isLogin && (
                       <div className="password-hint">At least 8 characters</div>
                     )}
-                  </div>
+                  </motion.div>
 
-                  {error && (
-                    <div className="error-message" style={{ 
-                      color: '#ff4444', 
-                      background: 'rgba(255, 68, 68, 0.1)',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      marginBottom: '1rem',
-                      border: '1px solid rgba(255, 68, 68, 0.3)'
-                    }}>
-                      {error}
-                    </div>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {error && (
+                      <motion.div 
+                        className="error-message" 
+                        style={{ 
+                          color: '#ff4444', 
+                          background: 'rgba(255, 68, 68, 0.1)',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          marginBottom: '1rem',
+                          border: '1px solid rgba(255, 68, 68, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        <FiAlertCircle />
+                        {error}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {isLogin && (
                     <div className="form-footer">
@@ -228,12 +322,31 @@ const Login = () => {
                     </div>
                   )}
 
-                  <button type="submit" className="btn-submit" disabled={loading}>
-                    {loading ? 'Loading...' : (isLogin ? 'Sign in' : 'Create account')}
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </button>
+                  <motion.button 
+                    type="submit" 
+                    className="btn-submit" 
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          style={{ display: 'inline-block' }}
+                        >
+                          ⏳
+                        </motion.div>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        {isLogin ? 'Sign in' : 'Create account'}
+                        <FiArrowRight />
+                      </>
+                    )}
+                  </motion.button>
                 </form>
               </div>
 
@@ -262,7 +375,7 @@ const Login = () => {
                 <a href="#">Privacy Policy</a>
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

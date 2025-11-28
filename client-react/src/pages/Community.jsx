@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { postsAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { motion } from 'framer-motion';
+import CountUp from 'react-countup';
+import { FiHeart, FiMessageCircle } from 'react-icons/fi';
 import '../home.css';
 
 const Community = () => {
@@ -70,30 +73,57 @@ const Community = () => {
       <main className="main-container">
         <div className="content-wrapper-single">
           {/* Header Section */}
-          <section className="community-header">
+          <motion.section 
+            className="community-header"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="community-header-content">
-              <div className="header-badge">
+              <motion.div 
+                className="header-badge"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+              >
                 <div className="live-dot"></div>
                 <span>Live Feed</span>
-              </div>
-              <h1>Community Activity</h1>
-              <p>See what others are building and share your progress</p>
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                Community Activity
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                See what others are building and share your progress
+              </motion.p>
             </div>
-            <div className="community-stats">
+            <motion.div 
+              className="community-stats"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
               <div className="stat-box">
-                <div className="stat-number">{stats.activeMembers}</div>
+                <div className="stat-number"><CountUp end={stats.activeMembers} duration={2} /></div>
                 <div className="stat-label">Active Members</div>
               </div>
               <div className="stat-box">
-                <div className="stat-number">{stats.postsToday}</div>
+                <div className="stat-number"><CountUp end={stats.postsToday} duration={2} /></div>
                 <div className="stat-label">Posts Today</div>
               </div>
               <div className="stat-box">
-                <div className="stat-number neon">{stats.completionRate}%</div>
+                <div className="stat-number neon"><CountUp end={stats.completionRate} duration={2} />%</div>
                 <div className="stat-label">Completion Rate</div>
               </div>
-            </div>
-          </section>
+            </motion.div>
+          </motion.section>
 
           {/* Feed Section */}
           <section className="feed-section">
@@ -110,14 +140,21 @@ const Community = () => {
                   <p>Be the first to share your progress! Check in to a habit from your dashboard.</p>
                 </div>
               ) : (
-                posts.map(post => {
+                posts.map((post, index) => {
                   const authorUsername = post.User?.username || 'Unknown User';
                   const authorAvatar = post.User?.avatar || '👤';
                   const habitTitle = post.Habit?.habitTitle || 'General Post';
                   const isLiked = post.isLikedByCurrentUser;
 
                   return (
-                    <div key={post.id} className="post-card">
+                    <motion.div 
+                      key={post.id} 
+                      className="post-card"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                    >
                       <div className="post-header">
                         <div className="post-author-info">
                           <div className="post-avatar">{authorAvatar}</div>
@@ -137,26 +174,21 @@ const Community = () => {
                         <p>{post.content}</p>
                       </div>
                       <div className="post-actions">
-                        <button 
+                        <motion.button 
                           className={`btn-like ${isLiked ? 'liked' : ''}`}
                           onClick={() => !isLiked && handleLike(post.id)}
                           disabled={isLiked}
+                          whileHover={{ scale: isLiked ? 1 : 1.05 }}
+                          whileTap={{ scale: isLiked ? 1 : 0.95 }}
                         >
-                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path 
-                              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
-                              stroke="currentColor" 
-                              strokeWidth="1.5" 
-                              fill={isLiked ? 'currentColor' : 'none'}
-                            />
-                          </svg>
+                          <FiHeart fill={isLiked ? 'currentColor' : 'none'} />
                           {isLiked ? 'Liked' : 'Like'}
-                        </button>
+                        </motion.button>
                         <span className="post-stat">
-                          ❤️ {post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}
+                          <FiHeart /> {post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })
               )}

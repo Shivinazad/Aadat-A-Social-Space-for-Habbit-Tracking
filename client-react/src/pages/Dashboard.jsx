@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { habitsAPI, postsAPI, inviteAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import { celebrateCheckIn } from '../utils/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
+import CountUp from 'react-countup';
+import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap } from 'react-icons/fi';
 import '../home.css';
 
 const Dashboard = () => {
@@ -265,25 +268,52 @@ const Dashboard = () => {
           {/* Left Column - Main Content */}
           <div className="main-column">
             {/* Welcome Section */}
-            <section className="welcome-section">
+            <motion.section 
+              className="welcome-section"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <div className="welcome-content">
-                <div className="welcome-badge">
+                <motion.div 
+                  className="welcome-badge"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                >
                   <div className="live-dot"></div>
                   <span>Welcome back</span>
-                </div>
-                <h1>Continue your journey</h1>
-                <p>Track your progress, build consistency, and achieve your goals one habit at a time.</p>
+                </motion.div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                  Continue your journey
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                >
+                  Track your progress, build consistency, and achieve your goals one habit at a time.
+                </motion.p>
               </div>
-              <div className="welcome-visual">
+              <motion.div 
+                className="welcome-visual"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
                 <div className="streak-display">
                   <div className="streak-icon">🔥</div>
                   <div className="streak-info">
-                    <div className="streak-number">{maxStreak}</div>
+                    <div className="streak-number"><CountUp end={maxStreak} duration={1.5} /></div>
                     <div className="streak-label">Day Streak</div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </motion.div>
+            </motion.section>
 
             {/* Today's Habits */}
             <section className="habits-section">
@@ -292,29 +322,40 @@ const Dashboard = () => {
                   <h2>Today's Habits</h2>
                   <p className="section-subtitle">Keep your momentum going</p>
                 </div>
-                <button onClick={() => setShowAddHabitModal(true)} className="btn-add">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 4v12m-6-6h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
+                <motion.button 
+                  onClick={() => setShowAddHabitModal(true)} 
+                  className="btn-add"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FiPlus />
                   Add Habit
-                </button>
+                </motion.button>
               </div>
               
               <div className="habit-list">
                 {habits.length === 0 ? (
-                  <div className="empty-state-habits">
+                  <motion.div 
+                    className="empty-state-habits"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <div className="empty-icon-large">🎯</div>
                     <h3>No habits yet!</h3>
                     <p>Start building better habits today. Add your first habit to get started.</p>
-                    <button onClick={() => setShowAddHabitModal(true)} className="btn-primary empty-cta">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M10 4v12m-6-6h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
+                    <motion.button 
+                      onClick={() => setShowAddHabitModal(true)} 
+                      className="btn-primary empty-cta"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <FiPlus />
                       Add Your First Habit
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 ) : (
-                  habits.map(habit => {
+                  habits.map((habit, index) => {
                     const lastCheckin = habit.lastCheckinDate ? new Date(habit.lastCheckinDate) : null;
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -325,7 +366,14 @@ const Dashboard = () => {
                     const daysSinceLastCheckin = lastCheckin ? Math.floor((Date.now() - lastCheckin) / (1000 * 60 * 60 * 24)) : null;
                     
                     return (
-                    <div key={habit.id} className="habit-item">
+                    <motion.div 
+                      key={habit.id} 
+                      className="habit-item"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                    >
                       <div className="habit-main-info">
                         <div className="habit-title-row">
                           <span className="habit-title">{habit.habitTitle}</span>
@@ -357,36 +405,36 @@ const Dashboard = () => {
                             toggleSettingsMenu(habit.id);
                           }}
                         >
-                          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <circle cx="10" cy="4" r="1.5"/>
-                            <circle cx="10" cy="10" r="1.5"/>
-                            <circle cx="10" cy="16" r="1.5"/>
-                          </svg>
+                          <FiMoreVertical />
                         </button>
-                        {settingsMenuOpen === habit.id && (
-                          <div className="settings-menu">
-                            <button 
-                              className="settings-menu-item"
-                              onClick={() => openEditModal(habit)}
+                        <AnimatePresence>
+                          {settingsMenuOpen === habit.id && (
+                            <motion.div 
+                              className="settings-menu"
+                              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                              transition={{ duration: 0.2 }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M11.333 2L14 4.667l-9.333 9.333H2v-2.667L11.333 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              Edit Habit
-                            </button>
-                            <button 
-                              className="settings-menu-item delete"
-                              onClick={() => handleDeleteHabit(habit.id)}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              Delete Habit
-                            </button>
-                          </div>
-                        )}
+                              <button 
+                                className="settings-menu-item"
+                                onClick={() => openEditModal(habit)}
+                              >
+                                <FiEdit2 />
+                                Edit Habit
+                              </button>
+                              <button 
+                                className="settings-menu-item delete"
+                                onClick={() => handleDeleteHabit(habit.id)}
+                              >
+                                <FiTrash2 />
+                                Delete Habit
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                   })
                 )}
@@ -397,49 +445,71 @@ const Dashboard = () => {
             <section className="quick-actions-section">
               <h2>Quick Actions</h2>
               <div className="actions-grid">
-                <a href="/community" className="action-card">
-                  <div className="action-icon">💬</div>
+                <motion.a 
+                  href="/community" 
+                  className="action-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <div className="action-icon"><FiUsers /></div>
                   <div className="action-content">
                     <h3>Join Community</h3>
                     <p>Connect with others building similar habits</p>
                   </div>
-                  <svg className="action-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </a>
+                  <FiArrowRight className="action-arrow" />
+                </motion.a>
 
-                <a href="/leaderboard" className="action-card">
-                  <div className="action-icon">🏆</div>
+                <motion.a 
+                  href="/leaderboard" 
+                  className="action-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <div className="action-icon"><FiAward /></div>
                   <div className="action-content">
                     <h3>View Leaderboard</h3>
                     <p>See how you rank against other members</p>
                   </div>
-                  <svg className="action-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </a>
+                  <FiArrowRight className="action-arrow" />
+                </motion.a>
 
-                <div className="action-card">
-                  <div className="action-icon">⚡</div>
+                <motion.div 
+                  className="action-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <div className="action-icon"><FiZap /></div>
                   <div className="action-content">
                     <h3>30-Day Challenge</h3>
                     <p>Commit to building consistency for 30 days</p>
                   </div>
-                  <svg className="action-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
+                  <FiArrowRight className="action-arrow" />
+                </motion.div>
 
-                <div className="action-card">
-                  <div className="action-icon">📊</div>
+                <motion.div 
+                  className="action-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <div className="action-icon"><FiTrendingUp /></div>
                   <div className="action-content">
                     <h3>View Analytics</h3>
                     <p>Track your progress with detailed insights</p>
                   </div>
-                  <svg className="action-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
+                  <FiArrowRight className="action-arrow" />
+                </motion.div>
               </div>
             </section>
 
@@ -516,21 +586,26 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="stats-card">
+            <motion.div 
+              className="stats-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <h4>This Week's Progress</h4>
               <div className="stat-row">
                 <span className="stat-label">Habits worked on</span>
-                <span className="stat-value">{weeklyStats.completedHabits}</span>
+                <span className="stat-value"><CountUp end={weeklyStats.completedHabits} duration={1.5} /></span>
               </div>
               <div className="stat-row">
                 <span className="stat-label">Total check-ins</span>
-                <span className="stat-value">{weeklyStats.totalCheckins}</span>
+                <span className="stat-value"><CountUp end={weeklyStats.totalCheckins} duration={1.5} /></span>
               </div>
               <div className="stat-row">
                 <span className="stat-label">Consistency rate</span>
-                <span className="stat-value neon">{weeklyStats.successRate}%</span>
+                <span className="stat-value neon"><CountUp end={weeklyStats.successRate} duration={1.5} />%</span>
               </div>
-            </div>
+            </motion.div>
           </aside>
         </div>
       </main>

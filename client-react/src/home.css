@@ -18,27 +18,49 @@
     --gray-700: #404040;
     --gray-800: #262626;
     --gray-900: #171717;
+    --gray-950: #0a0a0a;
+    
+    /* Neon Palette */
     --neon: #00ff88;
+    --neon-hover: #00cc6a;
     --neon-glow: rgba(0, 255, 136, 0.3);
+    --neon-glow-strong: rgba(0, 255, 136, 0.5);
+    --neon-bg: rgba(0, 255, 136, 0.1);
     
     /* Theme Variables */
-    --bg-primary: var(--black);
-    --bg-secondary: var(--gray-900);
-    --bg-card: var(--gray-900);
-    --text-primary: var(--white);
-    --text-secondary: var(--gray-400);
-    --border-color: var(--gray-800);
-    --border-radius: 12px;
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #121212;
+    --bg-tertiary: #1a1a1a;
+    --bg-card: rgba(26, 26, 26, 0.6);
+    --bg-hover: rgba(38, 38, 38, 0.8);
+    --text-primary: #ffffff;
+    --text-secondary: #a3a3a3;
+    --text-tertiary: #737373;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(0, 255, 136, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-neon: 0 0 20px rgba(0, 255, 136, 0.2);
+    --border-radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.light-mode {
-    --bg-primary: var(--white);
-    --bg-secondary: var(--gray-50);
-    --bg-card: var(--white);
-    --text-primary: var(--black);
-    --text-secondary: var(--gray-600);
-    --border-color: var(--gray-200);
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f3f5;
+    --bg-card: rgba(255, 255, 255, 0.8);
+    --bg-hover: rgba(241, 243, 245, 0.9);
+    --text-primary: #1a1a1a;
+    --text-secondary: #525252;
+    --text-tertiary: #737373;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 255, 136, 0.5);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+    --shadow-neon: 0 0 20px rgba(0, 255, 136, 0.3);
 }
 
 body.light-mode * {
@@ -680,10 +702,10 @@ body.light-mode .btn-add {
     border: 1px solid var(--gray-800) !important;
     border-bottom: 1px solid var(--gray-700) !important;
     border-radius: 12px;
-    padding: 24px 48px !important;
+    padding: 20px 28px !important;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     transition: var(--transition);
     margin-bottom: 12px;
     position: relative;
@@ -820,7 +842,9 @@ body.light-mode .habit-item span:first-child {
 
 .streak-count {
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -2536,21 +2560,25 @@ body:not(.landing-page) .nav-link:hover {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    min-width: 0;
 }
 
 .habit-title-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
 }
 
 .habit-title {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 32px;
+    font-weight: 800;
     color: var(--white);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 body.light-mode .habit-title {
@@ -2559,14 +2587,16 @@ body.light-mode .habit-title {
 
 .habit-category-badge {
     display: inline-flex;
-    padding: 4px 12px;
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 12px;
-    font-size: 12px;
+    align-items: center;
+    padding: 3px 10px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--neon);
-    text-transform: capitalize;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 body.light-mode .habit-category-badge {
@@ -2577,10 +2607,11 @@ body.light-mode .habit-category-badge {
 
 .last-checkin-text {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     display: flex;
     align-items: center;
     gap: 6px;
+    font-weight: 400;
 }
 
 .btn-checkin.checked-in {
@@ -2734,9 +2765,15 @@ body.light-mode .skeleton {
 
 /* Mobile phones */
 @media (max-width: 768px) {
-    /* Navigation */
+    /* Enhanced Mobile Navigation */
+    .navbar {
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 255, 133, 0.1);
+    }
+    
     .nav-container {
-        padding: 12px 16px;
+        padding: 8px 16px 12px;
         flex-direction: column;
         gap: 12px;
     }
@@ -2744,30 +2781,68 @@ body.light-mode .skeleton {
     .nav-left {
         width: 100%;
         justify-content: space-between;
-        gap: 16px;
+        align-items: center;
+        gap: 0;
     }
     
-    .logo {
-        font-size: 20px;
+    .brand {
+        font-size: 22px;
+        font-weight: 700;
     }
     
     .nav-links {
         display: flex !important;
         width: 100%;
-        justify-content: space-around;
-        gap: 0;
-        padding: 8px 0;
-        background: var(--card-bg);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
+        gap: 6px;
+        padding: 6px;
+        background: rgba(0, 255, 133, 0.05);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 255, 133, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     
     .nav-link {
-        font-size: 12px;
-        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 10px 12px;
         flex: 1;
         text-align: center;
         white-space: nowrap;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0, 255, 133, 0.1), rgba(0, 255, 133, 0.05));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+    
+    .nav-link:active {
+        transform: scale(0.95);
+    }
+    
+    .nav-link.active {
+        background: rgba(0, 255, 133, 0.15);
+        color: var(--neon);
+        box-shadow: 0 0 20px rgba(0, 255, 133, 0.2);
+    }
+    
+    .nav-link.active::before {
+        opacity: 1;
+    }
+    
+    .nav-link.active::after {
+        display: none;
     }
     
     .search-wrapper {
@@ -2777,19 +2852,48 @@ body.light-mode .skeleton {
     .nav-actions {
         width: 100%;
         justify-content: space-between;
-        gap: 12px;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .notification-container {
+        order: 1;
+    }
+    
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(0, 255, 133, 0.05);
+        border: 1px solid rgba(0, 255, 133, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .icon-btn:active {
+        transform: scale(0.9);
+    }
+    
+    .user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        background: rgba(0, 255, 133, 0.1);
+        border: 2px solid rgba(0, 255, 133, 0.3);
+        border-radius: 12px;
+        order: 3;
     }
     
     .theme-toggle {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 24px;
         flex-shrink: 0;
+        order: 2;
     }
     
     .btn-logout {
-        padding: 10px 20px;
-        font-size: 14px;
-        flex: 1;
+        display: none;
     }
     
     /* Main Container */
