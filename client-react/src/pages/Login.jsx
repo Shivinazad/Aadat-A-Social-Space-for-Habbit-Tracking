@@ -117,28 +117,25 @@ const Login = () => {
   return (
     <div className="auth-page">
       <motion.nav
-        className="login-navbar"
+        className="navbar"
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="login-nav-container">
-
-          {/* Left */}
-          <Link to="/" className="login-brand">
+        <div className="nav-container">
+          <Link to="/" className="brand">
             Aadat<span className="neon-dot"></span>
           </Link>
 
-          {/* Right */}
-          <div className="login-nav-actions">
-            <button onClick={toggleTheme} className="login-theme-btn">
-              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button onClick={toggleTheme} className="theme-toggle" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+              {theme === 'dark' ? <FiSun size={20} /> : <FiMoon size={20} />}
             </button>
-            <Link to="/" className="login-back-link">Back</Link>
+            <Link to="/" className="back-link" style={{ textDecoration: 'none', fontWeight: 500 }}>Back</Link>
           </div>
-
         </div>
       </motion.nav>
+
 
 
       <div className="auth-container">
@@ -409,7 +406,7 @@ const Login = () => {
           </motion.div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

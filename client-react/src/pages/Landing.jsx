@@ -103,29 +103,31 @@ const Landing = () => {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="brand">
-          Aadat<span className="gradient-dot"></span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <motion.button
-            onClick={toggleTheme}
-            className="theme-toggle"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              color: isDark ? 'var(--white)' : 'var(--black)',
-              fontSize: '1.25rem'
-            }}
-          >
-            {isDark ? <FiSun /> : <FiMoon />}
-          </motion.button>
-          <Link to="/login" className="sign-in">Sign in</Link>
+        <div className="nav-container">
+          <div className="brand">
+            Aadat<span className="gradient-dot"></span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <motion.button
+              onClick={toggleTheme}
+              className="theme-toggle"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                color: isDark ? 'var(--white)' : 'var(--black)',
+                fontSize: '1.25rem'
+              }}
+            >
+              {isDark ? <FiSun /> : <FiMoon />}
+            </motion.button>
+            <Link to="/login" className="sign-in">Sign in</Link>
+          </div>
         </div>
       </motion.nav>
 
@@ -472,16 +474,16 @@ const Landing = () => {
                     if (hours < 24) return `${hours}h ago`;
                     return `${Math.floor(hours / 24)}d ago`;
                   };
-                  
+
                   const getInitials = (name) => {
                     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                   };
 
                   return (
-                    <motion.div 
-                      key={activity.id} 
-                      className="feed-item" 
-                      animate={{ opacity: [0.5, 1, 0.5] }} 
+                    <motion.div
+                      key={activity.id}
+                      className="feed-item"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
                     >
                       <div className="feed-avatar">{getInitials(activity.User?.username || 'User')}</div>

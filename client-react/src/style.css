@@ -438,79 +438,91 @@ body {
 
 /* NAVIGATION */
 /* ✅ LANDING NAVBAR FINAL FIX */
+/* ✅ NAVBAR STYLES */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 60px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
+  justify-content: center;
   z-index: 1000;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--gray-200);
+  transition: var(--transition);
 }
 
-/* Brand */
-.navbar .brand {
-  font-size: 18px;
-  font-weight: 700;
-  color: black;
+body.dark-mode .navbar {
+  background: rgba(0, 0, 0, 0.9);
+  border-bottom-color: var(--gray-800);
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  height: 100%;
 }
 
-/* Right Side */
-.navbar > div {
+.nav-logo {
+  flex-shrink: 0;
+}
+
+.nav-links-center {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 2rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* Theme Button */
-.navbar .theme-toggle {
-  font-size: 18px;
-  color: white;
-}
-
-/* Sign in Button */
-.navbar .sign-in {
-  background: white;
-  color: black;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
+.nav-link {
+  color: var(--gray-500);
   text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
 }
 
-.brand {
-  font-size: 1.5rem;
-  font-weight: 800;
+.nav-link:hover,
+.nav-link.active {
   color: var(--black);
-  letter-spacing: -0.02em;
+}
+
+body.dark-mode .nav-link {
+  color: var(--gray-400);
+}
+
+body.dark-mode .nav-link:hover,
+body.dark-mode .nav-link.active {
+  color: var(--white);
+}
+
+.nav-icons {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.gradient-dot,
-.neon-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--neon);
-  border-radius: 50%;
-  box-shadow: var(--shadow-neon);
-  animation: pulse 2s ease-in-out infinite;
+/* Mobile Menu */
+.nav-links-mobile {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  background: var(--white);
+  padding: 1rem;
+  flex-direction: column;
+  transform: scale(1.2);
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
 }
 
 .sign-in {
@@ -558,8 +570,15 @@ body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translate(-50%, 0px); }
-  50% { transform: translate(-50%, -20px); }
+
+  0%,
+  100% {
+    transform: translate(-50%, 0px);
+  }
+
+  50% {
+    transform: translate(-50%, -20px);
+  }
 }
 
 .hero-container {
@@ -574,8 +593,15 @@ body {
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-badge {
@@ -611,8 +637,15 @@ body {
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .neon-text {
@@ -623,11 +656,14 @@ body {
 }
 
 @keyframes neonGlow {
-  0%, 100% { 
-    text-shadow: 0 0 30px var(--neon-glow), 0 0 50px var(--neon-glow), 0 0 70px rgba(0, 255, 136, 0.3); 
+
+  0%,
+  100% {
+    text-shadow: 0 0 30px var(--neon-glow), 0 0 50px var(--neon-glow), 0 0 70px rgba(0, 255, 136, 0.3);
   }
-  50% { 
-    text-shadow: 0 0 50px var(--neon-glow), 0 0 80px var(--neon-glow), 0 0 100px rgba(0, 255, 136, 0.5), 0 0 120px rgba(0, 255, 136, 0.3); 
+
+  50% {
+    text-shadow: 0 0 50px var(--neon-glow), 0 0 80px var(--neon-glow), 0 0 100px rgba(0, 255, 136, 0.5), 0 0 120px rgba(0, 255, 136, 0.3);
   }
 }
 
@@ -808,9 +844,17 @@ body {
   background: var(--gray-300);
 }
 
-.window-dots span:nth-child(1) { background: #ff5f57; }
-.window-dots span:nth-child(2) { background: #ffbd2e; }
-.window-dots span:nth-child(3) { background: #28ca42; }
+.window-dots span:nth-child(1) {
+  background: #ff5f57;
+}
+
+.window-dots span:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.window-dots span:nth-child(3) {
+  background: #28ca42;
+}
 
 .window-title {
   font-size: 0.875rem;
@@ -973,9 +1017,11 @@ body {
 }
 
 .section-header h2 {
-  max-width: 720px;       /* Controls where the line breaks */
+  max-width: 720px;
+  /* Controls where the line breaks */
   line-height: 1.15;
-  margin-top: 18px;      /* Space after FEATURES badge */
+  margin-top: 18px;
+  /* Space after FEATURES badge */
   word-wrap: break-word;
 }
 
@@ -1325,9 +1371,11 @@ body {
   0% {
     box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
   }
+
   50% {
     box-shadow: 0 0 0 8px rgba(0, 255, 136, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
   }
@@ -1411,8 +1459,13 @@ body {
 }
 
 @keyframes scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .ticker-item {
@@ -1558,8 +1611,17 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.8; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 .timeline-content {
@@ -1667,8 +1729,17 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 .feed-items {
@@ -1753,8 +1824,13 @@ body {
 }
 
 @keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .testimonial-card {
@@ -1955,16 +2031,16 @@ body {
   .navbar {
     padding: 1rem 1.5rem;
   }
-  
+
   .brand {
     font-size: 1.25rem;
   }
-  
+
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
   }
-  
+
   .hero-stats {
     padding: 1.5rem 2rem;
     gap: 2rem;
@@ -1976,105 +2052,105 @@ body {
     padding: 1rem;
     flex-wrap: wrap;
   }
-  
-  .navbar > div {
+
+  .navbar>div {
     gap: 0.75rem;
   }
-  
+
   .theme-toggle {
     order: -1;
   }
-  
+
   .sign-in {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
   }
-  
+
   .hero {
     padding: 5rem 1rem 2rem;
   }
-  
+
   .hero-title {
     font-size: 2.25rem !important;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
     margin: 0 auto 2rem;
   }
-  
+
   .hero-badge {
     font-size: 0.8125rem;
     padding: 0.5rem 1rem;
   }
-  
+
   .hero-actions {
     flex-direction: column;
     width: 100%;
     gap: 0.75rem;
     margin-bottom: 3rem;
   }
-  
+
   .btn-primary-new,
   .btn-secondary-new {
     width: 100%;
     justify-content: center;
     padding: 0.875rem 1.5rem;
   }
-  
+
   .hero-stats {
     flex-direction: column;
     gap: 1.5rem;
     padding: 1.5rem 1.5rem;
   }
-  
+
   .stat-divider {
     width: 100%;
     height: 1px;
   }
-  
+
   .stat-number {
     font-size: 1.75rem;
   }
-  
+
   .stat-label {
     font-size: 0.8125rem;
   }
-  
+
   .dashboard-window {
     margin: 0 -1rem;
   }
-  
+
   .window-content {
     padding: 1.5rem 1rem;
   }
-  
+
   .streak-display {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .habit-item {
     padding: 0.875rem;
   }
-  
+
   .features-section {
     padding: 4rem 1rem;
   }
-  
+
   .features-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .feature-card {
     padding: 2rem 1.5rem;
   }
-  
+
   .section-header h2 {
     font-size: 2rem !important;
   }
-  
+
   .section-subtitle {
     font-size: 1rem;
   }
@@ -2130,36 +2206,36 @@ body {
   }
 
 
-  
+
   .final-cta-section {
     padding: 6rem 1rem;
   }
-  
+
   .cta-content-new h2 {
     font-size: 2rem !important;
   }
-  
+
   .cta-content-new p {
     font-size: 1rem;
   }
-  
+
   .cta-fine-print {
     flex-direction: column;
     gap: 0.75rem;
     font-size: 0.8125rem;
   }
-  
+
   .footer-new {
     padding: 3rem 1rem 2rem;
   }
-  
+
   .footer-links {
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 2rem;
     padding-bottom: 2rem;
   }
-  
+
   .footer-bottom {
     font-size: 0.8125rem;
   }
@@ -2170,31 +2246,31 @@ body {
     font-size: 1.875rem !important;
     line-height: 1.2;
   }
-  
+
   .neon-text {
     font-size: 0.95em;
   }
-  
+
   .hero-subtitle {
     font-size: 0.9375rem;
   }
-  
+
   .hero-stats {
     padding: 1.25rem 1rem;
   }
-  
+
   .stat-number {
     font-size: 1.5rem;
   }
-  
+
   .feature-card {
     padding: 1.5rem 1.25rem;
   }
-  
+
   .feature-card h3 {
     font-size: 1.125rem;
   }
-  
+
   .feature-card p {
     font-size: 0.9375rem;
   }
@@ -2246,7 +2322,9 @@ body {
 
 }
 
-.waves { display: none; }
+.waves {
+  display: none;
+}
 
 /* ✅ ENABLE SCROLL FOR LANDING PAGE ONLY */
 body.landing-page {
@@ -2293,6 +2371,7 @@ body.landing-page .final-cta-section {
   overflow: visible !important;
   position: relative !important;
 }
+
 /* ✅ MOBILE NAVBAR FIX — DOES NOT AFFECT DESKTOP */
 @media (max-width: 768px) {
   .navbar {
@@ -2308,7 +2387,7 @@ body.landing-page .final-cta-section {
     gap: 6px;
   }
 
-  .navbar > div {
+  .navbar>div {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2342,6 +2421,7 @@ body.landing-page .final-cta-section {
     font-size: 12px;
   }
 }
+
 /* ✅ FINAL MOBILE NAVBAR ALIGNMENT FIX */
 @media (max-width: 768px) {
 
@@ -2362,22 +2442,24 @@ body.landing-page .final-cta-section {
     align-items: center !important;
     justify-content: space-between !important;
 
-    background: rgba(0,0,0,0.92) !important;
+    background: rgba(0, 0, 0, 0.92) !important;
     backdrop-filter: blur(10px);
     z-index: 9999;
   }
+
   /* ✅ LOWER THE TOGGLE + SIGN IN SLIGHTLY (MOBILE ONLY) */
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
 
-  .navbar > div {
-    margin-top: 4px !important;   /* adjust 4px → 6px if you want lower */
-  }
+    .navbar>div {
+      margin-top: 4px !important;
+      /* adjust 4px → 6px if you want lower */
+    }
 
-  .navbar button,
-  .navbar a {
-    margin-top: 2px !important;
+    .navbar button,
+    .navbar a {
+      margin-top: 2px !important;
+    }
   }
-}
 
 
   /* ✅ LEFT: BRAND */
@@ -2393,7 +2475,201 @@ body.landing-page .final-cta-section {
   }
 
   /* ✅ RIGHT: ICONS + SIGN IN */
-  .navbar > div {
+  .navbar>div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+  }
+
+  .navbar button {
+    padding: 6px !important;
+    font-size: 14px !important;
+  }
+
+  .navbar a {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 999px !important;
+    white-space: nowrap;
+  }
+
+  /* ✅ REMOVE EXTRA TOP GAP BELOW NAVBAR */
+  .hero,
+  .hero-container {}
+
+  .live-feed {
+    padding: 1.25rem;
+  }
+
+  .feed-avatar {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .testimonial-card {
+    flex: 0 0 280px;
+    padding: 1.25rem;
+  }
+
+
+}
+
+.waves {
+  display: none;
+}
+
+/* ✅ ENABLE SCROLL FOR LANDING PAGE ONLY */
+body.landing-page {
+  overflow-x: hidden !important;
+  height: auto !important;
+  min-height: 100vh;
+}
+
+/* ===========================
+   FORCE ENABLE SCROLL (GLOBAL OVERRIDE)
+   =========================== */
+
+html {
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+body {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+}
+
+/* Specifically for landing page */
+body.landing-page {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+}
+
+/* Free all landing sections */
+body.landing-page section,
+body.landing-page .hero,
+body.landing-page .features-section,
+body.landing-page .story-section,
+body.landing-page .social-proof-section,
+body.landing-page .final-cta-section {
+  height: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/* ✅ MOBILE NAVBAR FIX — DOES NOT AFFECT DESKTOP */
+@media (max-width: 768px) {
+  .navbar {
+    height: 56px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navbar .brand {
+    font-size: 16px;
+    gap: 6px;
+  }
+
+  .navbar>div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .navbar .theme-toggle {
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .navbar .sign-in {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 999px;
+  }
+}
+
+/* ✅ EXTRA SMALL PHONES */
+@media (max-width: 480px) {
+  .navbar {
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  .navbar .brand {
+    font-size: 15px;
+  }
+
+  .navbar .sign-in {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ✅ FINAL MOBILE NAVBAR ALIGNMENT FIX */
+@media (max-width: 768px) {
+
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+
+    padding: 0 14px !important;
+    border-radius: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    background: rgba(0, 0, 0, 0.92) !important;
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+  }
+
+  /* ✅ LOWER THE TOGGLE + SIGN IN SLIGHTLY (MOBILE ONLY) */
+  @media (max-width: 768px) {
+
+    .navbar>div {
+      margin-top: 4px !important;
+      /* adjust 4px → 6px if you want lower */
+    }
+
+    .navbar button,
+    .navbar a {
+      margin-top: 2px !important;
+    }
+  }
+
+
+  /* ✅ LEFT: BRAND */
+  .navbar .brand {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 15px !important;
+    font-weight: 700;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* ✅ RIGHT: ICONS + SIGN IN */
+  .navbar>div {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -2415,7 +2691,262 @@ body.landing-page .final-cta-section {
   /* ✅ REMOVE EXTRA TOP GAP BELOW NAVBAR */
   .hero,
   .hero-container {
-    padding-top: 72px !important;
-    margin-top: 0 !important;
+    .hero-container {}
+
+    .live-feed {
+      padding: 1.25rem;
+    }
+
+    .feed-avatar {
+      width: 2rem;
+      height: 2rem;
+      font-size: 0.75rem;
+    }
+
+    .testimonial-card {
+      flex: 0 0 280px;
+      padding: 1.25rem;
+    }
+
+
   }
-}
+
+  .waves {
+    display: none;
+  }
+
+  /* ✅ ENABLE SCROLL FOR LANDING PAGE ONLY */
+  body.landing-page {
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  /* ===========================
+   FORCE ENABLE SCROLL (GLOBAL OVERRIDE)
+   =========================== */
+
+  html {
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  body {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+
+  /* Specifically for landing page */
+  body.landing-page {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+
+  /* Free all landing sections */
+  body.landing-page section,
+  body.landing-page .hero,
+  body.landing-page .features-section,
+  body.landing-page .story-section,
+  body.landing-page .social-proof-section,
+  body.landing-page .final-cta-section {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  /* ✅ MOBILE NAVBAR FIX — DOES NOT AFFECT DESKTOP */
+  @media (max-width: 768px) {
+    .navbar {
+      height: 56px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar .brand {
+      font-size: 16px;
+      gap: 6px;
+    }
+
+    .navbar>div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar .theme-toggle {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .navbar .sign-in {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 999px;
+    }
+  }
+
+  /* ✅ EXTRA SMALL PHONES */
+  @media (max-width: 480px) {
+    .navbar {
+      height: 52px;
+      padding: 0 10px;
+    }
+
+    .navbar .brand {
+      font-size: 15px;
+    }
+
+    .navbar .sign-in {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+  }
+
+  /* ✅ FINAL MOBILE NAVBAR ALIGNMENT FIX */
+  @media (max-width: 768px) {
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+
+      height: 56px !important;
+      min-height: 56px !important;
+      max-height: 56px !important;
+
+      padding: 0 14px !important;
+      border-radius: 0 !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+
+      background: rgba(0, 0, 0, 0.92) !important;
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+    }
+
+    /* ✅ LOWER THE TOGGLE + SIGN IN SLIGHTLY (MOBILE ONLY) */
+    @media (max-width: 768px) {
+
+      .navbar>div {
+        margin-top: 4px !important;
+        /* adjust 4px → 6px if you want lower */
+      }
+
+      .navbar button,
+      .navbar a {
+        margin-top: 2px !important;
+      }
+    }
+
+
+    /* ✅ LEFT: BRAND */
+    .navbar .brand {
+      margin: 0 !important;
+      padding: 0 !important;
+
+      font-size: 15px !important;
+      font-weight: 700;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    /* ✅ RIGHT: ICONS + SIGN IN */
+    .navbar>div {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 10px !important;
+    }
+
+    .navbar button {
+      padding: 6px !important;
+      font-size: 14px !important;
+    }
+
+    .navbar a {
+      padding: 6px 12px !important;
+      font-size: 12px !important;
+      border-radius: 999px !important;
+      white-space: nowrap;
+    }
+
+    /* ✅ REMOVE EXTRA TOP GAP BELOW NAVBAR */
+    .hero,
+    .hero-container {
+      padding-top: 72px !important;
+      margin-top: 0 !important;
+    }
+  }
+
+  /* ✅ MOBILE RESPONSIVE FIXES */
+  @media (max-width: 768px) {
+
+    /* Fix Top Margin for Dashboard Content */
+    .main-container,
+    .dashboard-container,
+    .content-wrapper {
+      padding-top: 80px !important;
+      /* Navbar height + spacing */
+      margin-top: 0 !important;
+    }
+
+    /* Fix Dashboard Margins */
+    .main-column {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Fix Navbar Alignment - Logo Left, Icons Right */
+    .nav-container {
+      width: 100% !important;
+      justify-content: space-between !important;
+      padding: 0 1rem !important;
+      gap: 0 !important;
+    }
+
+    /* Force Logo Left */
+    .nav-logo,
+    .brand {
+      order: 1 !important;
+      margin-right: auto !important;
+      margin-left: 0 !important;
+      justify-content: flex-start !important;
+    }
+
+    /* Ensure Nav Actions (including Hamburger) are on Right */
+    .nav-icons,
+    .nav-actions {
+      order: 2 !important;
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      justify-content: flex-end !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 1rem !important;
+    }
+
+    /* Hamburger Styles */
+    .hamburger {
+      display: flex !important;
+      margin-left: 0.5rem !important;
+      position: relative !important;
+    }
+  }
