@@ -330,10 +330,12 @@ const Dashboard = () => {
               >
                 <div className="streak-card">
                   <div className="streak-icon">🔥</div>
-                  <div className="streak-number">
-                    <CountUp end={maxStreak} duration={1.5} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginTop: '8px' }}>
+                    <div className="streak-number" style={{ lineHeight: 1, marginBottom: 0 }}>
+                      <CountUp end={maxStreak} duration={1.5} />
+                    </div>
+                    <div className="streak-label" style={{ marginTop: 0 }}>DAY STREAK</div>
                   </div>
-                  <div className="streak-label">Day Streak</div>
                 </div>
               </motion.div>
 
