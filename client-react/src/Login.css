@@ -2,6 +2,13 @@
    YC-STYLE LOGIN/SIGNUP PAGE
    Seamless transition from landing page
    =================================== */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 :root {
   --black: #000000;
   --white: #ffffff;
@@ -249,12 +256,13 @@ body {
 
 /* AUTH CONTAINER */
 .auth-container {
-  height: 100vh;
-  padding-top: 70px;
+  height: calc(100vh - 60px);  /* navbar height */
+  margin-top: 60px;           /* push below navbar */
+  padding: 0;                 /* REMOVE padding */
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: hidden;           /* ✅ THIS KILLS EXTRA SCROLL */
 }
 
 .auth-content {
@@ -262,9 +270,11 @@ body {
   grid-template-columns: 1fr 1fr;
   max-width: 1400px;
   width: 100%;
-  height: calc(100vh - 70px);
-  max-height: calc(100vh - 70px);
+  height: 100%;
+  max-height: 100%;
 }
+
+
 
 /* LEFT SIDE - BRANDING */
 .auth-branding {
@@ -701,3 +711,166 @@ body {
     gap: 1rem;
   }
 }
+
+/* ================= LOGIN NAVBAR ================= */
+
+.login-navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px;
+  backdrop-filter: blur(12px);
+  z-index: 999;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* DARK MODE */
+body.dark-mode .login-navbar {
+  background: rgba(10,10,10,0.95);
+}
+
+/* LIGHT MODE */
+body.light-mode .login-navbar {
+  background: rgba(255,255,255,0.95);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ================= CONTENT LAYOUT ================= */
+
+.login-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ================= BRAND ================= */
+
+.login-brand {
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Dark */
+body.dark-mode .login-brand {
+  color: white;
+}
+
+/* Light */
+body.light-mode .login-brand {
+  color: black;
+}
+
+/* ================= RIGHT SIDE ICONS ================= */
+
+.login-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme Button */
+.login-theme-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Dark */
+body.dark-mode .login-theme-btn {
+  color: white;
+}
+
+/* Light */
+body.light-mode .login-theme-btn {
+  color: black;
+}
+
+/* Back Link */
+.login-back-link {
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* Dark */
+body.dark-mode .login-back-link {
+  color: #aaa;
+}
+
+/* Light */
+body.light-mode .login-back-link {
+  color: #444;
+}
+
+/* ================= MOBILE FIX ================= */
+
+@media (max-width: 768px) {
+  .login-nav-container {
+    padding: 0 10px;
+  }
+
+  .login-brand {
+    font-size: 18px;
+  }
+
+  .login-back-link {
+    font-size: 13px;
+  }
+}
+.auth-container {
+  min-height: calc(100vh - 60px); /* exact navbar height */
+  margin-top: 60px;              /* pushes content below navbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    margin-top: 60px;
+    min-height: calc(100vh - 60px);
+  }
+
+  .auth-content {
+    min-height: auto;
+  }
+}
+
+/* ✅ KILL ALL BOTTOM EXTRA SPACE (MOBILE SAFE FIX) */
+.auth-page {
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.auth-container {
+  height: calc(100dvh - 60px); /* exact navbar height */
+  max-height: calc(100dvh - 60px);
+  margin-top: 60px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-content {
+  height: 100%;
+  max-height: 100%;
+}
+
+.form-wrapper {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+

@@ -117,36 +117,29 @@ const Login = () => {
   return (
     <div className="auth-page">
       <motion.nav
-        className="navbar"
-        initial={{ y: -100 }}
+        className="login-navbar"
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.5 }}
       >
-        <Link to="/" className="brand">
-          Aadat<span className="neon-dot"></span>
-        </Link>
-        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <motion.button
-            onClick={toggleTheme}
-            className="theme-toggle-btn"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              color: theme === 'dark' ? 'var(--white)' : 'var(--black)',
-              fontSize: '1.25rem'
-            }}
-          >
-            {theme === 'dark' ? <FiSun /> : <FiMoon />}
-          </motion.button>
-          <Link to="/" className="back-link">← Back to home</Link>
+        <div className="login-nav-container">
+
+          {/* Left */}
+          <Link to="/" className="login-brand">
+            Aadat<span className="neon-dot"></span>
+          </Link>
+
+          {/* Right */}
+          <div className="login-nav-actions">
+            <button onClick={toggleTheme} className="login-theme-btn">
+              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+            </button>
+            <Link to="/" className="login-back-link">Back</Link>
+          </div>
+
         </div>
       </motion.nav>
+
 
       <div className="auth-container">
         <div className="auth-content">
@@ -387,7 +380,7 @@ const Login = () => {
                 {(() => {
                   const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
                   return <>
-                    <motion.button 
+                    <motion.button
                       className="social-btn"
                       onClick={() => window.location.href = `${API_URL}/api/users/auth/google`}
                       whileHover={{ scale: 1.02 }}
@@ -398,7 +391,7 @@ const Login = () => {
                       </svg>
                       Google
                     </motion.button>
-                    <motion.button 
+                    <motion.button
                       className="social-btn"
                       onClick={() => window.location.href = `${API_URL}/api/users/auth/github`}
                       whileHover={{ scale: 1.02 }}
@@ -412,12 +405,6 @@ const Login = () => {
                   </>;
                 })()}
               </div>
-
-              <p className="auth-terms">
-                By continuing, you agree to our
-                <a href="#">Terms of Service</a> and
-                <a href="#">Privacy Policy</a>
-              </p>
             </div>
           </motion.div>
         </div>
