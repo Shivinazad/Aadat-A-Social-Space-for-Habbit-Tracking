@@ -29,8 +29,19 @@ const Leaderboard = () => {
     return leaderboard[rank - 1] || null;
   };
 
+  // Avatar rendering: show image if URL, emoji/text otherwise
   const getAvatar = (user) => {
-    return user?.avatar || '👤';
+    if (!user?.avatar) return '👤';
+    if (typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+      return (
+        <img
+          src={user.avatar}
+          alt={user.username || 'avatar'}
+          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
+        />
+      );
+    }
+    return user.avatar;
   };
 
   return (

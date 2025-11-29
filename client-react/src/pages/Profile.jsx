@@ -107,8 +107,21 @@ const Profile = () => {
     }
   };
 
-  const getAvatar = () => {
-    return user?.avatar || '👤';
+  // Render avatar: if it's a URL, show image; if emoji, show as text
+  const getAvatarElement = () => {
+    if (!user?.avatar) return '👤';
+    // If avatar is a URL (starts with http/https), render image
+    if (typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+      return (
+        <img
+          src={user.avatar}
+          alt={user.username || 'avatar'}
+          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
+        />
+      );
+    }
+    // Otherwise, render as emoji/text
+    return user.avatar;
   };
 
   const handleLogout = () => {
@@ -174,7 +187,7 @@ const Profile = () => {
           <section className="profile-header-section">
             <div className="profile-header-card">
               <div className="profile-avatar-large">
-                <div className="avatar-circle-large">{user?.avatar || '👤'}</div>
+                <div className="avatar-circle-large">{getAvatarElement()}</div>
               </div>
               <div className="profile-header-info">
                 <h1 className="profile-username">{user?.username}</h1>
@@ -296,7 +309,7 @@ const Profile = () => {
                   <div key={post.id} className="post-card">
                     <div className="post-header">
                       <div className="post-author-info">
-                        <div className="post-avatar">{getAvatar()}</div>
+                        <div className="post-avatar">{getAvatarElement()}</div>
                         <div className="post-meta">
                           <div className="post-author-name">{user.username}</div>
                           <div className="post-date">

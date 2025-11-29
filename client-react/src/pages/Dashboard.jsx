@@ -62,21 +62,21 @@ const Dashboard = () => {
 
       const response = await postsAPI.getAll();
       const posts = response.data;
-      
+
       // Get posts from the last 7 days
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      
-      const weeklyPosts = posts.filter(post => 
-        new Date(post.createdAt) >= oneWeekAgo && 
+
+      const weeklyPosts = posts.filter(post =>
+        new Date(post.createdAt) >= oneWeekAgo &&
         post.userId === user.id
       );
-      
+
       // Calculate unique habits completed this week
       const uniqueHabits = new Set(weeklyPosts.map(post => post.habitId));
       const totalHabits = habits.length || 1;
       const successRate = Math.round((uniqueHabits.size / totalHabits) * 100);
-      
+
       setWeeklyStats({
         completedHabits: uniqueHabits.size,
         totalCheckins: weeklyPosts.length,
@@ -159,7 +159,7 @@ const Dashboard = () => {
       const response = await inviteAPI.sendInvite(inviteEmail);
       const data = response.data;
       setInviteEmail('');
-      
+
       // Check if email was actually sent or if we got a fallback link
       if (data.inviteLink) {
         // Email service not available - copy link to clipboard
@@ -212,9 +212,9 @@ const Dashboard = () => {
     }
 
     try {
-      await habitsAPI.update(editHabit.id, { 
-        habitTitle: editHabit.habitTitle, 
-        habitCategory: editHabit.habitCategory 
+      await habitsAPI.update(editHabit.id, {
+        habitTitle: editHabit.habitTitle,
+        habitCategory: editHabit.habitCategory
       });
       setShowEditHabitModal(false);
       setEditHabit(null);
@@ -239,7 +239,7 @@ const Dashboard = () => {
   }, [settingsMenuOpen]);
 
   const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.currentStreak || 0)) : 0;
-  
+
   // Calculate XP for next level dynamically
   const getXpForNextLevel = (level) => {
     if (level === 1) return 80;
@@ -253,11 +253,24 @@ const Dashboard = () => {
     if (level === 9) return 25600;
     return 51200 * (level - 9);
   };
-  
+
   const currentLevel = user?.user_level || 1;
   const xpForNextLevel = getXpForNextLevel(currentLevel);
   const xpPercentage = user ? ((user.user_xp % xpForNextLevel) / xpForNextLevel) * 100 : 0;
-  const initials = user?.username?.substring(0, 2).toUpperCase() || 'U';
+  // Avatar rendering: show image if URL, emoji/text otherwise
+  const getAvatarElement = () => {
+    if (!user?.avatar) return '👤';
+    if (typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+      return (
+        <img
+          src={user.avatar}
+          alt={user.username || 'avatar'}
+          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
+        />
+      );
+    }
+    return user.avatar;
+  };
 
 
   if (loading || !user) {
@@ -271,20 +284,20 @@ const Dashboard = () => {
   return (
     <div>
       <Navbar />
-      
+
       <main className="main-container">
         <div className="content-wrapper">
           {/* Left Column - Main Content */}
           <div className="main-column">
             {/* Welcome Section */}
-            <motion.section 
+            <motion.section
               className="welcome-section"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
               <div className="welcome-content">
-                <motion.div 
+                <motion.div
                   className="welcome-badge"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -297,6 +310,7 @@ const Dashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
+                  className="continue-journey-title"
                 >
                   Continue your journey
                 </motion.h1>
@@ -308,20 +322,21 @@ const Dashboard = () => {
                   Track your progress, build consistency, and achieve your goals one habit at a time.
                 </motion.p>
               </div>
-              <motion.div 
+              <motion.div
                 className="welcome-visual"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                <div className="streak-display">
+                <div className="streak-card">
                   <div className="streak-icon">🔥</div>
-                  <div className="streak-info">
-                    <div className="streak-number"><CountUp end={maxStreak} duration={1.5} /></div>
-                    <div className="streak-label">Day Streak</div>
+                  <div className="streak-number">
+                    <CountUp end={maxStreak} duration={1.5} />
                   </div>
+                  <div className="streak-label">Day Streak</div>
                 </div>
               </motion.div>
+
             </motion.section>
 
             {/* Today's Habits */}
@@ -331,8 +346,8 @@ const Dashboard = () => {
                   <h2>Today's Habits</h2>
                   <p className="section-subtitle">Keep your momentum going</p>
                 </div>
-                <motion.button 
-                  onClick={() => setShowAddHabitModal(true)} 
+                <motion.button
+                  onClick={() => setShowAddHabitModal(true)}
                   className="btn-add"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -341,10 +356,10 @@ const Dashboard = () => {
                   Add Habit
                 </motion.button>
               </div>
-              
+
               <div className="habit-list">
                 {habits.length === 0 ? (
-                  <motion.div 
+                  <motion.div
                     className="empty-state-habits"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -353,8 +368,8 @@ const Dashboard = () => {
                     <div className="empty-icon-large">🎯</div>
                     <h3>No habits yet!</h3>
                     <p>Start building better habits today. Add your first habit to get started.</p>
-                    <motion.button 
-                      onClick={() => setShowAddHabitModal(true)} 
+                    <motion.button
+                      onClick={() => setShowAddHabitModal(true)}
                       className="btn-primary empty-cta"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -370,81 +385,81 @@ const Dashboard = () => {
                     today.setHours(0, 0, 0, 0);
                     const lastCheckinDate = lastCheckin ? new Date(lastCheckin) : null;
                     if (lastCheckinDate) lastCheckinDate.setHours(0, 0, 0, 0);
-                    
+
                     const isCheckedInToday = lastCheckinDate && lastCheckinDate.getTime() === today.getTime();
                     const daysSinceLastCheckin = lastCheckin ? Math.floor((Date.now() - lastCheckin) / (1000 * 60 * 60 * 24)) : null;
-                    
+
                     return (
-                    <motion.div 
-                      key={habit.id} 
-                      className="habit-item"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    >
-                      <div className="habit-main-info">
-                        <div className="habit-title-row">
-                          <span className="habit-title">{habit.habitTitle}</span>
-                          {habit.habitCategory && (
-                            <span className="habit-category-badge">{habit.habitCategory}</span>
+                      <motion.div
+                        key={habit.id}
+                        className="habit-item"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                      >
+                        <div className="habit-main-info">
+                          <div className="habit-title-row">
+                            <span className="habit-title">{habit.habitTitle}</span>
+                            {habit.habitCategory && (
+                              <span className="habit-category-badge">{habit.habitCategory}</span>
+                            )}
+                          </div>
+                          {lastCheckin && (
+                            <span className="last-checkin-text">
+                              {isCheckedInToday ? '✅ Checked in today' :
+                                daysSinceLastCheckin === 1 ? '📅 Last check-in: Yesterday' :
+                                  `📅 Last check-in: ${daysSinceLastCheckin} days ago`}
+                            </span>
                           )}
                         </div>
-                        {lastCheckin && (
-                          <span className="last-checkin-text">
-                            {isCheckedInToday ? '✅ Checked in today' : 
-                             daysSinceLastCheckin === 1 ? '📅 Last check-in: Yesterday' :
-                             `📅 Last check-in: ${daysSinceLastCheckin} days ago`}
-                          </span>
-                        )}
-                      </div>
-                      <span className="streak-count">🔥 {habit.currentStreak} days</span>
-                      <button 
-                        className={`btn btn-primary btn-checkin ${isCheckedInToday ? 'checked-in' : ''}`}
-                        onClick={() => openCheckinModal(habit)}
-                        disabled={isCheckedInToday}
-                      >
-                        {isCheckedInToday ? '✓ Done' : 'Check In'}
-                      </button>
-                      <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
-                        <button 
-                          className="settings-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSettingsMenu(habit.id);
-                          }}
+                        <span className="streak-count">🔥 {habit.currentStreak} days</span>
+                        <button
+                          className={`btn btn-primary btn-checkin ${isCheckedInToday ? 'checked-in' : ''}`}
+                          onClick={() => openCheckinModal(habit)}
+                          disabled={isCheckedInToday}
                         >
-                          <FiMoreVertical />
+                          {isCheckedInToday ? '✓ Done' : 'Check In'}
                         </button>
-                        <AnimatePresence>
-                          {settingsMenuOpen === habit.id && (
-                            <motion.div 
-                              className="settings-menu"
-                              initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <button 
-                                className="settings-menu-item"
-                                onClick={() => openEditModal(habit)}
+                        <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="settings-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSettingsMenu(habit.id);
+                            }}
+                          >
+                            <FiMoreVertical />
+                          </button>
+                          <AnimatePresence>
+                            {settingsMenuOpen === habit.id && (
+                              <motion.div
+                                className="settings-menu"
+                                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                                transition={{ duration: 0.2 }}
                               >
-                                <FiEdit2 />
-                                Edit Habit
-                              </button>
-                              <button 
-                                className="settings-menu-item delete"
-                                onClick={() => handleDeleteHabit(habit.id)}
-                              >
-                                <FiTrash2 />
-                                Delete Habit
-                              </button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>
-                  );
+                                <button
+                                  className="settings-menu-item"
+                                  onClick={() => openEditModal(habit)}
+                                >
+                                  <FiEdit2 />
+                                  Edit Habit
+                                </button>
+                                <button
+                                  className="settings-menu-item delete"
+                                  onClick={() => handleDeleteHabit(habit.id)}
+                                >
+                                  <FiTrash2 />
+                                  Delete Habit
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    );
                   })
                 )}
               </div>
@@ -454,8 +469,8 @@ const Dashboard = () => {
             <section className="quick-actions-section">
               <h2>Quick Actions</h2>
               <div className="actions-grid">
-                <motion.a 
-                  href="/community" 
+                <motion.a
+                  href="/community"
                   className="action-card"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -471,8 +486,8 @@ const Dashboard = () => {
                   <FiArrowRight className="action-arrow" />
                 </motion.a>
 
-                <motion.a 
-                  href="/leaderboard" 
+                <motion.a
+                  href="/leaderboard"
                   className="action-card"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -488,7 +503,7 @@ const Dashboard = () => {
                   <FiArrowRight className="action-arrow" />
                 </motion.a>
 
-                <motion.div 
+                <motion.div
                   className="action-card"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -504,7 +519,7 @@ const Dashboard = () => {
                   <FiArrowRight className="action-arrow" />
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   className="action-card"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -532,9 +547,9 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="invite-form">
-                <input 
-                  type="email" 
-                  placeholder="friend@example.com" 
+                <input
+                  type="email"
+                  placeholder="friend@example.com"
                   className="invite-input"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
@@ -550,13 +565,13 @@ const Dashboard = () => {
             {/* Profile Card */}
             <div className="profile-card">
               <div className="profile-header">
-                <div className="avatar-circle">{initials}</div>
+                <div className="avatar-circle">{getAvatarElement()}</div>
                 <div className="profile-info">
                   <h3 className="profile-name">{user?.username}</h3>
                   <a href="/profile" className="view-profile-link">View profile →</a>
                 </div>
               </div>
-              
+
               <div className="level-section">
                 <div className="level-header">
                   <span className="level-text">Level {user?.user_level}</span>
@@ -595,7 +610,7 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Stats */}
-            <motion.div 
+            <motion.div
               className="stats-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -627,13 +642,13 @@ const Dashboard = () => {
               <h2>Check-in: {currentHabit?.habitTitle}</h2>
               <button onClick={() => setShowCheckinModal(false)} className="modal-close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
             <div className="modal-body">
               <label htmlFor="modal-textarea">What did you accomplish today?</label>
-              <textarea 
+              <textarea
                 id="modal-textarea"
                 placeholder="Share your progress..."
                 value={checkinContent}
@@ -660,7 +675,7 @@ const Dashboard = () => {
               <h2>Create New Habit</h2>
               <button onClick={() => setShowAddHabitModal(false)} className="modal-close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
@@ -668,10 +683,10 @@ const Dashboard = () => {
               <div className="modal-body">
                 <div className="input-group">
                   <label htmlFor="habit-title-input">Habit Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="habit-title-input"
-                    placeholder="e.g., Morning workout" 
+                    placeholder="e.g., Morning workout"
                     value={newHabit.habitTitle}
                     onChange={(e) => setNewHabit({ ...newHabit, habitTitle: e.target.value })}
                     required
@@ -679,8 +694,8 @@ const Dashboard = () => {
                 </div>
                 <div className="input-group">
                   <label htmlFor="habit-category-input">Category <span className="optional">(Optional)</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="habit-category-input"
                     placeholder="e.g., Fitness, Learning"
                     value={newHabit.habitCategory}
@@ -705,7 +720,7 @@ const Dashboard = () => {
               <h2>Edit Habit</h2>
               <button onClick={() => setShowEditHabitModal(false)} className="modal-close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
@@ -713,10 +728,10 @@ const Dashboard = () => {
               <div className="modal-body">
                 <div className="input-group">
                   <label htmlFor="edit-habit-title-input">Habit Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="edit-habit-title-input"
-                    placeholder="e.g., Morning workout" 
+                    placeholder="e.g., Morning workout"
                     value={editHabit.habitTitle}
                     onChange={(e) => setEditHabit({ ...editHabit, habitTitle: e.target.value })}
                     required
@@ -724,8 +739,8 @@ const Dashboard = () => {
                 </div>
                 <div className="input-group">
                   <label htmlFor="edit-habit-category-input">Category <span className="optional">(Optional)</span></label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="edit-habit-category-input"
                     placeholder="e.g., Fitness, Learning"
                     value={editHabit.habitCategory}

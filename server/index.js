@@ -65,12 +65,14 @@ async function initializeDb() {
         const dbType = process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'MySQL';
         console.log(`Successfully connected to the ${dbType} database! ✅`);
 
-        // Use alter: true in production to update schema, false in development
-        const syncOptions = process.env.NODE_ENV === 'production' ? { alter: true } : { alter: false };
-        await sequelize.sync(syncOptions);
-
-        console.log("All models were synchronized successfully.");
-        console.log(`Sync mode: ${syncOptions.alter ? 'ALTER TABLE' : 'NO ALTER'}`);
+        // In development, force sync to create missing tables
+        if (process.env.NODE_ENV === 'production') {
+            await sequelize.sync({ alter: true });
+            console.log("All models were synchronized successfully. Sync mode: ALTER TABLE");
+        } else {
+            await sequelize.sync({ force: false }); // force: true drops and recreates all tables, use with caution
+            console.log("All models were synchronized successfully. Sync mode: CREATE MISSING TABLES");
+        }
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
         process.exit(1);

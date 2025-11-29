@@ -146,6 +146,21 @@ const Community = () => {
                   const habitTitle = post.Habit?.habitTitle || 'General Post';
                   const isLiked = post.isLikedByCurrentUser;
 
+                  // Render avatar: show image if URL, emoji/text otherwise
+                  const renderAvatar = (avatar) => {
+                    if (!avatar) return '👤';
+                    if (typeof avatar === 'string' && avatar.startsWith('http')) {
+                      return (
+                        <img
+                          src={avatar}
+                          alt={authorUsername || 'avatar'}
+                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
+                        />
+                      );
+                    }
+                    return avatar;
+                  };
+
                   return (
                     <motion.div 
                       key={post.id} 
@@ -157,7 +172,7 @@ const Community = () => {
                     >
                       <div className="post-header">
                         <div className="post-author-info">
-                          <div className="post-avatar">{authorAvatar}</div>
+                          <div className="post-avatar">{renderAvatar(authorAvatar)}</div>
                           <div className="post-meta">
                             <div className="post-author-name">{authorUsername}</div>
                             <div className="post-date">{formatDate(post.createdAt)}</div>
