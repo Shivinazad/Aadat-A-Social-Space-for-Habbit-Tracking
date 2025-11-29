@@ -2886,67 +2886,263 @@ body.landing-page .final-cta-section {
     /* ✅ REMOVE EXTRA TOP GAP BELOW NAVBAR */
     .hero,
     .hero-container {
-      padding-top: 72px !important;
-      margin-top: 0 !important;
-    }
-  }
+      .hero-container {}
 
-  /* ✅ MOBILE RESPONSIVE FIXES */
-  @media (max-width: 768px) {
+      .live-feed {
+        padding: 1.25rem;
+      }
 
-    /* Fix Top Margin for Dashboard Content */
-    .main-container,
-    .dashboard-container,
-    .content-wrapper {
-      padding-top: 80px !important;
-      /* Navbar height + spacing */
-      margin-top: 0 !important;
-    }
+      .feed-avatar {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.75rem;
+      }
 
-    /* Fix Dashboard Margins */
-    .main-column {
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      padding-left: 1rem !important;
-      padding-right: 1rem !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
+      .testimonial-card {
+        flex: 0 0 280px;
+        padding: 1.25rem;
+      }
+
+
     }
 
-    /* Fix Navbar Alignment - Logo Left, Icons Right */
-    .nav-container {
-      width: 100% !important;
-      justify-content: space-between !important;
-      padding: 0 1rem !important;
-      gap: 0 !important;
+    .waves {
+      display: none;
     }
 
-    /* Force Logo Left */
-    .nav-logo,
-    .brand {
-      order: 1 !important;
-      margin-right: auto !important;
-      margin-left: 0 !important;
-      justify-content: flex-start !important;
+    /* ✅ ENABLE SCROLL FOR LANDING PAGE ONLY */
+    body.landing-page {
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100vh;
     }
 
-    /* Ensure Nav Actions (including Hamburger) are on Right */
-    .nav-icons,
-    .nav-actions {
-      order: 2 !important;
-      margin-left: auto !important;
-      margin-right: 0 !important;
-      justify-content: flex-end !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 1rem !important;
+    /* ===========================
+   FORCE ENABLE SCROLL (GLOBAL OVERRIDE)
+   =========================== */
+
+    html {
+      height: auto !important;
+      overflow-y: auto !important;
     }
 
-    /* Hamburger Styles */
-    .hamburger {
-      display: flex !important;
-      margin-left: 0.5rem !important;
+    body {
+      height: auto !important;
+      min-height: 100vh !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
       position: relative !important;
     }
-  }
+
+    /* Specifically for landing page */
+    body.landing-page {
+      height: auto !important;
+      min-height: 100vh !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      position: relative !important;
+    }
+
+    /* Free all landing sections */
+    body.landing-page section,
+    body.landing-page .hero,
+    body.landing-page .features-section,
+    body.landing-page .story-section,
+    body.landing-page .social-proof-section,
+    body.landing-page .final-cta-section {
+      height: auto !important;
+      min-height: auto !important;
+      overflow: visible !important;
+      position: relative !important;
+    }
+
+    /* ✅ MOBILE NAVBAR FIX — DOES NOT AFFECT DESKTOP */
+    @media (max-width: 768px) {
+      .navbar {
+        height: 56px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .navbar .brand {
+        font-size: 16px;
+        gap: 6px;
+      }
+
+      .navbar>div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .navbar .theme-toggle {
+        font-size: 17px;
+        line-height: 1;
+      }
+
+      .navbar .sign-in {
+        padding: 6px 12px;
+        font-size: 13px;
+        border-radius: 999px;
+      }
+    }
+
+    /* ✅ EXTRA SMALL PHONES */
+    @media (max-width: 480px) {
+      .navbar {
+        height: 52px;
+        padding: 0 10px;
+      }
+
+      .navbar .brand {
+        font-size: 15px;
+      }
+
+      .navbar .sign-in {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+    }
+
+    /* ✅ FINAL MOBILE NAVBAR ALIGNMENT FIX */
+    @media (max-width: 768px) {
+
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 56px !important;
+        min-height: 56px !important;
+        max-height: 56px !important;
+
+        padding: 0 14px !important;
+        border-radius: 0 !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+
+        background: rgba(0, 0, 0, 0.92) !important;
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+      }
+
+      /* ✅ LOWER THE TOGGLE + SIGN IN SLIGHTLY (MOBILE ONLY) */
+      @media (max-width: 768px) {
+
+        .navbar>div {
+          margin-top: 4px !important;
+          /* adjust 4px → 6px if you want lower */
+        }
+
+        .navbar button,
+        .navbar a {
+          margin-top: 2px !important;
+        }
+      }
+
+
+      /* ✅ LEFT: BRAND */
+      .navbar .brand {
+        margin: 0 !important;
+        padding: 0 !important;
+
+        font-size: 15px !important;
+        font-weight: 700;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      /* ✅ RIGHT: ICONS + SIGN IN */
+      .navbar>div {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+      }
+
+      .navbar button {
+        padding: 6px !important;
+        font-size: 14px !important;
+      }
+
+      .navbar a {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        border-radius: 999px !important;
+        white-space: nowrap;
+      }
+
+      /* ✅ REMOVE EXTRA TOP GAP BELOW NAVBAR */
+      .hero,
+      .hero-container {
+        padding-top: 72px !important;
+        margin-top: 0 !important;
+      }
+    }
+
+    /* ✅ MOBILE RESPONSIVE FIXES */
+    @media (max-width: 768px) {
+
+      /* Fix Top Margin - Reduce spacing */
+      .main-container,
+      .dashboard-container,
+      .content-wrapper {
+        padding-top: 18px !important;
+        margin-top: 0 !important;
+      }
+
+      /* Fix Dashboard Margins - Center Content */
+      .main-column,
+      .dashboard-container,
+      .content-wrapper {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        display: block !important;
+      }
+
+      /* Navbar Layout */
+      .nav-container {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 0 1rem !important;
+        position: relative !important;
+      }
+
+      /* Hamburger - Force Absolute Left */
+      .hamburger {
+        display: flex !important;
+        position: absolute !important;
+        left: 1rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        z-index: 1002 !important;
+      }
+
+      /* Logo - Positioned after Hamburger */
+      .nav-logo,
+      .brand {
+        margin-left: 2.5rem !important;
+        margin-right: auto !important;
+        justify-content: flex-start !important;
+      }
+
+      /* Nav Actions - Right Side */
+      .nav-icons,
+      .nav-actions {
+        margin-left: auto !important;
+        justify-content: flex-end !important;
+        padding-right: 0 !important;
+      }
+    }
