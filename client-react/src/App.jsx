@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import PrivateRoute from './components/PrivateRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Community from './pages/Community';
 import Leaderboard from './pages/Leaderboard';
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route 
             path="/dashboard" 
             element={

@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { FiArrowRight, FiPlay, FiCheck, FiTrendingUp, FiUsers, FiAward, FiZap, FiSun, FiMoon } from 'react-icons/fi';
-import axios from 'axios';
+import { FiArrowRight, FiPlay, FiCheck, FiTrendingUp, FiUsers, FiAward, FiZap, FiSun, FiMoon, FiBell, FiTarget, FiActivity, FiStar } from 'react-icons/fi';
+import api from '../services/api';
 
 const Landing = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -14,6 +14,7 @@ const Landing = () => {
     totalHabits: 0,
     totalCheckins: 0
   });
+  const [recentActivities, setRecentActivities] = useState([]);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -50,8 +51,7 @@ const Landing = () => {
     // Fetch real statistics
     const fetchStats = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
-        const response = await axios.get(`${API_BASE_URL}/api/stats/public`);
+        const response = await api.get('/stats/public');
         setStats(response.data);
       } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -59,7 +59,26 @@ const Landing = () => {
         setStats({ totalUsers: 1000, totalHabits: 5000, totalCheckins: 25000 });
       }
     };
+
+    // Fetch recent activities from posts
+    const fetchActivities = async () => {
+      try {
+        const response = await api.get('/posts/recent?limit=5');
+        if (response.data && Array.isArray(response.data)) {
+          setRecentActivities(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch activities:', error.response?.data || error.message);
+        // Set empty array on error so the UI shows "no activity" message
+        setRecentActivities([]);
+      }
+    };
+
     fetchStats();
+    fetchActivities();
+    // Refresh activities every 30 seconds
+    const interval = setInterval(fetchActivities, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -156,10 +175,6 @@ const Landing = () => {
               Get started free
               <FiArrowRight />
             </Link>
-            <button className="btn-secondary-new">
-              <FiPlay />
-              Watch demo
-            </button>
           </motion.div>
 
           {/* STATS BAR */}
@@ -295,7 +310,273 @@ const Landing = () => {
               <h3>Achievements</h3>
               <p>Unlock badges and achievements as you hit milestones.</p>
             </motion.div>
+            <motion.div
+              className="feature-card"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+            >
+              <div className="feature-icon"><FiBell /></div>
+              <h3>Smart Reminders</h3>
+              <p>Never miss a habit with intelligent reminders that adapt to your schedule.</p>
+            </motion.div>
+            <motion.div
+              className="feature-card"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+            >
+              <div className="feature-icon"><FiTarget /></div>
+              <h3>Smart Goals</h3>
+              <p>Set realistic goals based on data-driven insights from successful users.</p>
+            </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* STORY/TIMELINE SECTION */}
+      <section className="story-section">
+        <div className="story-container">
+          <div className="section-header">
+            <span className="section-badge">YOUR JOURNEY</span>
+            <h2>The transformation happens in steps</h2>
+            <p className="section-subtitle">Here's what users experience on their habit-building journey</p>
+          </div>
+
+          <div className="timeline">
+            <motion.div
+              className="timeline-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <div className="timeline-marker"></div>
+              <div className="timeline-content">
+                <div className="timeline-badge">Day 1</div>
+                <h3>The Beginning</h3>
+                <p>You create your first habit and join thousands on the same journey. The excitement is real, but so is the uncertainty.</p>
+                <div className="mini-streak">
+                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
+                  <div className="streak-day"></div>
+                  <div className="streak-day"></div>
+                  <div className="streak-day"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="timeline-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="timeline-marker"></div>
+              <div className="timeline-content">
+                <div className="timeline-badge">Week 2-4</div>
+                <h3>Building Momentum</h3>
+                <p>Your streaks grow. The community celebrates with you. What seemed impossible now feels achievable.</p>
+                <div className="mini-streak">
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
+                  <div className="streak-day"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="timeline-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className="timeline-marker"></div>
+              <div className="timeline-content">
+                <div className="timeline-badge">Month 2-3</div>
+                <h3>Overcoming Challenges</h3>
+                <p>Life happens. You miss a day. But the community's there, and our smart recovery system helps you bounce back stronger.</p>
+                <div className="mini-streak">
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="timeline-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="timeline-marker"></div>
+              <div className="timeline-content">
+                <div className="timeline-badge">Month 4+</div>
+                <h3>Transformation</h3>
+                <p>It's not willpower anymore—it's who you are. You're inspiring others, achieving goals, and building the life you dreamed of.</p>
+                <div className="mini-streak">
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF SECTION */}
+      <section className="social-proof-section">
+        <div className="proof-container">
+          <div className="section-header">
+            <span className="section-badge">COMMUNITY</span>
+            <h2>You're not alone on this journey</h2>
+            <p className="section-subtitle">Join thousands building better habits right now</p>
+          </div>
+
+          {/* Live Activity Feed */}
+          <motion.div
+            className="live-feed"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="feed-header">
+              <FiActivity className="pulse-icon" />
+              <span>Live Activity</span>
+            </div>
+            <div className="feed-items">
+              {recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => {
+                  const timeAgo = () => {
+                    const seconds = Math.floor((new Date() - new Date(activity.createdAt)) / 1000);
+                    if (seconds < 60) return `${seconds}s ago`;
+                    const minutes = Math.floor(seconds / 60);
+                    if (minutes < 60) return `${minutes}m ago`;
+                    const hours = Math.floor(minutes / 60);
+                    if (hours < 24) return `${hours}h ago`;
+                    return `${Math.floor(hours / 24)}d ago`;
+                  };
+                  
+                  const getInitials = (name) => {
+                    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                  };
+
+                  return (
+                    <motion.div 
+                      key={activity.id} 
+                      className="feed-item" 
+                      animate={{ opacity: [0.5, 1, 0.5] }} 
+                      transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                    >
+                      <div className="feed-avatar">{getInitials(activity.User?.username || 'User')}</div>
+                      <div className="feed-content">
+                        <span className="feed-name">{activity.User?.username || 'Anonymous'}</span>
+                        <span className="feed-action">{activity.content} {activity.Habit ? `on "${activity.Habit.habitTitle}"` : ''}</span>
+                      </div>
+                      <span className="feed-time">{timeAgo()}</span>
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <div className="feed-empty">No recent activity yet. Be the first to share your progress!</div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Testimonials Ticker */}
+          <motion.div
+            className="testimonials-ticker"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="ticker-track">
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"Finally broke my 2-year procrastination streak. This app changed everything."</p>
+                <span className="author">— James M.</span>
+              </div>
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"The community support is incredible. I've made real friends here."</p>
+                <span className="author">— Emily R.</span>
+              </div>
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"From 0 to 90-day streak. Best decision I made this year."</p>
+                <span className="author">— David K.</span>
+              </div>
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"Simple, beautiful, effective. Everything a habit tracker should be."</p>
+                <span className="author">— Lisa P.</span>
+              </div>
+              {/* Duplicate for seamless loop */}
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"Finally broke my 2-year procrastination streak. This app changed everything."</p>
+                <span className="author">— James M.</span>
+              </div>
+              <div className="testimonial-card">
+                <div className="stars">
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                  <FiStar className="star-filled" />
+                </div>
+                <p>"The community support is incredible. I've made real friends here."</p>
+                <span className="author">— Emily R.</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -319,8 +600,8 @@ const Landing = () => {
             </Link>
           </div>
           <div className="cta-fine-print">
+            <span><FiCheck /> 14-day free trial</span>
             <span><FiCheck /> No credit card required</span>
-            <span><FiCheck /> Free forever</span>
             <span><FiCheck /> Cancel anytime</span>
           </div>
         </motion.div>

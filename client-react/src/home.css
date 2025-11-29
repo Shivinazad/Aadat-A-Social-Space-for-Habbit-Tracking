@@ -104,12 +104,13 @@ input, textarea {
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--bg-secondary);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
     z-index: 1000;
     padding: 16px 0;
+    transition: var(--transition);
 }
 
 .nav-container {
@@ -2489,23 +2490,34 @@ body.light-mode .empty-message-hint {
     }
 }
 
-/* Force dark navbar on dashboard pages - override landing page styles */
+/* Dashboard navbar styling - adapts to theme */
 body:not(.landing-page) .navbar {
-    background: rgba(0, 0, 0, 0.8) !important;
-    border-bottom: 1px solid #262626 !important;
+    background: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
 }
 
 body:not(.landing-page) .brand {
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
 }
 
 body:not(.landing-page) .nav-link {
-    color: #a3a3a3 !important;
+    color: var(--text-secondary) !important;
 }
 
 body:not(.landing-page) .nav-link.active,
 body:not(.landing-page) .nav-link:hover {
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
+}
+
+/* Dark mode specific overrides for dashboard */
+body.dark-mode:not(.landing-page) .navbar {
+    background: rgba(18, 18, 18, 0.95) !important;
+}
+
+/* Light mode specific overrides for dashboard */
+body.light-mode:not(.landing-page) .navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* ================================

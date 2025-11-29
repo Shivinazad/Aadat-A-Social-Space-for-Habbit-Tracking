@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
-import { FiArrowRight, FiMail, FiLock, FiUser, FiCheck, FiAlertCircle } from 'react-icons/fi';
+import { FiArrowRight, FiMail, FiLock, FiUser, FiCheck, FiAlertCircle, FiSun, FiMoon } from 'react-icons/fi';
 import axios from 'axios';
 import '../Login.css';
 
@@ -125,15 +125,25 @@ const Login = () => {
         <Link to="/" className="brand">
           Aadat<span className="neon-dot"></span>
         </Link>
-        <div className="nav-actions">
-          <label className="theme-toggle">
-            <input 
-              type="checkbox" 
-              checked={theme === 'light'}
-              onChange={toggleTheme}
-            />
-            <div className="toggle-slider"></div>
-          </label>
+        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <motion.button
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              color: theme === 'dark' ? 'var(--white)' : 'var(--black)',
+              fontSize: '1.25rem'
+            }}
+          >
+            {theme === 'dark' ? <FiSun /> : <FiMoon />}
+          </motion.button>
           <Link to="/" className="back-link">← Back to home</Link>
         </div>
       </motion.nav>
@@ -371,19 +381,36 @@ const Login = () => {
                 <span>Or continue with</span>
               </div>
 
+
               <div className="social-buttons">
-                <button className="social-btn">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.2 8.3V12h5.3c-.2 1.2-1.4 3.5-5.3 3.5-3.2 0-5.8-2.6-5.8-5.8s2.6-5.8 5.8-5.8c1.8 0 3 .8 3.7 1.4l2.9-2.8C14.6 1 12.6 0 10.2 0 4.6 0 0 4.6 0 10.2s4.6 10.2 10.2 10.2c5.9 0 9.8-4.1 9.8-9.9 0-.7-.1-1.2-.1-1.7h-9.7z" />
-                  </svg>
-                  Google
-                </button>
-                <button className="social-btn">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.165 20 14.418 20 10c0-5.523-4.477-10-10-10z" />
-                  </svg>
-                  GitHub
-                </button>
+                {/** Use VITE_API_URL for Render/production, fallback to localhost for dev */}
+                {(() => {
+                  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
+                  return <>
+                    <motion.button 
+                      className="social-btn"
+                      onClick={() => window.location.href = `${API_URL}/api/users/auth/google`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.2 8.3V12h5.3c-.2 1.2-1.4 3.5-5.3 3.5-3.2 0-5.8-2.6-5.8-5.8s2.6-5.8 5.8-5.8c1.8 0 3 .8 3.7 1.4l2.9-2.8C14.6 1 12.6 0 10.2 0 4.6 0 0 4.6 0 10.2s4.6 10.2 10.2 10.2c5.9 0 9.8-4.1 9.8-9.9 0-.7-.1-1.2-.1-1.7h-9.7z" />
+                      </svg>
+                      Google
+                    </motion.button>
+                    <motion.button 
+                      className="social-btn"
+                      onClick={() => window.location.href = `${API_URL}/api/users/auth/github`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.165 20 14.418 20 10c0-5.523-4.477-10-10-10z" />
+                      </svg>
+                      GitHub
+                    </motion.button>
+                  </>;
+                })()}
               </div>
 
               <p className="auth-terms">

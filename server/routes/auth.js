@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const passport = require('../config/passport');
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345';
@@ -174,5 +175,65 @@ router.get('/me/achievements', auth, async (req, res) => {
         res.status(500).json({ msg: 'Server error fetching achievements.' });
     }
 });
+
+// ============ OAUTH ROUTES ============
+
+// Google OAuth - Initiate
+router.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+// Google OAuth - Callback
+router.get('/auth/google/callback', 
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+        try {
+            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            
+            if (!req.user) {
+                return res.redirect(`${frontendURL}/login?error=google-auth-failed`);
+            }
+            
+            // Generate JWT token for the user
+            const token = jwt.sign({ id: req.user.id, email: req.user.email }, JWT_SECRET, { expiresIn: '7d' });
+            
+            // Redirect to frontend with token
+            res.redirect(`${frontendURL}/auth/callback?token=${token}`);
+        } catch (error) {
+            console.error('Error in Google OAuth callback:', error);
+            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            res.redirect(`${frontendURL}/login?error=auth-failed`);
+        }
+    }
+);
+
+// GitHub OAuth - Initiate
+router.get('/auth/github', passport.authenticate('github', {
+    scope: ['user:email']
+}));
+
+// GitHub OAuth - Callback
+router.get('/auth/github/callback',
+    passport.authenticate('github', { session: false }),
+    (req, res) => {
+        try {
+            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            
+            if (!req.user) {
+                return res.redirect(`${frontendURL}/login?error=github-auth-failed`);
+            }
+            
+            // Generate JWT token for the user
+            const token = jwt.sign({ id: req.user.id, email: req.user.email }, JWT_SECRET, { expiresIn: '7d' });
+            
+            // Redirect to frontend with token
+            res.redirect(`${frontendURL}/auth/callback?token=${token}`);
+        } catch (error) {
+            console.error('Error in GitHub OAuth callback:', error);
+            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            res.redirect(`${frontendURL}/login?error=auth-failed`);
+        }
+    }
+);
 
 module.exports = router;

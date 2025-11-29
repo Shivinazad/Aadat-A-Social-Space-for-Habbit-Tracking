@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
+      setLoading(true); // Ensure loading is true while fetching user
       fetchUser();
     } else {
       setLoading(false);

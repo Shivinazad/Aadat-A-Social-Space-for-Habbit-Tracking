@@ -11,6 +11,31 @@ const auth = require('../middleware/auth');
 const { calculateLevel } = require('../utils/levelUtils');
 const router = express.Router();
 
+// GET /recent - Get Recent Posts (Public endpoint for landing page)
+router.get('/recent', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5;
+        const posts = await Post.findAll({
+            limit,
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: User,
+                    attributes: ['id', 'username']
+                },
+                {
+                    model: Habit,
+                    attributes: ['id', 'habitTitle']
+                }
+            ]
+        });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error('Error fetching recent posts:', error);
+        res.status(500).json({ msg: 'Server error fetching recent posts.' });
+    }
+});
+
 // GET /stats/community - Get Community Statistics
 router.get('/stats/community', auth, async (req, res) => {
     try {

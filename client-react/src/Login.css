@@ -27,8 +27,9 @@
 
 /* Dark Mode Overrides for Login Page */
 body.dark-mode .navbar {
-  background: rgba(0, 0, 0, 0.8) !important;
-  border-bottom-color: var(--gray-800) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom-color: var(--gray-200) !important;
 }
 
 body.dark-mode .brand {
@@ -152,6 +153,21 @@ body.dark-mode .auth-terms a:hover {
   color: var(--neon) !important;
 }
 
+/* Light Mode Overrides */
+body.light-mode .navbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom-color: var(--gray-200) !important;
+}
+
+body.light-mode .btn-submit {
+  background: var(--black) !important;
+  color: var(--white) !important;
+}
+
+body.light-mode .btn-submit:hover {
+  background: var(--gray-900) !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -174,9 +190,9 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--gray-200);
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gray-200) !important;
   padding: 1.25rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -233,11 +249,12 @@ body {
 
 /* AUTH CONTAINER */
 .auth-container {
-  min-height: 100vh;
-  padding-top: 80px;
+  height: 100vh;
+  padding-top: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .auth-content {
@@ -245,7 +262,8 @@ body {
   grid-template-columns: 1fr 1fr;
   max-width: 1400px;
   width: 100%;
-  min-height: calc(100vh - 80px);
+  height: calc(100vh - 70px);
+  max-height: calc(100vh - 70px);
 }
 
 /* LEFT SIDE - BRANDING */
@@ -535,8 +553,8 @@ body {
 .btn-submit {
   width: 100%;
   padding: 1rem 2rem;
-  background: var(--black);
-  color: var(--white);
+  background: var(--black) !important;
+  color: var(--white) !important;
   border: none;
   border-radius: var(--border-radius);
   font-weight: 600;

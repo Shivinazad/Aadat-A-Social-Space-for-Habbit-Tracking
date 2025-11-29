@@ -8,6 +8,7 @@ import CountUp from 'react-countup';
 import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap } from 'react-icons/fi';
 import '../home.css';
 
+
 const Dashboard = () => {
   const { user, updateUser, fetchUser } = useAuth();
   const [habits, setHabits] = useState([]);
@@ -28,6 +29,13 @@ const Dashboard = () => {
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(null);
   const [showEditHabitModal, setShowEditHabitModal] = useState(false);
   const [editHabit, setEditHabit] = useState(null);
+
+  // Ensure user is loaded after OAuth login
+  useEffect(() => {
+    if (!user) {
+      fetchUser();
+    }
+  }, [user, fetchUser]);
 
   useEffect(() => {
     fetchHabits();
@@ -251,7 +259,8 @@ const Dashboard = () => {
   const xpPercentage = user ? ((user.user_xp % xpForNextLevel) / xpForNextLevel) * 100 : 0;
   const initials = user?.username?.substring(0, 2).toUpperCase() || 'U';
 
-  if (loading) {
+
+  if (loading || !user) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div className="loading-spinner"></div>
