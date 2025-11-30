@@ -395,6 +395,7 @@ const Dashboard = () => {
                       <motion.div
                         key={habit.id}
                         className="habit-item"
+                        style={{ zIndex: settingsMenuOpen === habit.id ? 50 : 1, position: 'relative' }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -633,139 +634,147 @@ const Dashboard = () => {
               </div>
             </motion.div>
           </aside>
-        </div>
-      </main>
+        </div >
+      </main >
 
       {/* Check-in Modal */}
-      {showCheckinModal && (
-        <div className="modal-overlay open" onClick={() => setShowCheckinModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Check-in: {currentHabit?.habitTitle}</h2>
-              <button onClick={() => setShowCheckinModal(false)} className="modal-close">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-            <div className="modal-body">
-              <label htmlFor="modal-textarea">What did you accomplish today?</label>
-              <textarea
-                id="modal-textarea"
-                placeholder="Share your progress..."
-                value={checkinContent}
-                onChange={(e) => setCheckinContent(e.target.value)}
-                maxLength={280}
-              />
-              <div className="char-counter-wrapper">
-                <span className="char-counter">{280 - checkinContent.length}</span>
+      {
+        showCheckinModal && (
+          <div className="modal-overlay open" onClick={() => setShowCheckinModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Check-in: {currentHabit?.habitTitle}</h2>
+                <button onClick={() => setShowCheckinModal(false)} className="modal-close">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <div className="modal-body">
+                <label htmlFor="modal-textarea">What did you accomplish today?</label>
+                <textarea
+                  id="modal-textarea"
+                  placeholder="Share your progress..."
+                  value={checkinContent}
+                  onChange={(e) => setCheckinContent(e.target.value)}
+                  maxLength={280}
+                />
+                <div className="char-counter-wrapper">
+                  <span className="char-counter">{280 - checkinContent.length}</span>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button onClick={() => setShowCheckinModal(false)} className="btn-secondary">Cancel</button>
+                <button onClick={handleCheckin} className="btn-primary">Post Check-in</button>
               </div>
             </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowCheckinModal(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleCheckin} className="btn-primary">Post Check-in</button>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Add Habit Modal */}
-      {showAddHabitModal && (
-        <div className="modal-overlay open" onClick={() => setShowAddHabitModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Create New Habit</h2>
-              <button onClick={() => setShowAddHabitModal(false)} className="modal-close">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
+      {
+        showAddHabitModal && (
+          <div className="modal-overlay open" onClick={() => setShowAddHabitModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Create New Habit</h2>
+                <button onClick={() => setShowAddHabitModal(false)} className="modal-close">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <form onSubmit={handleAddHabit}>
+                <div className="modal-body">
+                  <div className="input-group">
+                    <label htmlFor="habit-title-input">Habit Title</label>
+                    <input
+                      type="text"
+                      id="habit-title-input"
+                      placeholder="e.g., Morning workout"
+                      value={newHabit.habitTitle}
+                      onChange={(e) => setNewHabit({ ...newHabit, habitTitle: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label htmlFor="habit-category-input">Category <span className="optional">(Optional)</span></label>
+                    <input
+                      type="text"
+                      id="habit-category-input"
+                      placeholder="e.g., Fitness, Learning"
+                      value={newHabit.habitCategory}
+                      onChange={(e) => setNewHabit({ ...newHabit, habitCategory: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" onClick={() => setShowAddHabitModal(false)} className="btn-secondary">Cancel</button>
+                  <button type="submit" className="btn-primary">Create Habit</button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleAddHabit}>
-              <div className="modal-body">
-                <div className="input-group">
-                  <label htmlFor="habit-title-input">Habit Title</label>
-                  <input
-                    type="text"
-                    id="habit-title-input"
-                    placeholder="e.g., Morning workout"
-                    value={newHabit.habitTitle}
-                    onChange={(e) => setNewHabit({ ...newHabit, habitTitle: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <label htmlFor="habit-category-input">Category <span className="optional">(Optional)</span></label>
-                  <input
-                    type="text"
-                    id="habit-category-input"
-                    placeholder="e.g., Fitness, Learning"
-                    value={newHabit.habitCategory}
-                    onChange={(e) => setNewHabit({ ...newHabit, habitCategory: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" onClick={() => setShowAddHabitModal(false)} className="btn-secondary">Cancel</button>
-                <button type="submit" className="btn-primary">Create Habit</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Edit Habit Modal */}
-      {showEditHabitModal && editHabit && (
-        <div className="modal-overlay open" onClick={() => setShowEditHabitModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Edit Habit</h2>
-              <button onClick={() => setShowEditHabitModal(false)} className="modal-close">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
+      {
+        showEditHabitModal && editHabit && (
+          <div className="modal-overlay open" onClick={() => setShowEditHabitModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Edit Habit</h2>
+                <button onClick={() => setShowEditHabitModal(false)} className="modal-close">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <form onSubmit={handleEditHabit}>
+                <div className="modal-body">
+                  <div className="input-group">
+                    <label htmlFor="edit-habit-title-input">Habit Title</label>
+                    <input
+                      type="text"
+                      id="edit-habit-title-input"
+                      placeholder="e.g., Morning workout"
+                      value={editHabit.habitTitle}
+                      onChange={(e) => setEditHabit({ ...editHabit, habitTitle: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label htmlFor="edit-habit-category-input">Category <span className="optional">(Optional)</span></label>
+                    <input
+                      type="text"
+                      id="edit-habit-category-input"
+                      placeholder="e.g., Fitness, Learning"
+                      value={editHabit.habitCategory}
+                      onChange={(e) => setEditHabit({ ...editHabit, habitCategory: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" onClick={() => setShowEditHabitModal(false)} className="btn-secondary">Cancel</button>
+                  <button type="submit" className="btn-primary">Update Habit</button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleEditHabit}>
-              <div className="modal-body">
-                <div className="input-group">
-                  <label htmlFor="edit-habit-title-input">Habit Title</label>
-                  <input
-                    type="text"
-                    id="edit-habit-title-input"
-                    placeholder="e.g., Morning workout"
-                    value={editHabit.habitTitle}
-                    onChange={(e) => setEditHabit({ ...editHabit, habitTitle: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <label htmlFor="edit-habit-category-input">Category <span className="optional">(Optional)</span></label>
-                  <input
-                    type="text"
-                    id="edit-habit-category-input"
-                    placeholder="e.g., Fitness, Learning"
-                    value={editHabit.habitCategory}
-                    onChange={(e) => setEditHabit({ ...editHabit, habitCategory: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" onClick={() => setShowEditHabitModal(false)} className="btn-secondary">Cancel</button>
-                <button type="submit" className="btn-primary">Update Habit</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Toast Notification */}
-      {toast.show && (
-        <div className={`toast-notification show ${toast.type === 'error' ? 'toast-error' : ''}`}>
-          {toast.message}
-        </div>
-      )}
-    </div>
+      {
+        toast.show && (
+          <div className={`toast-notification show ${toast.type === 'error' ? 'toast-error' : ''}`}>
+            {toast.message}
+          </div>
+        )
+      }
+    </div >
   );
 };
 

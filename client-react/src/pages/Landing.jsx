@@ -104,8 +104,8 @@ const Landing = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div className="nav-container">
-          <div className="brand">
-            Aadat<span className="gradient-dot"></span>
+          <div className="brand-footer">
+            Aadat<span className="neon-dot"></span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <motion.button
@@ -126,7 +126,20 @@ const Landing = () => {
             >
               {isDark ? <FiSun /> : <FiMoon />}
             </motion.button>
-            <Link to="/login" className="sign-in">Sign in</Link>
+            <Link
+              to="/login"
+              className="sign-in"
+              style={{
+                backgroundColor: 'var(--neon)',
+                color: 'var(--black)',
+                border: 'none',
+                fontWeight: '600',
+                borderRadius: '999px',
+                padding: '0.5rem 0.5rem'
+              }}
+            >
+              Sign Up
+            </Link>
           </div>
         </div>
       </motion.nav>
