@@ -131,8 +131,10 @@ router.post('/', auth, async (req, res) => {
                     // Consecutive day - increment streak
                     habit.currentStreak += 1;
                 } else if (lastCheckin.getTime() < yesterday.getTime()) {
-                    // Missed day(s) - reset streak
-                    habit.currentStreak = 1;
+                    // Missed day(s) - streak was broken: reset to 0, then
+                    // today's check-in starts a new streak (so we increment below).
+                    habit.currentStreak = 0;
+                    habit.currentStreak += 1;
                 }
                 // If lastCheckin is today, this shouldn't happen due to check above
             } else {

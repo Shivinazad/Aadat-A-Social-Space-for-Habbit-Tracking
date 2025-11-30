@@ -132,7 +132,19 @@ const Profile = () => {
         // If we're viewing another user's profile but `viewedUser` wasn't set (server fetch may have failed),
         // use the author info attached to posts as a reliable fallback
         if (viewingUserId && (!viewedUser || !viewedUser.id) && sortedPosts.length > 0 && sortedPosts[0].User) {
+          // Use the author info from the post as an immediate fallback so the UI
+          // shows a username/avatar quickly, but then try to fetch the full
+          // public profile (which includes `user_xp` and `user_level`) so the
+          // Total XP and Level cards show correct values.
           setViewedUser(sortedPosts[0].User);
+          try {
+            const fullProfile = await authAPI.getUserById(sortedPosts[0].User.id);
+            if (fullProfile && fullProfile.data) {
+              setViewedUser(prev => ({ ...prev, ...fullProfile.data }));
+            }
+          } catch (e) {
+            console.warn('Could not fetch full viewed user profile:', e);
+          }
         }
       } else {
         console.warn('Response data is not an array:', response.data);

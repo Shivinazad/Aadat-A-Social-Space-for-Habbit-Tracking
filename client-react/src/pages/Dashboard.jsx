@@ -75,8 +75,10 @@ const Dashboard = () => {
 
       // Calculate unique habits completed this week
       const uniqueHabits = new Set(weeklyPosts.map(post => post.habitId));
-      const totalHabits = habits.length || 1;
-      const successRate = Math.round((uniqueHabits.size / totalHabits) * 100);
+      const totalHabits = habits.length;
+      // If we don't yet know the user's habits, avoid reporting >100%.
+      // When totalHabits is 0 (no habits), successRate should be 0.
+      const successRate = totalHabits > 0 ? Math.min(100, Math.round((uniqueHabits.size / totalHabits) * 100)) : 0;
 
       setWeeklyStats({
         completedHabits: uniqueHabits.size,

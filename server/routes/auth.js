@@ -113,10 +113,40 @@ router.get('/stats', auth, async (req, res) => {
 
         const habits = await Habit.findAll({ where: { userId } });
 
-        // Calculate current streak (max streak across all habits)
-        const currentStreak = habits.length > 0
-            ? Math.max(...habits.map(h => h.currentStreak || 0))
-            : 0;
+        // Calculate current streak (max streak across all habits).
+        // If a habit's last check-in is older than yesterday, the streak is broken
+        // and should be reset to 0. Persist the reset so subsequent reads are correct.
+        const yesterday = new Date();
+        yesterday.setHours(0, 0, 0, 0);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        let effectiveStreaks = [];
+        for (const h of habits) {
+            let effective = 0;
+            if (h.lastCheckinDate) {
+                const last = new Date(h.lastCheckinDate);
+                last.setHours(0, 0, 0, 0);
+                if (last.getTime() < yesterday.getTime()) {
+                    // Streak broken; reset and persist if needed
+                    if (h.currentStreak !== 0) {
+                        h.currentStreak = 0;
+                        try { await h.save(); } catch (e) { console.error('Error saving habit streak reset:', e); }
+                    }
+                    effective = 0;
+                } else {
+                    effective = h.currentStreak || 0;
+                }
+            } else {
+                effective = 0;
+                if (h.currentStreak !== 0) {
+                    h.currentStreak = 0;
+                    try { await h.save(); } catch (e) { console.error('Error saving habit streak reset (no lastCheckin):', e); }
+                }
+            }
+            effectiveStreaks.push(effective);
+        }
+
+        const currentStreak = effectiveStreaks.length > 0 ? Math.max(...effectiveStreaks) : 0;
 
         // Calculate longest streak
         const longestStreak = habits.length > 0
@@ -214,9 +244,37 @@ router.get('/:id/stats', async (req, res) => {
 
         const habits = await Habit.findAll({ where: { userId } });
 
-        const currentStreak = habits.length > 0
-            ? Math.max(...habits.map(h => h.currentStreak || 0))
-            : 0;
+        // Compute effective streaks and persist resets for stale habits.
+        const yesterday = new Date();
+        yesterday.setHours(0, 0, 0, 0);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        let effectiveStreaks = [];
+        for (const h of habits) {
+            let effective = 0;
+            if (h.lastCheckinDate) {
+                const last = new Date(h.lastCheckinDate);
+                last.setHours(0, 0, 0, 0);
+                if (last.getTime() < yesterday.getTime()) {
+                    if (h.currentStreak !== 0) {
+                        h.currentStreak = 0;
+                        try { await h.save(); } catch (e) { console.error('Error saving habit streak reset:', e); }
+                    }
+                    effective = 0;
+                } else {
+                    effective = h.currentStreak || 0;
+                }
+            } else {
+                effective = 0;
+                if (h.currentStreak !== 0) {
+                    h.currentStreak = 0;
+                    try { await h.save(); } catch (e) { console.error('Error saving habit streak reset (no lastCheckin):', e); }
+                }
+            }
+            effectiveStreaks.push(effective);
+        }
+
+        const currentStreak = effectiveStreaks.length > 0 ? Math.max(...effectiveStreaks) : 0;
 
         const longestStreak = habits.length > 0
             ? Math.max(...habits.map(h => h.longestStreak || 0))
