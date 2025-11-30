@@ -66,6 +66,14 @@ function App() {
               </PrivateRoute>
             } 
           />
+          <Route 
+            path="/profile/:id"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

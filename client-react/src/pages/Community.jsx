@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { postsAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiHeart, FiMessageCircle } from 'react-icons/fi';
@@ -174,7 +175,13 @@ const Community = () => {
                         <div className="post-author-info">
                           <div className="post-avatar">{renderAvatar(authorAvatar)}</div>
                           <div className="post-meta">
-                            <div className="post-author-name">{authorUsername}</div>
+                            <div className="post-author-name">
+                              {post.User ? (
+                                <Link to={`/profile/${post.User.id || post.User._id}`} className="author-link">{authorUsername}</Link>
+                              ) : (
+                                authorUsername
+                              )}
+                            </div>
                             <div className="post-date">{formatDate(post.createdAt)}</div>
                           </div>
                         </div>

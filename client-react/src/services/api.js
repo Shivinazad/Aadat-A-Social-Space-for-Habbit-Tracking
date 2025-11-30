@@ -48,7 +48,11 @@ export const authAPI = {
   updateProfile: (data) => api.put('/users/profile', data),
   getAchievements: () => api.get('/users/me/achievements'),
   getStats: () => api.get('/stats/landing'),
-  getUserStats: () => api.get('/users/stats'),
+  // getUserStats accepts optional id to fetch another user's stats
+  getUserStats: (id) => id ? api.get(`/users/${id}/stats`) : api.get('/users/stats'),
+  // Public user endpoints
+  getUserById: (id) => api.get(`/users/${id}`),
+  getUserAchievements: (id) => api.get(`/users/${id}/achievements`),
 };
 
 // Achievements API

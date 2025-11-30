@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { leaderboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiAward, FiTrendingUp } from 'react-icons/fi';
@@ -99,8 +100,12 @@ const Leaderboard = () => {
                     <div className="rank-number">2</div>
                   </div>
                   <div className="podium-avatar">{getAvatar(getPodiumUser(2))}</div>
-                  <div className="podium-info">
-                    <div className="podium-name">{getPodiumUser(2)?.username || 'Loading...'}</div>
+                    <div className="podium-info">
+                    <div className="podium-name">
+                      {getPodiumUser(2) ? (
+                        <Link to={`/profile/${getPodiumUser(2).id || getPodiumUser(2)._id}`} className="author-link">{getPodiumUser(2).username}</Link>
+                      ) : 'Loading...'}
+                    </div>
                     <div className="podium-stats">
                       <span>Level <strong>{getPodiumUser(2)?.user_level || '-'}</strong></span>
                       <span className="podium-xp"><CountUp end={getPodiumUser(2)?.user_xp || 0} duration={2} /> XP</span>
@@ -120,7 +125,11 @@ const Leaderboard = () => {
                   </div>
                   <div className="podium-avatar">{getAvatar(getPodiumUser(1))}</div>
                   <div className="podium-info">
-                    <div className="podium-name">{getPodiumUser(1)?.username || 'Loading...'}</div>
+                    <div className="podium-name">
+                      {getPodiumUser(1) ? (
+                        <Link to={`/profile/${getPodiumUser(1).id || getPodiumUser(1)._id}`} className="author-link">{getPodiumUser(1).username}</Link>
+                      ) : 'Loading...'}
+                    </div>
                     <div className="podium-stats">
                       <span>Level <strong>{getPodiumUser(1)?.user_level || '-'}</strong></span>
                       <span className="podium-xp"><CountUp end={getPodiumUser(1)?.user_xp || 0} duration={2} /> XP</span>
@@ -140,7 +149,11 @@ const Leaderboard = () => {
                   </div>
                   <div className="podium-avatar">{getAvatar(getPodiumUser(3))}</div>
                   <div className="podium-info">
-                    <div className="podium-name">{getPodiumUser(3)?.username || 'Loading...'}</div>
+                    <div className="podium-name">
+                      {getPodiumUser(3) ? (
+                        <Link to={`/profile/${getPodiumUser(3).id || getPodiumUser(3)._id}`} className="author-link">{getPodiumUser(3).username}</Link>
+                      ) : 'Loading...'}
+                    </div>
                     <div className="podium-stats">
                       <span>Level <strong>{getPodiumUser(3)?.user_level || '-'}</strong></span>
                       <span className="podium-xp"><CountUp end={getPodiumUser(3)?.user_xp || 0} duration={2} /> XP</span>
@@ -200,7 +213,9 @@ const Leaderboard = () => {
                         <td>
                           <div className="user-cell">
                             <div className="user-avatar-small">{getAvatar(user)}</div>
-                            <span>{user.username}</span>
+                            <span>{user ? (
+                              <Link to={`/profile/${user.id || user._id}`} className="author-link">{user.username}</Link>
+                            ) : '-'}</span>
                           </div>
                         </td>
                         <td>

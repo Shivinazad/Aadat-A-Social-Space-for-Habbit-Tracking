@@ -176,6 +176,80 @@ router.get('/me/achievements', auth, async (req, res) => {
     }
 });
 
+// PUBLIC: GET /api/users/:id - get public profile for a user
+router.get('/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findByPk(id, { attributes: ['id', 'username', 'user_level', 'user_xp', 'communities', 'avatar', 'bio'] });
+        if (!user) return res.status(404).json({ msg: 'User not found.' });
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching public user:', error);
+        res.status(500).json({ msg: 'Server error fetching user.' });
+    }
+});
+
+// PUBLIC: GET /api/users/:id/achievements - get public achievements for a user
+router.get('/:id/achievements', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const Achievement = require('../models/Achievement');
+        const userWithAchievements = await User.findByPk(id, { include: [{ model: Achievement, through: { attributes: ['unlockedAt'] }, attributes: ['id', 'name', 'displayName', 'description', 'icon'] }] });
+        if (!userWithAchievements) return res.status(404).json({ msg: 'User not found.' });
+        const achievements = userWithAchievements.Achievements || [];
+        res.status(200).json(achievements);
+    } catch (error) {
+        console.error('Error fetching public user achievements:', error);
+        res.status(500).json({ msg: 'Server error fetching achievements.' });
+    }
+});
+
+// PUBLIC: GET /api/users/:id/stats - get stats for a specific user
+router.get('/:id/stats', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const Habit = require('../models/Habit');
+        const Completion = require('../models/Completion');
+        const { Op } = require('sequelize');
+
+        const habits = await Habit.findAll({ where: { userId } });
+
+        const currentStreak = habits.length > 0
+            ? Math.max(...habits.map(h => h.currentStreak || 0))
+            : 0;
+
+        const longestStreak = habits.length > 0
+            ? Math.max(...habits.map(h => h.longestStreak || 0))
+            : 0;
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const totalPossibleCheckins = habits.length * 7;
+        const actualCheckins = await Completion.count({
+            include: [{ model: Habit, where: { userId }, required: true }],
+            where: { date: { [Op.gte]: oneWeekAgo } }
+        });
+
+        const completionRate = totalPossibleCheckins > 0
+            ? Math.round((actualCheckins / totalPossibleCheckins) * 100)
+            : 0;
+
+        const statsData = {
+            currentStreak,
+            longestStreak,
+            completionRate,
+            totalHabits: habits.length,
+            totalCheckins: actualCheckins
+        };
+
+        res.status(200).json(statsData);
+    } catch (error) {
+        console.error('Error fetching public user stats:', error);
+        res.status(500).json({ msg: 'Server error fetching user stats.' });
+    }
+});
+
 // ============ OAUTH ROUTES ============
 
 // Google OAuth - Initiate

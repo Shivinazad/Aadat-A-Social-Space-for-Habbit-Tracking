@@ -4,14 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { achievementsAPI, postsAPI, authAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import '../home.css';
+import { useParams } from 'react-router-dom';
 
 const Profile = () => {
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
+  const params = useParams();
+  const viewingUserId = params.id;
+  const isOwnProfile = !viewingUserId || String(viewingUserId) === String(user?.id);
   const [achievements, setAchievements] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [viewedUser, setViewedUser] = useState(null);
   const [stats, setStats] = useState({
     currentStreak: 0,
     longestStreak: 0,
@@ -23,36 +28,81 @@ const Profile = () => {
   const avatarOptions = ['👤', '😀', '😎', '🤓', '🥳', '🤠', '🧑‍💻', '🧑‍🎨', '🧑‍🚀', '🧑‍🔬', '🦸', '🧙', '🧚', '🧛', '🐱', '🐶', '🦊', '🐻', '🐼', '🐨', '🦁', '🐯', '🦄', '🐧', '🦉', '🦋', '🌟', '⚡', '🔥', '💎'];
 
   useEffect(() => {
-    if (user?.id) {
-      fetchAchievements();
-      fetchPosts();
-      fetchStats();
+    // Decide which user's data to load: current user or a public user by id
+    const targetId = viewingUserId || user?.id;
+    if (viewingUserId) {
+      fetchViewedUser(viewingUserId);
+    } else {
+      setViewedUser(null);
     }
-  }, [user]);
+    if (targetId) {
+      fetchAchievements(targetId);
+      fetchPosts(targetId);
+      fetchStats(targetId);
+    }
+  }, [user, viewingUserId]);
 
-  const fetchStats = async () => {
+  const fetchViewedUser = async (id) => {
     try {
-      const response = await authAPI.getUserStats();
-      setStats(response.data);
+      const res = await authAPI.getUserById(id);
+      setViewedUser(res.data);
+    } catch (err) {
+      console.error('Failed to fetch viewed user:', err);
+      setViewedUser(null);
+    }
+  };
+
+  const fetchStats = async (targetId) => {
+    try {
+      if (!isOwnProfile && viewingUserId) {
+        // viewing another user's profile
+        try {
+          const response = await authAPI.getUserStats(viewingUserId);
+          setStats(response.data);
+        } catch (err) {
+          console.warn('Failed to fetch viewed user stats:', err);
+          setStats((s) => s);
+        }
+      } else {
+        const response = await authAPI.getUserStats();
+        setStats(response.data);
+      }
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
     }
   };
 
-  const fetchAchievements = async () => {
+  const fetchAchievements = async (targetId) => {
     try {
       // Get all achievements
       const allAchievementsResponse = await achievementsAPI.getAll();
       const allAchievements = allAchievementsResponse.data;
       
-      // Get user's unlocked achievements
-      const userAchievementsResponse = await authAPI.getAchievements();
-      const unlockedIds = new Set(userAchievementsResponse.data.map(a => a.id));
-      
-      // Mark which achievements are unlocked
+      // Get user's unlocked achievements (use public endpoint when viewing another user)
+      let userAchievementsResponse;
+      if (targetId && viewingUserId) {
+        try {
+          userAchievementsResponse = await authAPI.getUserAchievements(targetId);
+        } catch (err) {
+          userAchievementsResponse = { data: [] };
+        }
+      } else {
+        userAchievementsResponse = await authAPI.getAchievements();
+      }
+      const userAchList = userAchievementsResponse.data || [];
+      // Debug: log the returned unlocked achievements for inspection
+      console.log('User achievements response for', targetId, userAchList);
+      // Build lookup by id, name and displayName to be robust against different shapes
+      const unlockedIds = new Set(userAchList.map(a => String(a.id)));
+      const unlockedNames = new Set(userAchList.map(a => a.name));
+      const unlockedDisplayNames = new Set(userAchList.map(a => a.displayName));
+      // If the API returned UserAchievement records, they may reference the achievement via `achievementId`
+      const unlockedByRefId = new Set(userAchList.map(a => a.achievementId ? String(a.achievementId) : null));
+
+      // Mark which achievements are unlocked (match by id or name)
       const achievementsWithStatus = allAchievements.map(achievement => ({
         ...achievement,
-        unlocked: unlockedIds.has(achievement.id)
+        unlocked: unlockedIds.has(String(achievement.id)) || unlockedNames.has(achievement.name) || unlockedDisplayNames.has(achievement.displayName) || unlockedByRefId.has(String(achievement.id))
       }));
       
       setAchievements(achievementsWithStatus);
@@ -65,19 +115,25 @@ const Profile = () => {
 
   const fetchPosts = async () => {
     try {
-      console.log('Fetching posts for user:', user.id);
-      const response = await postsAPI.getUserPosts(user.id);
+      const targetId = viewingUserId || user.id;
+      console.log('Fetching posts for user:', targetId);
+      const response = await postsAPI.getUserPosts(targetId);
       console.log('Posts API response:', response);
       console.log('Posts received:', response.data);
       console.log('Number of posts:', response.data?.length || 0);
       
-      if (response.data && Array.isArray(response.data)) {
+        if (response.data && Array.isArray(response.data)) {
         // Sort posts by creation date (newest first)
         const sortedPosts = response.data.sort((a, b) => 
           new Date(b.createdAt) - new Date(a.createdAt)
         );
         console.log('Sorted posts:', sortedPosts);
         setPosts(sortedPosts);
+        // If we're viewing another user's profile but `viewedUser` wasn't set (server fetch may have failed),
+        // use the author info attached to posts as a reliable fallback
+        if (viewingUserId && (!viewedUser || !viewedUser.id) && sortedPosts.length > 0 && sortedPosts[0].User) {
+          setViewedUser(sortedPosts[0].User);
+        }
       } else {
         console.warn('Response data is not an array:', response.data);
         setPosts([]);
@@ -107,21 +163,21 @@ const Profile = () => {
     }
   };
 
-  // Render avatar: if it's a URL, show image; if emoji, show as text
-  const getAvatarElement = () => {
-    if (!user?.avatar) return '👤';
-    // If avatar is a URL (starts with http/https), render image
-    if (typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+  // Render avatar: prefer viewed user's avatar when viewing someone else
+  const getAvatarElement = (overrideUser) => {
+    const targetUser = overrideUser || (isOwnProfile ? user : viewedUser);
+    const avatar = targetUser?.avatar;
+    if (!avatar) return '👤';
+    if (typeof avatar === 'string' && avatar.startsWith('http')) {
       return (
         <img
-          src={user.avatar}
-          alt={user.username || 'avatar'}
+          src={avatar}
+          alt={targetUser?.username || 'avatar'}
           style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
         />
       );
     }
-    // Otherwise, render as emoji/text
-    return user.avatar;
+    return avatar;
   };
 
   const handleLogout = () => {
@@ -189,41 +245,43 @@ const Profile = () => {
               <div className="profile-avatar-large">
                 <div className="avatar-circle-large">{getAvatarElement()}</div>
               </div>
-              <div className="profile-header-info">
-                <h1 className="profile-username">{user?.username}</h1>
-                <p className="profile-bio">{user?.bio || 'Building habits in public.'}</p>
+                <div className="profile-header-info">
+                <h1 className="profile-username">{isOwnProfile ? (user?.username) : (viewedUser?.username || 'User')}</h1>
+                <p className="profile-bio">{isOwnProfile ? (user?.bio || 'Building habits in public.') : (viewedUser?.bio || 'Building habits in public.')}</p>
               </div>
-              <div className="profile-settings-container">
-                <button 
-                  className="settings-btn" 
-                  onClick={() => setShowSettings(!showSettings)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
-                    <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-                    <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
-                  </svg>
-                </button>
-                {showSettings && (
-                  <div className="settings-dropdown">
-                    <button 
-                      className="settings-item" 
-                      onClick={() => {
-                        setShowSettings(false);
-                        navigate('/profile/edit');
-                      }}
-                    >
-                      <span>✏️</span> Edit Profile
-                    </button>
-                    <button 
-                      className="settings-item danger" 
-                      onClick={handleLogout}
-                    >
-                      <span>🚪</span> Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              {isOwnProfile && (
+                <div className="profile-settings-container">
+                  <button 
+                    className="settings-btn" 
+                    onClick={() => setShowSettings(!showSettings)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
+                    </svg>
+                  </button>
+                  {showSettings && (
+                    <div className="settings-dropdown">
+                      <button 
+                        className="settings-item" 
+                        onClick={() => {
+                          setShowSettings(false);
+                          navigate('/profile/edit');
+                        }}
+                      >
+                        <span>✏️</span> Edit Profile
+                      </button>
+                      <button 
+                        className="settings-item danger" 
+                        onClick={handleLogout}
+                      >
+                        <span>🚪</span> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Stats Grid */}
@@ -237,21 +295,14 @@ const Profile = () => {
                 <div className="stat-label">Longest Streak</div>
               </div>
               <div className="profile-stat-card">
-                <div className="stat-number">Level {user?.user_level || 1}</div>
+                <div className="stat-number">Level {isOwnProfile ? (user?.user_level || 1) : (viewedUser?.user_level || 1)}</div>
                 <div className="stat-label">Current Level</div>
               </div>
               <div className="profile-stat-card">
-                <div className="stat-number neon">{user?.user_xp || 0}</div>
+                <div className="stat-number neon">{isOwnProfile ? (user?.user_xp || 0) : (viewedUser?.user_xp || 0)}</div>
                 <div className="stat-label">Total XP</div>
               </div>
-              <div className="profile-stat-card">
-                <div className="stat-number">📊 {stats.completionRate}%</div>
-                <div className="stat-label">Weekly Completion</div>
-              </div>
-              <div className="profile-stat-card">
-                <div className="stat-number">✅ {stats.totalCheckins}</div>
-                <div className="stat-label">Check-ins (7 days)</div>
-              </div>
+              {/* Weekly completion and check-ins removed per request */}
             </div>
           </section>
 
@@ -309,9 +360,9 @@ const Profile = () => {
                   <div key={post.id} className="post-card">
                     <div className="post-header">
                       <div className="post-author-info">
-                        <div className="post-avatar">{getAvatarElement()}</div>
+                        <div className="post-avatar">{getAvatarElement(post.User || viewedUser)}</div>
                         <div className="post-meta">
-                          <div className="post-author-name">{user.username}</div>
+                          <div className="post-author-name">{post.User?.username || viewedUser?.username || user?.username}</div>
                           <div className="post-date">
                             {new Date(post.createdAt).toLocaleDateString('en-US', {
                               month: 'short',

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { habitsAPI, postsAPI, inviteAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { Link } from 'react-router-dom';
 import { celebrateCheckIn } from '../utils/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
@@ -571,7 +572,7 @@ const Dashboard = () => {
                 <div className="avatar-circle">{getAvatarElement()}</div>
                 <div className="profile-info">
                   <h3 className="profile-name">{user?.username}</h3>
-                  <a href="/profile" className="view-profile-link">View profile →</a>
+                  <Link to={`/profile/${user?.id}`} className="view-profile-link">View profile →</Link>
                 </div>
               </div>
 
