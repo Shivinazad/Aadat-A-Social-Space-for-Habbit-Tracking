@@ -65,7 +65,20 @@ const Navbar = () => {
 
   if (!user) return null;
 
-  const avatar = user.avatar || '👤';
+  const renderAvatarElement = () => {
+    const avatar = user?.avatar;
+    if (!avatar) return '👤';
+    if (typeof avatar === 'string' && avatar.startsWith('http')) {
+      return (
+        <img
+          src={avatar}
+          alt={user?.username || 'avatar'}
+          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', background: '#222' }}
+        />
+      );
+    }
+    return avatar;
+  };
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
@@ -127,7 +140,7 @@ const Navbar = () => {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
             )}
           </button>
-          <Link to="/profile" className="user-avatar" aria-label="Profile">{avatar}</Link>
+          <Link to="/profile" className="user-avatar" aria-label="Profile">{renderAvatarElement()}</Link>
           {/* Hamburger for mobile */}
           <button className={`hamburger${mobileMenuOpen ? ' open' : ''}`} aria-label="Toggle menu" onClick={() => setMobileMenuOpen((open) => !open)}>
             <span></span>
