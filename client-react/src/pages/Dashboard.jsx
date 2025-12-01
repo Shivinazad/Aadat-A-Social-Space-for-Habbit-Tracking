@@ -43,6 +43,20 @@ const Dashboard = () => {
     fetchWeeklyStats();
   }, []);
 
+  // Poll the authenticated user's profile periodically so UI (XP bar, level)
+  // updates soon after server-side XP changes without requiring a full page reload.
+  useEffect(() => {
+    // Only poll when user is present (authenticated)
+    if (!user?.id) return;
+
+    const POLL_INTERVAL = 10000; // 10s
+    const interval = setInterval(() => {
+      fetchUser();
+    }, POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [user?.id, fetchUser]);
+
   const fetchHabits = async () => {
     try {
       const response = await habitsAPI.getAll();

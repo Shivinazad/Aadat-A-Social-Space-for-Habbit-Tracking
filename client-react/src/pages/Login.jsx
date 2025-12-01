@@ -24,11 +24,27 @@ const Login = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3000');
+        // Use VITE_API_URL for production (Render) consistency. Fallback to localhost in dev.
+        const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
         const response = await axios.get(`${API_BASE_URL}/api/stats/public`);
-        setStats(response.data);
+
+        // Defensive: ensure the response is an object with numeric fields.
+        const data = response?.data;
+        if (data && typeof data === 'object') {
+          // coerce to numbers where possible
+          const parsed = {
+            totalUsers: Number(data.totalUsers) || 0,
+            totalHabits: Number(data.totalHabits) || 0,
+            totalCheckins: Number(data.totalCheckins) || 0
+          };
+          setStats(parsed);
+        } else {
+          console.warn('Unexpected stats response, using defaults:', data);
+          setStats({ totalUsers: 0, totalHabits: 0, totalCheckins: 0 });
+        }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
+        setStats({ totalUsers: 0, totalHabits: 0, totalCheckins: 0 });
       }
     };
     fetchStats();
