@@ -5,8 +5,9 @@
 html, body {
   width: 100%;
   height: 100%;
+  /* Prevent horizontal overflow, allow vertical scrolling when needed. */
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 :root {
@@ -206,6 +207,52 @@ body {
   align-items: center;
 }
 
+/* Container used in Login.jsx nav (keeps nav content centered within page) */
+.nav-container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* Ensure brand stays left and nav actions align right on small screens */
+@media (max-width: 640px) {
+  .nav-container {
+    justify-content: flex-start;
+  }
+  .nav-container .brand {
+    margin-right: auto;
+    text-align: left;
+  }
+  .nav-container > div {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+/* Stronger mobile override to ensure brand is left-aligned inside the fixed navbar */
+@media (max-width: 640px) {
+  .navbar .nav-container {
+    justify-content: flex-start !important;
+    padding-left: 0.75rem !important;
+  }
+  .navbar .nav-container .brand {
+    margin-right: auto !important;
+    text-align: left !important;
+    transform: none !important;
+  }
+  /* push the actions group to the far right within the container */
+  .navbar .nav-container > div:last-child {
+    margin-left: auto !important;
+  }
+}
+
 .brand {
   font-size: 1.5rem;
   font-weight: 800;
@@ -256,13 +303,15 @@ body {
 
 /* AUTH CONTAINER */
 .auth-container {
-  height: calc(100vh - 60px);  /* navbar height */
-  margin-top: 60px;           /* push below navbar */
-  padding: 0;                 /* REMOVE padding */
+  /* Fill available vertical space and allow scrolling when content exceeds viewport. */
+  min-height: calc(100vh - 60px);  /* navbar height */
+  margin-top: 60px;                /* push below navbar */
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;           /* ✅ THIS KILLS EXTRA SCROLL */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .auth-content {
@@ -272,6 +321,9 @@ body {
   width: 100%;
   height: 100%;
   max-height: 100%;
+  overflow-x: hidden; /* ensure inner content doesn't cause horizontal scroll */
+  padding: 0 1rem; /* small horizontal padding to avoid edge overflow */
+  box-sizing: border-box;
 }
 
 
@@ -403,11 +455,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Prevent inner content from forcing horizontal scroll */
+  overflow-x: hidden;
 }
 
 .form-wrapper {
   width: 100%;
   max-width: 420px;
+}
+
+/* Ensure images and large elements don't overflow horizontally */
+img, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 /* TABS */
@@ -849,7 +909,8 @@ body.light-mode .login-back-link {
 .auth-page {
   min-height: 100dvh;
   height: 100dvh;
-  overflow: hidden;
+  /* Hide page vertical scroll on desktop; enable on smaller screens via media query */
+  overflow-y: hidden;
 }
 
 .auth-container {
@@ -870,7 +931,36 @@ body.light-mode .login-back-link {
 
 .form-wrapper {
   max-height: 100%;
+  /* Allow the form column to scroll internally when content is tall */
   overflow-y: auto;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Hide visible scrollbars on desktop while preserving scroll behavior */
+@media (min-width: 1025px) {
+  html, body {
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    width: 0px; /* WebKit */
+    height: 0px;
+  }
+  .form-wrapper::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+}
+
+/* Responsive: enable vertical scrolling on tablet and mobile to avoid content clipping */
+@media (max-width: 1024px) {
+  html, body {
+    overflow-y: auto;
+  }
+  .auth-page, .auth-container {
+    overflow-y: auto;
+  }
+  .form-wrapper {
+    overflow-y: auto;
+  }
 }
 
