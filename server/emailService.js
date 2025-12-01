@@ -2,20 +2,33 @@
 const nodemailer = require('nodemailer');
 
 // Create email transporter
-// For production, use environment variables for credentials
 const createTransporter = () => {
-    // Using Gmail as an example
-    // You'll need to enable "Less secure app access" or use App Passwords
-    return nodemailer.createTransport({
+    // Use SendGrid for production (works on Render, no recipient restrictions)
+    if (process.env.SENDGRID_API_KEY) {
+        return nodemailer.createTransport({
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'apikey',
+                pass: process.env.SENDGRID_API_KEY
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 15000
+        });
+    }
+    
+    // Fallback to Gmail for local development
+    return nodemailer.createTransporter({
         service: 'gmail',
         auth: {
-            user: process.env.EMAIL_USER || 'your-email@gmail.com',
-            pass: process.env.EMAIL_PASSWORD || 'your-app-password'
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
         },
-        // Add timeout settings to prevent hanging
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 5000,    // 5 seconds
-        socketTimeout: 15000      // 15 seconds
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
+        socketTimeout: 15000
     });
 };
 
@@ -24,10 +37,16 @@ const sendInvitationEmail = async (toEmail, senderName) => {
     try {
         const transporter = createTransporter();
         
+        const senderEmail = process.env.SENDGRID_API_KEY 
+            ? (process.env.SENDGRID_SENDER_EMAIL || 'noreply@yourdomain.com')
+            : process.env.EMAIL_USER;
+        
         const mailOptions = {
-            from: `Aadat - Habit Tracker <${process.env.EMAIL_USER || 'noreply@aadat.com'}>`,
+            from: `Aadat <${senderEmail}>`,
+            replyTo: senderEmail,
             to: toEmail,
-            subject: `${senderName} invited you to join Aadat! 🚀`,
+            subject: `${senderName} invited you to Aadat`,
+            text: `Hi there!\\n\\n${senderName} has invited you to join Aadat, a habit-tracking platform where you can build better habits together.\\n\\nJoin now: ${process.env.CLIENT_URL || 'http://localhost:5173'}\\n\\nBest regards,\\nAadat Team`,
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -316,11 +335,11 @@ const sendInvitationEmail = async (toEmail, senderName) => {
         };
         
         const info = await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${toEmail}. Message ID: ${info.messageId}`);
+        console.log(`✅ Invitation email sent to ${toEmail}. Message ID: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
         
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('❌ Error sending invitation email:', error);
         throw error;
     }
 };
@@ -330,10 +349,16 @@ const sendOTPEmail = async (toEmail, otp, username) => {
     try {
         const transporter = createTransporter();
         
+        const senderEmail = process.env.SENDGRID_API_KEY 
+            ? (process.env.SENDGRID_SENDER_EMAIL || 'noreply@yourdomain.com')
+            : process.env.EMAIL_USER;
+        
         const mailOptions = {
-            from: `Aadat - Habit Tracker <${process.env.EMAIL_USER || 'noreply@aadat.com'}>`,
+            from: `Aadat <${senderEmail}>`,
+            replyTo: senderEmail,
             to: toEmail,
-            subject: `Your Aadat Verification Code: ${otp}`,
+            subject: `Your verification code is ${otp}`,
+            text: `Hello ${username || 'there'},\\n\\nYour Aadat verification code is: ${otp}\\n\\nThis code expires in 10 minutes.\\n\\nIf you didn't request this code, please ignore this email.\\n\\nBest regards,\\nAadat Team`,
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -504,11 +529,11 @@ const sendOTPEmail = async (toEmail, otp, username) => {
         };
         
         const info = await transporter.sendMail(mailOptions);
-        console.log(`OTP email sent successfully to ${toEmail}. Message ID: ${info.messageId}`);
+        console.log(`✅ OTP email sent to ${toEmail}. Message ID: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
         
     } catch (error) {
-        console.error('Error sending OTP email:', error);
+        console.error('❌ Error sending OTP email:', error);
         throw error;
     }
 };

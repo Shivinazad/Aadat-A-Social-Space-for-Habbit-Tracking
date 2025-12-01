@@ -142,7 +142,7 @@ const Login = () => {
         
         setOtpData({ ...otpData, email: formData.email });
         setShowOTPVerification(true);
-        setSuccess(response.data.message);
+        setSuccess('✅ OTP sent! Check your inbox and spam folder.');
         setOtpTimer(600); // 10 minutes in seconds
       }
     } catch (err) {
@@ -345,6 +345,21 @@ const Login = () => {
                     <div className="form-header">
                       <h2>🔐 Verify Your Email</h2>
                       <p>Enter the 6-digit code sent to {otpData.email}</p>
+                      <div style={{ 
+                        background: 'rgba(255, 193, 7, 0.1)', 
+                        border: '1px solid rgba(255, 193, 7, 0.3)',
+                        borderRadius: '8px',
+                        padding: '10px 15px',
+                        marginTop: '12px',
+                        fontSize: '13px',
+                        color: '#ffc107',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <FiMail />
+                        <span>📧 Check your <strong>spam folder</strong> if you don't see the email</span>
+                      </div>
                     </div>
 
                     <form onSubmit={handleOTPVerify}>
