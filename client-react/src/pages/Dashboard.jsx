@@ -360,10 +360,29 @@ const Dashboard = () => {
 
             {/* Today's Habits */}
             <section className="habits-section">
-              <div className="section-header">
-                <div>
-                  <h2>Today's Habits</h2>
-                  <p className="section-subtitle">Keep your momentum going</p>
+              <div className="section-header" style={{ 
+                marginBottom: '2rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ textAlign: 'left' }}>
+                  <h2 style={{ 
+                    fontSize: '2rem', 
+                    fontWeight: '900', 
+                    marginBottom: '0.5rem',
+                    letterSpacing: '-0.02em',
+                    color: 'var(--white)'
+                  }}>
+                    Today's Habits
+                  </h2>
+                  <p className="section-subtitle" style={{ 
+                    color: 'var(--gray-400)', 
+                    fontSize: '0.95rem',
+                    fontWeight: '400'
+                  }}>
+                    {habits.length === 0 ? 'Start tracking your daily habits' : 'Keep your momentum going'}
+                  </p>
                 </div>
                 <motion.button
                   onClick={() => setShowAddHabitModal(true)}
@@ -380,22 +399,44 @@ const Dashboard = () => {
                 {habits.length === 0 ? (
                   <motion.div
                     className="empty-state-habits"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4rem 2rem',
+                      textAlign: 'center',
+                      minHeight: '300px'
+                    }}
                   >
-                    <div className="empty-icon-large">🎯</div>
-                    <h3>No habits yet!</h3>
-                    <p>Start building better habits today. Add your first habit to get started.</p>
-                    <motion.button
-                      onClick={() => setShowAddHabitModal(true)}
-                      className="btn-primary empty-cta"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <FiPlus />
-                      Add Your First Habit
-                    </motion.button>
+                    <div style={{ 
+                      fontSize: '64px', 
+                      marginBottom: '1.5rem',
+                      opacity: 0.6,
+                      lineHeight: 1
+                    }}>
+                      ✨
+                    </div>
+                    <h3 style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: '700', 
+                      marginBottom: '0.75rem',
+                      color: 'var(--white)'
+                    }}>
+                      No habits yet
+                    </h3>
+                    <p style={{ 
+                      color: 'var(--gray-400)', 
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                      maxWidth: '420px',
+                      margin: '0 auto'
+                    }}>
+                      Ready to start your journey? Click the <strong style={{ color: 'var(--neon)' }}>Add Habit</strong> button above to create your first habit and begin building consistency.
+                    </p>
                   </motion.div>
                 ) : (
                   habits.map((habit, index) => {
@@ -412,71 +453,152 @@ const Dashboard = () => {
                       <motion.div
                         key={habit.id}
                         className="habit-item"
-                        style={{ zIndex: settingsMenuOpen === habit.id ? 50 : 1, position: 'relative' }}
+                        style={{ 
+                          zIndex: settingsMenuOpen === habit.id ? 50 : 1, 
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '1.25rem 1.5rem',
+                          gap: '1.5rem',
+                          background: isCheckedInToday ? 'rgba(0, 255, 136, 0.05)' : 'rgba(255, 255, 255, 0.03)',
+                          border: isCheckedInToday ? '1px solid rgba(0, 255, 136, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
+                          borderRadius: '12px',
+                          transition: 'all 0.3s ease'
+                        }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
-                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        whileHover={{ 
+                          y: -4, 
+                          borderColor: isCheckedInToday ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 255, 255, 0.15)',
+                          transition: { duration: 0.2 } 
+                        }}
                       >
-                        <div className="habit-main-info">
-                          <div className="habit-title-row">
-                            <span className="habit-title">{habit.habitTitle}</span>
+                        <div className="habit-main-info" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {habit.habitCategory && (
-                              <span className="habit-category-badge">{habit.habitCategory}</span>
+                              <span className="habit-category-badge" style={{
+                                fontSize: '0.7rem',
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '6px',
+                                fontWeight: '600',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px',
+                                display: 'inline-block',
+                                width: 'fit-content'
+                              }}>
+                                {habit.habitCategory}
+                              </span>
                             )}
+                            <span className="habit-title" style={{ 
+                              fontSize: '1.1rem', 
+                              fontWeight: '700',
+                              color: 'var(--white)',
+                              display: 'block'
+                            }}>
+                              {habit.habitTitle}
+                            </span>
                           </div>
-                          {lastCheckin && (
-                            <span className="last-checkin-text">
-                              {isCheckedInToday ? '✅ Checked in today' :
-                                daysSinceLastCheckin === 1 ? '📅 Last check-in: Yesterday' :
-                                  `📅 Last check-in: ${daysSinceLastCheckin} days ago`}
+                          {isCheckedInToday && (
+                            <span className="last-checkin-text" style={{
+                              fontSize: '0.85rem',
+                              color: 'var(--neon)',
+                              fontWeight: '600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              <FiCheck style={{ fontSize: '1rem' }} />
+                              Checked in today
                             </span>
                           )}
                         </div>
-                        <span className="streak-count">🔥 {habit.currentStreak} days</span>
-                        <button
-                          className={`btn btn-primary btn-checkin ${isCheckedInToday ? 'checked-in' : ''}`}
-                          onClick={() => openCheckinModal(habit)}
-                          disabled={isCheckedInToday}
-                        >
-                          {isCheckedInToday ? '✓ Done' : 'Check In'}
-                        </button>
-                        <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <span className="streak-count" style={{
+                            fontSize: '0.95rem',
+                            fontWeight: '700',
+                            color: 'var(--white)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            🔥 {habit.currentStreak} {habit.currentStreak === 1 ? 'day' : 'days'}
+                          </span>
                           <button
-                            className="settings-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSettingsMenu(habit.id);
+                            className={`btn btn-primary btn-checkin ${isCheckedInToday ? 'checked-in' : ''}`}
+                            onClick={() => openCheckinModal(habit)}
+                            disabled={isCheckedInToday}
+                            style={{
+                              padding: '0.65rem 1.5rem',
+                              borderRadius: '8px',
+                              fontWeight: '600',
+                              fontSize: '0.9rem',
+                              whiteSpace: 'nowrap',
+                              minWidth: isCheckedInToday ? '90px' : '110px'
                             }}
                           >
-                            <FiMoreVertical />
-                          </button>
-                          <AnimatePresence>
-                            {settingsMenuOpen === habit.id && (
-                              <motion.div
-                                className="settings-menu"
-                                initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <button
-                                  className="settings-menu-item"
-                                  onClick={() => openEditModal(habit)}
-                                >
-                                  <FiEdit2 />
-                                  Edit Habit
-                                </button>
-                                <button
-                                  className="settings-menu-item delete"
-                                  onClick={() => handleDeleteHabit(habit.id)}
-                                >
-                                  <FiTrash2 />
-                                  Delete Habit
-                                </button>
-                              </motion.div>
+                            {isCheckedInToday ? (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <FiCheck /> Done
+                              </span>
+                            ) : (
+                              'Check In'
                             )}
-                          </AnimatePresence>
+                          </button>
+                          <div className="habit-settings" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              className="settings-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSettingsMenu(habit.id);
+                              }}
+                              style={{
+                                padding: '0.5rem',
+                                borderRadius: '6px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: 'var(--gray-400)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <FiMoreVertical />
+                            </button>
+                            <AnimatePresence>
+                              {settingsMenuOpen === habit.id && (
+                                <motion.div
+                                  className="settings-menu"
+                                  initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <button
+                                    className="settings-menu-item"
+                                    onClick={() => openEditModal(habit)}
+                                  >
+                                    <FiEdit2 />
+                                    Edit Habit
+                                  </button>
+                                  <button
+                                    className="settings-menu-item delete"
+                                    onClick={() => handleDeleteHabit(habit.id)}
+                                  >
+                                    <FiTrash2 />
+                                    Delete Habit
+                                  </button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
                       </motion.div>
                     );
@@ -783,7 +905,7 @@ const Dashboard = () => {
         )
       }
             {/* FOOTER */}
-      <footer className="footer-new">
+      <footer className="footer-new" style={{ marginTop: '4rem' }}>
         <div className="footer-container">
           <motion.div
             className="footer-brand"
