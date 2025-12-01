@@ -1,0 +1,48 @@
+services:
+  # Backend API + Frontend Static Files
+  - type: web
+    name: aadat-app
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd server && npm install && cd ../client-react && npm install && npm run build
+    startCommand: cd server && node index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_URL
+        value: https://aadat-app.onrender.com
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        value: https://aadat-app.onrender.com/api/users/auth/google/callback
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CALLBACK_URL
+        value: https://aadat-app.onrender.com/api/users/auth/github/callback
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+
+databases:
+  - name: aadat-db
+    databaseName: aadat_db
+    user: aadat_user
+    region: oregon
+    plan: free

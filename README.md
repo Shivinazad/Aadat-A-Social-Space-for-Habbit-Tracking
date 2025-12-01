@@ -8,6 +8,7 @@
 
 ## 🌟 Features
 
+- **🤖 AI-Powered Roadmaps** - Gemini AI generates personalized 30-day habit-building paths
 - **📊 Habit Tracking** - Track daily habits and build streaks
 - **🔥 Streak System** - Visual feedback for consistency
 - **👥 Community Feed** - Share progress and support others
@@ -120,6 +121,7 @@ aadat-app/
 - **JWT** - Authentication
 - **Bcrypt** - Password hashing
 - **Nodemailer** - Email invitations
+- **Google Gemini AI** - Roadmap generation
 
 ## 🌐 Deployment
 
@@ -189,6 +191,7 @@ PORT=3000
 CLIENT_URL=https://your-app.onrender.com
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ## 🧪 Testing

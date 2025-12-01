@@ -35,7 +35,23 @@ const Habit = sequelize.define('Habit', {
     type: DataTypes.DATEONLY,
     allowNull: true,
   },
-  // Foreign Key for User
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  aiDescription: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  roadmap: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  targetPercentage: {
+    type: DataTypes.INTEGER,
+    defaultValue: 70,
+    allowNull: true,
+  },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,

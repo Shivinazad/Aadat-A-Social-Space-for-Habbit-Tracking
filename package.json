@@ -1,0 +1,15 @@
+{
+  "name": "aadat",
+  "version": "1.0.0",
+  "description": "Aadat - A Social Space for Habit Tracking",
+  "scripts": {
+    "start": "./start.sh",
+    "dev": "./start.sh",
+    "server": "cd server && npm run dev",
+    "client": "cd client-react && npm run dev",
+    "install-all": "cd server && npm install && cd ../client-react && npm install"
+  },
+  "keywords": ["habit-tracking", "social", "productivity"],
+  "author": "Shivinazad",
+  "license": "MIT"
+}

@@ -9,6 +9,7 @@ import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Community from './pages/Community';
 import Leaderboard from './pages/Leaderboard';
+import Roadmap from './pages/Roadmap';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import './style.css';
@@ -54,6 +55,22 @@ function App() {
                 <ErrorBoundary>
                   <Leaderboard />
                 </ErrorBoundary>
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/roadmap" 
+            element={
+              <PrivateRoute>
+                <Roadmap />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/roadmap/:habitId" 
+            element={
+              <PrivateRoute>
+                <Roadmap />
               </PrivateRoute>
             } 
           />

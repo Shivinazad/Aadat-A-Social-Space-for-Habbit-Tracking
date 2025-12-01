@@ -98,6 +98,25 @@ const Habit = require('./models/Habit');
 const Post = require('./models/Post');
 const OTP = require('./models/OTP');
 
+// Support both /api/stats/landing and /api/stats/public for compatibility
+app.get('/api/stats/landing', async (req, res) => {
+    try {
+        const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
+            User.count(),
+            Habit.count(),
+            Post.count()
+        ]);
+        res.json({
+            totalUsers,
+            totalHabits,
+            totalCheckins
+        });
+    } catch (error) {
+        console.error('Error fetching public stats:', error);
+        res.status(500).json({ message: 'Failed to fetch statistics' });
+    }
+});
+
 app.get('/api/stats/public', async (req, res) => {
     try {
         const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
