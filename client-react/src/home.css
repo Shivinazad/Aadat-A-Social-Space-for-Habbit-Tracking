@@ -41,8 +41,8 @@
 
 @media (max-width: 1024px) {
     .main-container {
-        margin-top: 80px !important;
-        padding-top: 16px;
+        margin-top: 120px !important;
+        padding-top: 28px;
     }
 }
 
@@ -359,8 +359,8 @@ body.light-mode .hamburger span {
     }
 
     .main-container {
-        margin-top: 72px !important;
-        padding: 12px 8px;
+        margin-top: 120px !important;
+        padding: 28px 8px;
     }
 
     .nav-links-mobile {
@@ -4372,6 +4372,7 @@ body.light-mode .user-cell {
 /* Profile Header Section */
 .profile-header-section {
     margin-bottom: 32px;
+    margin-top: 24px;
 }
 
 .profile-header-card {
@@ -4745,6 +4746,7 @@ body.light-mode .empty-message-hint {
         flex-direction: column;
         text-align: center;
         padding: 24px;
+        margin-top: 16px;
     }
 
     .profile-username {
@@ -5452,7 +5454,8 @@ body.light-mode .skeleton {
     }
 
     .profile-stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
     .notifications-dropdown {
@@ -5654,6 +5657,29 @@ body.light-mode .modal-header h2 {
     box-shadow: 0 0 20px rgba(0, 255, 133, 0.3);
 }
 
+/* Username Input */
+.username-input {
+    width: 100%;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.username-input:focus {
+    outline: none;
+    border-color: var(--neon);
+    box-shadow: 0 0 0 3px rgba(0, 255, 133, 0.1);
+}
+
+.username-input::placeholder {
+    color: var(--text-secondary);
+}
+
 /* Bio Textarea */
 .bio-textarea {
     width: 100%;
@@ -5690,6 +5716,11 @@ body.light-mode .modal-content {
     background: var(--white);
 }
 
+body.light-mode .username-input {
+    background: var(--gray-100);
+    color: var(--black);
+}
+
 body.light-mode .bio-textarea {
     background: var(--gray-100);
     color: var(--black);
@@ -5719,6 +5750,7 @@ body.light-mode .avatar-option {
 
 .profile-container {
     width: 100%;
+    padding-top: 20px;
 }
 
 .edit-profile-header {
@@ -5913,7 +5945,7 @@ body.light-mode .avatar-option {
     }
     
     .profile-container {
-        padding: 0 12px;
+        padding: 20px 12px 0;
     }
 }
 
@@ -5932,7 +5964,8 @@ body.light-mode .avatar-option {
 }
 
 .main-container {
-    margin-top: 64px !important;
+    margin-top: 200px !important;
+    padding-top: 32px;
 }
 
 /* Prevent icon floating bugs */

@@ -9,11 +9,15 @@ const EditProfile = () => {
   const { user, updateUser, fetchUser } = useAuth();
   const navigate = useNavigate();
   const [selectedAvatar, setSelectedAvatar] = useState('👤');
+  const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [savingAvatar, setSavingAvatar] = useState(false);
+  const [savingUsername, setSavingUsername] = useState(false);
   const [savingBio, setSavingBio] = useState(false);
   const [avatarSaved, setAvatarSaved] = useState(false);
+  const [usernameSaved, setUsernameSaved] = useState(false);
   const [bioSaved, setBioSaved] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const avatarOptions = [
     '😊', '😎', '🤓', '🥳', '🤩', 
@@ -24,12 +28,15 @@ const EditProfile = () => {
     '🦸', '🦹', '🧙', '🧚', '🧛'
   ];
 
+  // Initialize state only once when component mounts
   useEffect(() => {
-    if (user) {
+    if (user && !isInitialized) {
       setSelectedAvatar(user.avatar || '👤');
+      setUsername(user.username || '');
       setBio(user.bio || '');
+      setIsInitialized(true);
     }
-  }, [user]);
+  }, [user, isInitialized]);
 
   const handleSaveAvatar = async () => {
     setSavingAvatar(true);
@@ -48,6 +55,43 @@ const EditProfile = () => {
       alert('Failed to update avatar. Please try again.');
     } finally {
       setSavingAvatar(false);
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    if (!username.trim()) {
+      alert('Username cannot be empty');
+      return;
+    }
+    
+    if (username.trim() === user?.username) {
+      return;
+    }
+    
+    setSavingUsername(true);
+    setUsernameSaved(false);
+    try {
+      const response = await authAPI.updateProfile({
+        username: username.trim()
+      });
+
+      // Update the context immediately with the response data
+      if (response.data) {
+        updateUser(response.data);
+      }
+      
+      // Also refetch to ensure consistency
+      await fetchUser();
+      
+      setUsernameSaved(true);
+      setTimeout(() => setUsernameSaved(false), 3000);
+    } catch (error) {
+      console.error('Error updating username:', error);
+      alert(error.response?.data?.msg || 'Failed to update username. Please try again.');
+      // Reset to original username on error
+      setUsername(user?.username || '');
+    } finally {
+      setSavingUsername(false);
     }
   };
 
@@ -71,8 +115,11 @@ const EditProfile = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate('/profile');
+  const handleCancel = async () => {
+    // Ensure all changes are saved before navigating
+    await fetchUser();
+    // Navigate to profile page with user ID to force refresh
+    navigate(`/profile/${user?.id}`, { replace: true });
   };
 
   return (
@@ -117,6 +164,34 @@ const EditProfile = () => {
                 disabled={savingAvatar || selectedAvatar === user?.avatar}
               >
                 {savingAvatar ? '💾 Saving...' : avatarSaved ? '✓ Saved!' : '💾 Save Avatar'}
+              </button>
+            </div>
+          </section>
+
+          <section className="edit-section">
+            <div className="section-header">
+              <h2>👤 Username</h2>
+              <p className="section-description">Change your display name</p>
+            </div>
+            <input
+              type="text"
+              className="username-input"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setUsernameSaved(false);
+              }}
+              placeholder="Enter your username"
+              maxLength={30}
+            />
+            <div className="char-count">{username.length}/30 characters</div>
+            <div className="section-actions">
+              <button 
+                className="btn-primary" 
+                onClick={handleSaveUsername} 
+                disabled={savingUsername || username.trim() === user?.username}
+              >
+                {savingUsername ? '💾 Saving...' : usernameSaved ? '✓ Saved!' : '💾 Save Username'}
               </button>
             </div>
           </section>

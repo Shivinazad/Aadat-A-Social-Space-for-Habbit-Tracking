@@ -228,10 +228,19 @@ router.post('/login', async (req, res) => {
 // PUT /profile
 router.put('/profile', auth, async (req, res) => {
     try {
-        const { communities, avatar, bio } = req.body;
+        const { communities, avatar, bio, username } = req.body;
         const userId = req.user.id;
         const user = await User.findByPk(userId);
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
+
+        // Check if username is being updated and if it's already taken
+        if (username !== undefined && username !== user.username) {
+            const existingUser = await User.findOne({ where: { username } });
+            if (existingUser && existingUser.id !== userId) {
+                return res.status(409).json({ msg: 'Username already taken.' });
+            }
+            user.username = username;
+        }
 
         if (communities !== undefined) user.communities = communities;
         if (avatar !== undefined) user.avatar = avatar;
