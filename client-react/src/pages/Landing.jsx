@@ -411,7 +411,7 @@ const Landing = () => {
                 <div className="mini-streak">
                   <div className="streak-day active"></div>
                   <div className="streak-day active"></div>
-                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
                   <div className="streak-day"></div>
                   <div className="streak-day"></div>
                 </div>
@@ -434,7 +434,7 @@ const Landing = () => {
                   <div className="streak-day active"></div>
                   <div className="streak-day active"></div>
                   <div className="streak-day active"></div>
-                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
                   <div className="streak-day"></div>
                 </div>
               </div>
@@ -449,9 +449,31 @@ const Landing = () => {
             >
               <div className="timeline-marker"></div>
               <div className="timeline-content">
-                <div className="timeline-badge">Month 4+</div>
+                <div className="timeline-badge">Month 4-6</div>
                 <h3>Transformation</h3>
                 <p>It's not willpower anymore—it's who you are. You're inspiring others, achieving goals, and building the life you dreamed of.</p>
+                <div className="mini-streak">
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day active"></div>
+                  <div className="streak-day"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="timeline-item"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <div className="timeline-marker"></div>
+              <div className="timeline-content">
+                <div className="timeline-badge">6+ Months</div>
+                <h3>Mastery & Beyond</h3>
+                <p>You've become the best version of yourself. Your habits are automatic, your goals are exceeded, and you're leading others on their journey.</p>
                 <div className="mini-streak">
                   <div className="streak-day active"></div>
                   <div className="streak-day active"></div>
