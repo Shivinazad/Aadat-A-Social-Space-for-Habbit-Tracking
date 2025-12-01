@@ -9,13 +9,20 @@ import '../Login.css';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
   });
+  const [otpData, setOtpData] = useState({
+    otp: '',
+    email: ''
+  });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
   const [stats, setStats] = useState({ totalUsers: 0, totalHabits: 0, totalCheckins: 0 });
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const { login, register, isAuthenticated, loading: authLoading } = useAuth();
@@ -61,6 +68,16 @@ const Login = () => {
     }
   }, [isAuthenticated, authLoading, navigate]);
 
+  // OTP Timer countdown - MUST be before any conditional returns
+  useEffect(() => {
+    if (otpTimer > 0 && showOTPVerification) {
+      const interval = setInterval(() => {
+        setOtpTimer(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [otpTimer, showOTPVerification]);
+
   if (authLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -105,6 +122,7 @@ const Login = () => {
 
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       if (isLogin) {
@@ -114,12 +132,18 @@ const Login = () => {
         });
         navigate('/dashboard');
       } else {
-        await register({
+        // Send OTP for registration
+        const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
+        const response = await axios.post(`${API_BASE_URL}/api/users/register/send-otp`, {
           username: formData.username,
           email: formData.email,
           password: formData.password,
         });
-        navigate('/dashboard');
+        
+        setOtpData({ ...otpData, email: formData.email });
+        setShowOTPVerification(true);
+        setSuccess(response.data.message);
+        setOtpTimer(600); // 10 minutes in seconds
       }
     } catch (err) {
       console.error('Auth error:', err);
@@ -128,6 +152,73 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOTPVerify = async (e) => {
+    e.preventDefault();
+    
+    if (!otpData.otp || otpData.otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
+      const response = await axios.post(`${API_BASE_URL}/api/users/register/verify-otp`, {
+        email: otpData.email,
+        otp: otpData.otp,
+      });
+
+      // Store token and update auth context
+      localStorage.setItem('token', response.data.token);
+      setSuccess('Account created successfully!');
+      
+      // Navigate to dashboard after short delay
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      const errorMessage = err.response?.data?.message || err.response?.data?.msg || err.message || 'Invalid OTP. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
+      const response = await axios.post(`${API_BASE_URL}/api/users/register/resend-otp`, {
+        email: otpData.email,
+      });
+      
+      setSuccess(response.data.message);
+      setOtpTimer(600); // Reset timer to 10 minutes
+      setOtpData({ ...otpData, otp: '' }); // Clear OTP input
+
+    } catch (err) {
+      console.error('Resend OTP error:', err);
+      const errorMessage = err.response?.data?.message || err.response?.data?.msg || err.message || 'Failed to resend OTP.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -248,16 +339,184 @@ const Login = () => {
               </div>
 
               <div className="form-section active">
-                <div className="form-header">
-                  <h2>{isLogin ? 'Welcome back' : 'Create an account'}</h2>
-                  <p>
-                    {isLogin
-                      ? 'Enter your credentials to access your account'
-                      : 'Start building better habits today'}
-                  </p>
-                </div>
+                {showOTPVerification && !isLogin ? (
+                  // OTP Verification Form
+                  <>
+                    <div className="form-header">
+                      <h2>🔐 Verify Your Email</h2>
+                      <p>Enter the 6-digit code sent to {otpData.email}</p>
+                    </div>
 
-                <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleOTPVerify}>
+                      <motion.div
+                        className="input-group"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <label htmlFor="otp">Verification Code</label>
+                        <input
+                          type="text"
+                          id="otp"
+                          name="otp"
+                          placeholder="000000"
+                          value={otpData.otp}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setOtpData({ ...otpData, otp: value });
+                            setError('');
+                          }}
+                          maxLength={6}
+                          style={{ 
+                            fontSize: '24px', 
+                            letterSpacing: '8px', 
+                            textAlign: 'center',
+                            fontFamily: 'monospace',
+                            fontWeight: 'bold'
+                          }}
+                          required
+                          autoFocus
+                        />
+                        {otpTimer > 0 && (
+                          <div className="password-hint" style={{ color: '#00ff88', fontWeight: '600' }}>
+                            ⏱️ Code expires in {formatTime(otpTimer)}
+                          </div>
+                        )}
+                        {otpTimer === 0 && (
+                          <div className="password-hint" style={{ color: '#e53e3e', fontWeight: '600' }}>
+                            ⚠️ Code expired. Please request a new one.
+                          </div>
+                        )}
+                      </motion.div>
+
+                      <AnimatePresence mode="wait">
+                        {success && (
+                          <motion.div
+                            className="error-message"
+                            style={{
+                              color: '#00ff88',
+                              background: 'rgba(0, 255, 136, 0.1)',
+                              padding: '12px',
+                              borderRadius: '8px',
+                              marginBottom: '1rem',
+                              border: '1px solid rgba(0, 255, 136, 0.3)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                          >
+                            <FiCheck />
+                            {success}
+                          </motion.div>
+                        )}
+                        {error && (
+                          <motion.div
+                            className="error-message"
+                            style={{
+                              color: '#ff4444',
+                              background: 'rgba(255, 68, 68, 0.1)',
+                              padding: '12px',
+                              borderRadius: '8px',
+                              marginBottom: '1rem',
+                              border: '1px solid rgba(255, 68, 68, 0.3)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                          >
+                            <FiAlertCircle />
+                            {error}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <motion.button
+                        type="submit"
+                        className="btn-submit"
+                        disabled={loading || otpData.otp.length !== 6 || otpTimer === 0}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {loading ? (
+                          <>
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              style={{ display: 'inline-block' }}
+                            >
+                              ⏳
+                            </motion.div>
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            Verify & Create Account
+                            <FiCheck />
+                          </>
+                        )}
+                      </motion.button>
+
+                      <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleResendOTP}
+                          disabled={loading || otpTimer > 540}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: otpTimer > 540 ? '#999' : '#00ff88',
+                            cursor: otpTimer > 540 ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          {otpTimer > 540 ? 'Resend available in ' + formatTime(otpTimer - 540) : 'Resend Code'}
+                        </button>
+                        <span style={{ margin: '0 1rem', color: '#999' }}>|</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowOTPVerification(false);
+                            setOtpData({ otp: '', email: '' });
+                            setOtpTimer(0);
+                            setError('');
+                            setSuccess('');
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#999',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          Change Email
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                ) : (
+                  // Regular Login/Signup Form
+                  <>
+                    <div className="form-header">
+                      <h2>{isLogin ? 'Welcome back' : 'Create an account'}</h2>
+                      <p>
+                        {isLogin
+                          ? 'Enter your credentials to access your account'
+                          : 'Start building better habits today'}
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit}>
                   <AnimatePresence mode="wait">
                     {!isLogin && (
                       <motion.div
@@ -321,6 +580,28 @@ const Login = () => {
                   </motion.div>
 
                   <AnimatePresence mode="wait">
+                    {success && (
+                      <motion.div
+                        className="error-message"
+                        style={{
+                          color: '#00ff88',
+                          background: 'rgba(0, 255, 136, 0.1)',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          marginBottom: '1rem',
+                          border: '1px solid rgba(0, 255, 136, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        <FiCheck />
+                        {success}
+                      </motion.div>
+                    )}
                     {error && (
                       <motion.div
                         className="error-message"
@@ -381,11 +662,15 @@ const Login = () => {
                     )}
                   </motion.button>
                 </form>
+                </>
+                )}
               </div>
 
-              <div className="divider">
-                <span>Or continue with</span>
-              </div>
+              {!showOTPVerification && (
+                <>
+                  <div className="divider">
+                    <span>Or continue with</span>
+                  </div>
 
 
               <div className="social-buttons">
@@ -396,7 +681,6 @@ const Login = () => {
                     <motion.button
                       className="social-btn"
                       onClick={() => window.location.href = `${API_URL}/api/users/auth/google`}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -407,7 +691,6 @@ const Login = () => {
                     <motion.button
                       className="social-btn"
                       onClick={() => window.location.href = `${API_URL}/api/users/auth/github`}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -418,6 +701,8 @@ const Login = () => {
                   </>;
                 })()}
               </div>
+              </>
+              )}
             </div>
           </motion.div>
         </div>

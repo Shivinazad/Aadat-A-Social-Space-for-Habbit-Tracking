@@ -321,6 +321,195 @@ const sendInvitationEmail = async (toEmail, senderName) => {
     }
 };
 
+// Send OTP email
+const sendOTPEmail = async (toEmail, otp, username) => {
+    try {
+        const transporter = createTransporter();
+        
+        const mailOptions = {
+            from: `Aadat - Habit Tracker <${process.env.EMAIL_USER || 'noreply@aadat.com'}>`,
+            to: toEmail,
+            subject: `Your Aadat Verification Code: ${otp}`,
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #1a1a1a;
+                            background: #f5f7fa;
+                            padding: 40px 20px;
+                        }
+                        .email-wrapper {
+                            max-width: 500px;
+                            margin: 0 auto;
+                            background: #ffffff;
+                            border-radius: 16px;
+                            overflow: hidden;
+                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+                            padding: 30px;
+                            text-align: center;
+                            border-bottom: 4px solid #00ff88;
+                        }
+                        .logo {
+                            font-size: 32px;
+                            font-weight: 900;
+                            color: #ffffff;
+                            letter-spacing: -0.03em;
+                        }
+                        .neon-dot {
+                            display: inline-block;
+                            width: 8px;
+                            height: 8px;
+                            background: #00ff88;
+                            border-radius: 50%;
+                            margin-left: 4px;
+                            box-shadow: 0 0 15px #00ff88;
+                        }
+                        .content {
+                            padding: 40px 30px;
+                        }
+                        h1 {
+                            color: #000000;
+                            font-size: 24px;
+                            font-weight: 700;
+                            margin-bottom: 15px;
+                        }
+                        .greeting {
+                            color: #4a5568;
+                            font-size: 16px;
+                            margin-bottom: 30px;
+                        }
+                        .otp-container {
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            border-radius: 12px;
+                            padding: 30px;
+                            text-align: center;
+                            margin: 30px 0;
+                            border: 2px solid #00ff88;
+                        }
+                        .otp-label {
+                            color: #718096;
+                            font-size: 14px;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            margin-bottom: 15px;
+                            font-weight: 600;
+                        }
+                        .otp-code {
+                            font-size: 48px;
+                            font-weight: 900;
+                            color: #000000;
+                            letter-spacing: 8px;
+                            font-family: 'Courier New', monospace;
+                            text-shadow: 2px 2px 0px #00ff88;
+                        }
+                        .expiry-text {
+                            color: #e53e3e;
+                            font-size: 14px;
+                            margin-top: 15px;
+                            font-weight: 600;
+                        }
+                        .info-text {
+                            color: #4a5568;
+                            font-size: 15px;
+                            line-height: 1.8;
+                            margin: 20px 0;
+                        }
+                        .warning-box {
+                            background: #fff5f5;
+                            border-left: 4px solid #e53e3e;
+                            padding: 15px;
+                            margin: 25px 0;
+                            border-radius: 8px;
+                        }
+                        .warning-text {
+                            color: #c53030;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        .footer {
+                            background: #f8f9fa;
+                            padding: 25px 30px;
+                            text-align: center;
+                            border-top: 1px solid #e2e8f0;
+                        }
+                        .footer-text {
+                            color: #718096;
+                            font-size: 13px;
+                            margin: 5px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <div class="logo">
+                                Aadat<span class="neon-dot"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="content">
+                            <h1>🔐 Verify Your Email</h1>
+                            <p class="greeting">Hello ${username || 'there'}! Welcome to Aadat.</p>
+                            
+                            <p class="info-text">
+                                To complete your registration, please use the verification code below:
+                            </p>
+                            
+                            <div class="otp-container">
+                                <div class="otp-label">Your Verification Code</div>
+                                <div class="otp-code">${otp}</div>
+                                <div class="expiry-text">⏱️ Expires in 10 minutes</div>
+                            </div>
+                            
+                            <p class="info-text">
+                                Enter this code on the registration page to verify your email and activate your account.
+                            </p>
+                            
+                            <div class="warning-box">
+                                <p class="warning-text">🔒 Security Notice</p>
+                                <p style="color: #718096; font-size: 13px; margin-top: 8px;">
+                                    Never share this code with anyone. Aadat will never ask you for this code via email or phone.
+                                </p>
+                            </div>
+                            
+                            <p class="info-text">
+                                If you didn't request this code, please ignore this email or contact our support team.
+                            </p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p class="footer-text">This verification code was requested for your Aadat account</p>
+                            <p class="footer-text">Aadat · Build Better Habits Together</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
+        };
+        
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`OTP email sent successfully to ${toEmail}. Message ID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+        
+    } catch (error) {
+        console.error('Error sending OTP email:', error);
+        throw error;
+    }
+};
+
 module.exports = {
-    sendInvitationEmail
+    sendInvitationEmail,
+    sendOTPEmail
 };

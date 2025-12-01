@@ -96,6 +96,7 @@ app.get('/health', (req, res) => {
 const User = require('./models/User');
 const Habit = require('./models/Habit');
 const Post = require('./models/Post');
+const OTP = require('./models/OTP');
 
 app.get('/api/stats/public', async (req, res) => {
     try {
