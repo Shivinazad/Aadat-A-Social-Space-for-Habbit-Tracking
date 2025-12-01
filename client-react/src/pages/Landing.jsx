@@ -614,11 +614,7 @@ const Landing = () => {
               <FiArrowRight />
             </Link>
           </div>
-          <div className="cta-fine-print">
-            <span><FiCheck /> 14-day free trial</span>
-            <span><FiCheck /> No credit card required</span>
-            <span><FiCheck /> Cancel anytime</span>
-          </div>
+          
         </motion.div>
       </section>
 
