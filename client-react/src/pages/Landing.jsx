@@ -126,19 +126,9 @@ const Landing = () => {
             >
               {isDark ? <FiSun /> : <FiMoon />}
             </motion.button>
-            <Link
-              to="/login"
-              className="sign-in"
-              style={{
-                backgroundColor: 'var(--neon)',
-                color: 'var(--black)',
-                border: 'none',
-                fontWeight: '600',
-                borderRadius: '999px',
-                padding: '0.5rem 0.5rem'
-              }}
-            >
-              Sign Up
+            <Link to="/login" className="btn-primary-new">
+              Sign up
+              <FiArrowRight />
             </Link>
           </div>
         </div>
