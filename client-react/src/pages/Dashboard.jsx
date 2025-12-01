@@ -60,6 +60,12 @@ const Dashboard = () => {
   const fetchHabits = async () => {
     try {
       const response = await habitsAPI.getAll();
+      console.log('📋 Fetched habits:', response.data.map(h => ({ 
+        id: h.id, 
+        title: h.habitTitle, 
+        hasRoadmap: !!h.roadmap,
+        roadmapLength: h.roadmap ? (Array.isArray(h.roadmap) ? h.roadmap.length : 'not array') : 0
+      })));
       setHabits(response.data);
     } catch (error) {
       console.error('Failed to fetch habits:', error);

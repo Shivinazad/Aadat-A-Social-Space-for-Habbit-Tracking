@@ -85,8 +85,10 @@ Return ONLY valid JSON (no markdown, no code blocks):
                     
                     // Clean up response
                     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                    roadmapData = JSON.parse(text);
-                    console.log('✅ Roadmap generated successfully');
+                    const parsedData = JSON.parse(text);
+                    // Extract the roadmap array from the response
+                    roadmapData = parsedData.roadmap || parsedData;
+                    console.log('✅ Roadmap generated successfully with', roadmapData.length, 'checkpoints');
                 }
             } catch (error) {
                 console.error('Failed to generate roadmap:', error.message);
