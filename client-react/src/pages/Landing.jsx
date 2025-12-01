@@ -636,19 +636,6 @@ const Landing = () => {
             <p>Build habits that actually stick</p>
           </motion.div>
           <motion.div
-            className="footer-links"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <a href="#">Product</a>
-            <a href="#">Pricing</a>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Support</a>
-          </motion.div>
-          <motion.div
             className="footer-bottom"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}

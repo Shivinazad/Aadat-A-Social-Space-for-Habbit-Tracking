@@ -782,6 +782,30 @@ const Dashboard = () => {
           </div>
         )
       }
+            {/* FOOTER */}
+      <footer className="footer-new">
+        <div className="footer-container">
+          <motion.div
+            className="footer-brand"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="brand-footer">Aadat<span className="neon-dot"></span></div>
+            <p>Build habits that actually stick</p>
+          </motion.div>
+          <motion.div
+            className="footer-bottom"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <span>© 2025 Aadat. All rights reserved.</span>
+          </motion.div>
+        </div>
+      </footer>
 
       {/* Toast Notification */}
       {
