@@ -92,6 +92,7 @@ const Navbar = () => {
         <div className="nav-links-center">
           <Link to="/dashboard" className={`nav-link ${isActive('/dashboard')}`}>Dashboard</Link>
           <Link to="/community" className={`nav-link ${isActive('/community')}`}>Community</Link>
+          <Link to="/roadmap" className={`nav-link ${isActive('/roadmap')}`}>Roadmap</Link>
           <Link to="/leaderboard" className={`nav-link ${isActive('/leaderboard')}`}>Leaderboard</Link>
         </div>
         <div className="nav-icons">

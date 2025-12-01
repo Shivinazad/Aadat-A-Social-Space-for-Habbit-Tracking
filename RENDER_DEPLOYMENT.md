@@ -84,9 +84,10 @@ git push -u origin main
    JWT_SECRET = your_super_secret_jwt_key_change_this_12345
    NODE_ENV = production
    CLIENT_URL = https://aadat-app.onrender.com
+   GEMINI_API_KEY = AIzaSyBhxToLV029D32UUM4CKAQsnBoRwMrJNp8
    ```
    
-   Optional (for email invitations):
+   Optional (for email features):
    ```
    EMAIL_USER = your_email@gmail.com
    EMAIL_PASSWORD = your_gmail_app_password
@@ -141,11 +142,38 @@ Once deployment is successful:
    - [ ] Sign up works
    - [ ] Log in works
    - [ ] Can create a habit
+   - [ ] **Can generate AI roadmap** (click "🤖 Generate AI Roadmap")
+   - [ ] **View roadmap page** (/roadmap)
+   - [ ] **Complete checkpoints** in roadmap
    - [ ] Can check in to a habit
    - [ ] Community feed shows posts
    - [ ] Leaderboard displays
    - [ ] Profile page loads
    - [ ] Can invite a friend (if email configured)
+
+---
+
+## AI Features Included 🤖
+
+Your app now has powerful AI capabilities powered by Google Gemini:
+
+### 1. AI-Powered Habit Roadmaps
+- Click "Add Habit" and fill in the form
+- Click "🤖 Generate AI Roadmap" button
+- AI analyzes your goal and creates a personalized 6-checkpoint roadmap
+- Roadmaps include: milestones, action steps, resources, and tips
+- View and track progress on dedicated `/roadmap` page
+
+### 2. Background AI Jobs (Automatic)
+- **Daily Inactivity Emails (9 AM):** Sends funny reminders if users haven't logged in
+- **Goal Analysis Emails (10 AM):** AI analyzes habit performance and sends personalized insights
+
+### 3. Smart AI Prompts
+- AI respects user's current skill level (beginner/intermediate/advanced)
+- Provides specific resources with time estimates
+- Creates achievable milestones at Days 1, 5, 10, 15, 20, 25
+
+**Note:** The `GEMINI_API_KEY` is already included in the environment variables above.
 
 ---
 
