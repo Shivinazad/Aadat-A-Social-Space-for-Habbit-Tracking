@@ -15,6 +15,13 @@ const Landing = () => {
     totalCheckins: 0
   });
   const [recentActivities, setRecentActivities] = useState([]);
+  const [testimonialUsers, setTestimonialUsers] = useState([
+    { username: 'Loading...' },
+    { username: 'Loading...' },
+    { username: 'Loading...' },
+    { username: 'Loading...' },
+    { username: 'Loading...' }
+  ]);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -74,8 +81,22 @@ const Landing = () => {
       }
     };
 
+    // Fetch random users for testimonials
+    const fetchTestimonialUsers = async () => {
+      try {
+        const response = await api.get('/users/random?limit=5');
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          setTestimonialUsers(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch testimonial users:', error);
+        // Keep the initial placeholder state - don't set to empty array
+      }
+    };
+
     fetchStats();
     fetchActivities();
+    fetchTestimonialUsers();
     // Refresh activities every 30 seconds
     const interval = setInterval(fetchActivities, 30000);
     return () => clearInterval(interval);
@@ -513,73 +534,42 @@ const Landing = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="ticker-track">
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
+              {[
+                "Aadat completely transformed how I approach habit building. The streak tracking keeps me motivated every single day!",
+                "I went from 0 consistent habits to 5 active streaks in just 3 months. This app is a game changer!",
+                "The analytics dashboard shows me exactly what's working. Best feature ever for understanding my patterns!",
+                "The community features make accountability fun. I love celebrating wins with others on the platform!",
+                "Finally a habit tracker that actually sticks with me. The UI is clean and the features are exactly what I needed."
+              ].map((text, index) => (
+                <div key={`testimonial-${index}`} className="testimonial-card">
+                  <div className="stars">
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                  </div>
+                  <p>"{text}"</p>
+                  <span className="author">@{testimonialUsers[index]?.username || 'Loading...'}</span>
                 </div>
-                <p>"Finally broke my 2-year procrastination streak. This app changed everything."</p>
-                <span className="author">— James M.</span>
-              </div>
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                </div>
-                <p>"The community support is incredible. I've made real friends here."</p>
-                <span className="author">— Emily R.</span>
-              </div>
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                </div>
-                <p>"From 0 to 90-day streak. Best decision I made this year."</p>
-                <span className="author">— David K.</span>
-              </div>
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                </div>
-                <p>"Simple, beautiful, effective. Everything a habit tracker should be."</p>
-                <span className="author">— Lisa P.</span>
-              </div>
+              ))}
               {/* Duplicate for seamless loop */}
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
+              {[
+                "Aadat completely transformed how I approach habit building. The streak tracking keeps me motivated every single day!",
+                "I went from 0 consistent habits to 5 active streaks in just 3 months. This app is a game changer!"
+              ].map((text, index) => (
+                <div key={`testimonial-dup-${index}`} className="testimonial-card">
+                  <div className="stars">
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                    <FiStar className="star-filled" />
+                  </div>
+                  <p>"{text}"</p>
+                  <span className="author">@{testimonialUsers[index]?.username || 'Loading...'}</span>
                 </div>
-                <p>"Finally broke my 2-year procrastination streak. This app changed everything."</p>
-                <span className="author">— James M.</span>
-              </div>
-              <div className="testimonial-card">
-                <div className="stars">
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                  <FiStar className="star-filled" />
-                </div>
-                <p>"The community support is incredible. I've made real friends here."</p>
-                <span className="author">— Emily R.</span>
-              </div>
+              ))}
             </div>
           </motion.div>
         </div>

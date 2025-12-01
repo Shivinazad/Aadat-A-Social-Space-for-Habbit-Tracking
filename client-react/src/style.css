@@ -267,12 +267,12 @@ body.dark-mode .streak-day.active {
 }
 
 body.dark-mode .social-proof-section {
-  background: var(--gray-900) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
 }
 
 body.dark-mode .live-feed {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 body.dark-mode .feed-header {
@@ -296,16 +296,17 @@ body.dark-mode .feed-action {
 }
 
 body.dark-mode .testimonial-card {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 body.dark-mode .testimonial-card p {
-  color: var(--gray-300) !important;
+  color: var(--gray-200) !important;
 }
 
 body.dark-mode .testimonial-card .author {
-  color: var(--gray-500) !important;
+  color: var(--neon) !important;
+  font-weight: 700 !important;
 }
 
 body.dark-mode .feed-empty {
@@ -1477,10 +1478,6 @@ body.dark-mode .nav-link.active {
   will-change: transform;
 }
 
-.ticker-track:hover {
-  animation-play-state: paused;
-}
-
 @keyframes scroll {
   from {
     transform: translateX(0);
@@ -1843,7 +1840,7 @@ body.dark-mode .nav-link.active {
 .ticker-track {
   display: flex;
   gap: 2rem;
-  animation: ticker-scroll 30s linear infinite;
+  animation: ticker-scroll 20s linear infinite;
 }
 
 @keyframes ticker-scroll {

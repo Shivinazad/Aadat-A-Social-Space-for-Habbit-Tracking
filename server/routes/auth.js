@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const passport = require('../config/passport');
+const sequelize = require('../db');
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345';
@@ -203,6 +204,25 @@ router.get('/me/achievements', auth, async (req, res) => {
     } catch (error) {
         console.error('Error fetching user achievements:', error);
         res.status(500).json({ msg: 'Server error fetching achievements.' });
+    }
+});
+
+// GET /random - Get random users for testimonials
+// IMPORTANT: This must come BEFORE /:id route to avoid conflict
+router.get('/random', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5;
+        // Use RANDOM() for PostgreSQL (Render) and RAND() for MySQL (local)
+        const randomFunc = process.env.NODE_ENV === 'production' ? 'RANDOM()' : 'RAND()';
+        const users = await User.findAll({
+            attributes: ['username'],
+            order: sequelize.literal(randomFunc),
+            limit: limit
+        });
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching random users:', error);
+        res.status(500).json({ message: 'Failed to fetch users' });
     }
 });
 
