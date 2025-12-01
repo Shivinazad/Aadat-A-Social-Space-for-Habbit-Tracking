@@ -53,22 +53,21 @@ router.post('/register/send-otp', async (req, res) => {
             verified: false
         });
         
-        // Send OTP email
-        try {
-            await sendOTPEmail(email, otp, username);
-            res.status(200).json({ 
-                message: 'OTP sent successfully to your email.',
-                email: email
+        // Respond immediately to avoid timeout
+        res.status(200).json({ 
+            message: 'OTP sent to your email. Please check your inbox.',
+            email: email
+        });
+        
+        // Send OTP email asynchronously (non-blocking)
+        sendOTPEmail(email, otp, username)
+            .then(() => {
+                console.log(`✅ OTP email sent successfully to ${email}`);
+            })
+            .catch(emailError => {
+                console.error('❌ Email sending error:', emailError);
+                // Email failed but user can still proceed with OTP
             });
-        } catch (emailError) {
-            console.error('Email sending error:', emailError);
-            // Even if email fails, we've stored the OTP
-            res.status(200).json({ 
-                message: 'OTP generated. Check your email.',
-                email: email,
-                warning: 'Email service may be experiencing delays.'
-            });
-        }
         
     } catch (error) {
         console.error('Send OTP error:', error);

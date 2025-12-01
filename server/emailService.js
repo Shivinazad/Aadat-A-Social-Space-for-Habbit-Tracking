@@ -11,7 +11,11 @@ const createTransporter = () => {
         auth: {
             user: process.env.EMAIL_USER || 'your-email@gmail.com',
             pass: process.env.EMAIL_PASSWORD || 'your-app-password'
-        }
+        },
+        // Add timeout settings to prevent hanging
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 5000,    // 5 seconds
+        socketTimeout: 15000      // 15 seconds
     });
 };
 
