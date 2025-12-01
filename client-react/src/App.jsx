@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { useEffect } from 'react';
 import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
@@ -30,7 +31,9 @@ function App() {
             path="/dashboard" 
             element={
               <PrivateRoute>
-                <Dashboard />
+                <ErrorBoundary>
+                  <Dashboard />
+                </ErrorBoundary>
               </PrivateRoute>
             } 
           />
@@ -38,7 +41,9 @@ function App() {
             path="/community" 
             element={
               <PrivateRoute>
-                <Community />
+                <ErrorBoundary>
+                  <Community />
+                </ErrorBoundary>
               </PrivateRoute>
             } 
           />
@@ -46,7 +51,9 @@ function App() {
             path="/leaderboard" 
             element={
               <PrivateRoute>
-                <Leaderboard />
+                <ErrorBoundary>
+                  <Leaderboard />
+                </ErrorBoundary>
               </PrivateRoute>
             } 
           />
@@ -54,7 +61,9 @@ function App() {
             path="/profile" 
             element={
               <PrivateRoute>
-                <Profile />
+                <ErrorBoundary>
+                  <Profile />
+                </ErrorBoundary>
               </PrivateRoute>
             } 
           />
@@ -62,7 +71,9 @@ function App() {
             path="/profile/edit" 
             element={
               <PrivateRoute>
-                <EditProfile />
+                <ErrorBoundary>
+                  <EditProfile />
+                </ErrorBoundary>
               </PrivateRoute>
             } 
           />
@@ -70,7 +81,9 @@ function App() {
             path="/profile/:id"
             element={
               <PrivateRoute>
-                <Profile />
+                <ErrorBoundary>
+                  <Profile />
+                </ErrorBoundary>
               </PrivateRoute>
             }
           />

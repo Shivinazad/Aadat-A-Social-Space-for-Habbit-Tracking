@@ -151,9 +151,30 @@ const Navbar = () => {
       </div>
       {/* Mobile nav links dropdown */}
       <div className={`nav-links-mobile${mobileMenuOpen ? ' open' : ''}`}>
-        <Link to="/dashboard" className={`nav-link ${isActive('/dashboard')}`} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-        <Link to="/community" className={`nav-link ${isActive('/community')}`} onClick={() => setMobileMenuOpen(false)}>Community</Link>
-        <Link to="/leaderboard" className={`nav-link ${isActive('/leaderboard')}`} onClick={() => setMobileMenuOpen(false)}>Leaderboard</Link>
+        <Link 
+          to="/dashboard" 
+          className={`nav-link ${isActive('/dashboard')}`} 
+          onClick={() => setMobileMenuOpen(false)}
+          style={theme === 'light' ? { color: '#000000 !important' } : {}}
+        >
+          Dashboard
+        </Link>
+        <Link 
+          to="/community" 
+          className={`nav-link ${isActive('/community')}`} 
+          onClick={() => setMobileMenuOpen(false)}
+          style={theme === 'light' ? { color: '#000000 !important' } : {}}
+        >
+          Community
+        </Link>
+        <Link 
+          to="/leaderboard" 
+          className={`nav-link ${isActive('/leaderboard')}`} 
+          onClick={() => setMobileMenuOpen(false)}
+          style={theme === 'light' ? { color: '#000000 !important' } : {}}
+        >
+          Leaderboard
+        </Link>
       </div>
     </nav>
   );

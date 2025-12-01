@@ -9,6 +9,7 @@ import CountUp from 'react-countup';
 import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap } from 'react-icons/fi';
 import '../home.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
 
 const Dashboard = () => {
   const { user, updateUser, fetchUser } = useAuth();
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(null);
   const [showEditHabitModal, setShowEditHabitModal] = useState(false);
   const [editHabit, setEditHabit] = useState(null);
+  const [achievements, setAchievements] = useState([]);
 
   // Ensure user is loaded after OAuth login
   useEffect(() => {
@@ -41,6 +43,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchHabits();
     fetchWeeklyStats();
+    fetchAchievements();
   }, []);
 
   // Poll the authenticated user's profile periodically so UI (XP bar, level)
@@ -101,6 +104,26 @@ const Dashboard = () => {
       });
     } catch (error) {
       console.error('Failed to fetch weekly stats:', error);
+    }
+  };
+
+  const fetchAchievements = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/api/users/me/achievements`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAchievements(data);
+      }
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
     }
   };
 
@@ -304,6 +327,27 @@ const Dashboard = () => {
 
       <main className="main-container">
         <div className="content-wrapper">
+          {/* Mobile Header - Profile + Streak */}
+          <div className="mobile-header">
+            <div className="mobile-profile">
+              <div className="avatar-circle-mobile">{getAvatarElement()}</div>
+              <div className="mobile-profile-info">
+                <h3 className="mobile-profile-name">{user?.username}</h3>
+                <div className="mobile-level">
+                  <span className="mobile-level-badge">Level {user?.user_level}</span>
+                  <span className="mobile-xp">{user?.user_xp} XP</span>
+                </div>
+              </div>
+            </div>
+            <div className="mobile-streak">
+              <div className="streak-icon-mobile">🔥</div>
+              <div className="streak-info-mobile">
+                <div className="streak-number-mobile">{maxStreak}</div>
+                <div className="streak-label-mobile">Day Streak</div>
+              </div>
+            </div>
+          </div>
+
           {/* Left Column - Main Content */}
           <div className="main-column">
             {/* Welcome Section */}
@@ -470,8 +514,7 @@ const Dashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                         whileHover={{ 
-                          y: -4, 
-                          borderColor: isCheckedInToday ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 255, 255, 0.15)',
+                          y: -4,
                           transition: { duration: 0.2 } 
                         }}
                       >
@@ -725,18 +768,48 @@ const Dashboard = () => {
               </div>
 
               <div className="achievements-grid">
-                <div className="achievement-item locked">
-                  <span className="achievement-icon">🥉</span>
-                </div>
-                <div className="achievement-item unlocked">
-                  <span className="achievement-icon">🔥</span>
-                </div>
-                <div className="achievement-item locked">
-                  <span className="achievement-icon">⭐</span>
-                </div>
-                <div className="achievement-item locked">
-                  <span className="achievement-icon">🏆</span>
-                </div>
+                {achievements.length > 0 ? (
+                  achievements.slice(0, 4).map((achievement) => (
+                    <div 
+                      key={achievement.id} 
+                      className="achievement-item unlocked"
+                      title={`${achievement.displayName}: ${achievement.description}`}
+                    >
+                      <span className="achievement-icon">{achievement.icon}</span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="achievement-item locked" title="First Post - Share your first check-in">
+                      <span className="achievement-icon" style={{ opacity: 0.3 }}>🎉</span>
+                    </div>
+                    <div className="achievement-item locked" title="3-Day Streak - Maintain a 3-day streak">
+                      <span className="achievement-icon" style={{ opacity: 0.3 }}>🔥</span>
+                    </div>
+                    <div className="achievement-item locked" title="7-Day Streak - Maintain a 7-day streak">
+                      <span className="achievement-icon" style={{ opacity: 0.3 }}>⭐</span>
+                    </div>
+                    <div className="achievement-item locked" title="30-Day Streak - Maintain a 30-day streak">
+                      <span className="achievement-icon" style={{ opacity: 0.3 }}>🏆</span>
+                    </div>
+                  </>
+                )}
+                {achievements.length > 0 && achievements.length < 4 && (
+                  Array.from({ length: 4 - achievements.length }).map((_, i) => {
+                    const nextAchievements = [
+                      { icon: '🎉', title: 'First Post - Share your first check-in' },
+                      { icon: '🔥', title: '3-Day Streak - Maintain a 3-day streak' },
+                      { icon: '⭐', title: '7-Day Streak - Maintain a 7-day streak' },
+                      { icon: '🏆', title: '30-Day Streak - Maintain a 30-day streak' }
+                    ];
+                    const nextAch = nextAchievements[achievements.length + i];
+                    return (
+                      <div key={`locked-${i}`} className="achievement-item locked" title={nextAch?.title || 'Complete more tasks to unlock'}>
+                        <span className="achievement-icon" style={{ opacity: 0.3 }}>{nextAch?.icon || '🔒'}</span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
