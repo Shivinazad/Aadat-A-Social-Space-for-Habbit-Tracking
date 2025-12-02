@@ -6,6 +6,7 @@ import '../styles/AddHabitModal.css';
 
 const AddHabitModal = ({ isOpen, onClose, onSuccess }) => {
   const [habitTitle, setHabitTitle] = useState('');
+  const [habitCategory, setHabitCategory] = useState('');
   const [description, setDescription] = useState('');
   const [createRoadmap, setCreateRoadmap] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -29,13 +30,14 @@ const AddHabitModal = ({ isOpen, onClose, onSuccess }) => {
       // Create habit with roadmap flag
       await habitsAPI.create({
         habitTitle,
-        habitCategory: 'Personal',
+        habitCategory: habitCategory || 'Personal',
         description,
         generateRoadmap: createRoadmap,
       });
       
       // Reset form
       setHabitTitle('');
+      setHabitCategory('');
       setDescription('');
       setCreateRoadmap(false);
       
@@ -51,6 +53,7 @@ const AddHabitModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleClose = () => {
     setHabitTitle('');
+    setHabitCategory('');
     setDescription('');
     setCreateRoadmap(false);
     setError('');
@@ -102,6 +105,20 @@ const AddHabitModal = ({ isOpen, onClose, onSuccess }) => {
                   placeholder="e.g., Morning Run"
                   className="form-input-glass"
                   autoFocus
+                />
+              </div>
+
+              <div className="form-group-compact">
+                <label htmlFor="habitCategory">
+                  Category <span style={{ color: 'var(--gray-400)', fontWeight: '400' }}>(Optional)</span>
+                </label>
+                <input
+                  id="habitCategory"
+                  type="text"
+                  value={habitCategory}
+                  onChange={(e) => setHabitCategory(e.target.value)}
+                  placeholder="e.g., Fitness, Learning, Health"
+                  className="form-input-glass"
                 />
               </div>
 
