@@ -1749,15 +1749,17 @@ body.light-mode .streak-label {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 32px;
+    text-align: left;
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 24px;
     gap: 16px;
     flex-wrap: wrap;
+    text-align: left;
 }
 
 @media (max-width: 640px) {
@@ -1768,10 +1770,15 @@ body.light-mode .streak-label {
 }
 
 .section-header h2 {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
     margin-bottom: 4px;
     color: var(--text-primary);
+    text-align: left;
+}
+
+.section-header > div {
+    text-align: left;
 }
 
 .section-subtitle {
@@ -3738,7 +3745,7 @@ body.light-mode:not(.landing-page) .navbar {
 .empty-state-habits {
     text-align: center;
     padding: 60px 20px;
-    background: var(--bg-card);
+    background: transparent;
     border: 2px dashed var(--border-color);
     border-radius: var(--border-radius);
     margin: 20px 0;
@@ -3747,19 +3754,6 @@ body.light-mode:not(.landing-page) .navbar {
 .empty-icon-large {
     font-size: 80px;
     margin-bottom: 20px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
 }
 
 .empty-state-habits h3 {

@@ -352,10 +352,29 @@ const Dashboard = () => {
 
             {/* Today's Habits */}
             <section className="habits-section">
-              <div className="section-header">
-                <div>
-                  <h2>Today's Habits</h2>
-                  <p className="section-subtitle">Keep your momentum going</p>
+              <div className="section-header" style={{ 
+                marginBottom: '2rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ textAlign: 'left' }}>
+                  <h2 style={{ 
+                    fontSize: '2rem', 
+                    fontWeight: '900', 
+                    marginBottom: '0.5rem',
+                    letterSpacing: '-0.02em',
+                    color: 'var(--white)'
+                  }}>
+                    Today's Habits
+                  </h2>
+                  <p className="section-subtitle" style={{ 
+                    color: 'var(--gray-400)', 
+                    fontSize: '0.95rem',
+                    fontWeight: '400'
+                  }}>
+                    {habits.length === 0 ? 'Start tracking your daily habits' : 'Keep your momentum going'}
+                  </p>
                 </div>
                 <motion.button
                   onClick={() => setShowAddHabitModal(true)}
@@ -372,22 +391,44 @@ const Dashboard = () => {
                 {habits.length === 0 ? (
                   <motion.div
                     className="empty-state-habits"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4rem 2rem',
+                      textAlign: 'center',
+                      minHeight: '300px'
+                    }}
                   >
-                    <div className="empty-icon-large">🎯</div>
-                    <h3>No habits yet!</h3>
-                    <p>Start building better habits today. Add your first habit to get started.</p>
-                    <motion.button
-                      onClick={() => setShowAddHabitModal(true)}
-                      className="btn-primary empty-cta"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <FiPlus />
-                      Add Your First Habit
-                    </motion.button>
+                    <div style={{ 
+                      fontSize: '64px', 
+                      marginBottom: '1.5rem',
+                      opacity: 0.6,
+                      lineHeight: 1
+                    }}>
+                      ✨
+                    </div>
+                    <h3 style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: '700', 
+                      marginBottom: '0.75rem',
+                      color: 'var(--white)'
+                    }}>
+                      No habits yet
+                    </h3>
+                    <p style={{ 
+                      color: 'var(--gray-400)', 
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                      maxWidth: '420px',
+                      margin: '0 auto'
+                    }}>
+                      Ready to start your journey? Click the <strong style={{ color: 'var(--neon)' }}>Add Habit</strong> button above to create your first habit and begin building consistency.
+                    </p>
                   </motion.div>
                 ) : (
                   habits.map((habit, index) => {
