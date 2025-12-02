@@ -30,6 +30,8 @@ const Dashboard = () => {
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(null);
   const [showEditHabitModal, setShowEditHabitModal] = useState(false);
   const [editHabit, setEditHabit] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [habitToDelete, setHabitToDelete] = useState(null);
 
   // Ensure user is loaded after OAuth login
   useEffect(() => {
@@ -190,16 +192,21 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteHabit = async (habitId) => {
-    if (!window.confirm('Are you sure you want to delete this habit? This action cannot be undone.')) {
-      return;
-    }
+  const openDeleteModal = (habit) => {
+    setHabitToDelete(habit);
+    setShowDeleteModal(true);
+    setSettingsMenuOpen(null);
+  };
+
+  const handleDeleteHabit = async () => {
+    if (!habitToDelete) return;
 
     try {
-      await habitsAPI.delete(habitId);
+      await habitsAPI.delete(habitToDelete.id);
       // Remove roadmap progress from localStorage
-      localStorage.removeItem(`roadmap_progress_${habitId}`);
-      setSettingsMenuOpen(null);
+      localStorage.removeItem(`roadmap_progress_${habitToDelete.id}`);
+      setShowDeleteModal(false);
+      setHabitToDelete(null);
       showToast('Habit deleted successfully');
       fetchHabits();
     } catch (error) {
@@ -511,7 +518,7 @@ const Dashboard = () => {
                                 </button>
                                 <button
                                   className="settings-menu-item delete"
-                                  onClick={() => handleDeleteHabit(habit.id)}
+                                  onClick={() => openDeleteModal(habit)}
                                 >
                                   <FiTrash2 />
                                   Delete Habit
@@ -784,6 +791,113 @@ const Dashboard = () => {
           </div>
         )
       }
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && habitToDelete && (
+          <motion.div
+            className="modal-overlay open"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteModal(false)}
+          >
+            <motion.div
+              className="modal-content"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '420px' }}
+            >
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px'
+                  }}>
+                    🗑️
+                  </div>
+                  <div>
+                    <h2 style={{ marginBottom: '4px' }}>Delete Habit</h2>
+                    <p style={{ color: 'var(--gray-400)', fontSize: '0.9rem', margin: 0 }}>
+                      This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setShowDeleteModal(false)} className="modal-close">
+                  <FiX />
+                </button>
+              </div>
+              <div className="modal-body">
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '16px'
+                }}>
+                  <p style={{ 
+                    color: 'var(--white)', 
+                    fontSize: '1rem', 
+                    marginBottom: '8px',
+                    fontWeight: '600'
+                  }}>
+                    {habitToDelete.habitTitle}
+                  </p>
+                  {habitToDelete.habitCategory && (
+                    <span style={{
+                      fontSize: '0.75rem',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      background: 'rgba(0, 255, 136, 0.15)',
+                      color: 'var(--neon)',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {habitToDelete.habitCategory}
+                    </span>
+                  )}
+                </div>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                  Are you sure you want to delete this habit? All your progress, check-ins, and roadmap data will be permanently removed.
+                </p>
+              </div>
+              <div className="modal-footer" style={{ gap: '12px' }}>
+                <button 
+                  onClick={() => setShowDeleteModal(false)} 
+                  className="btn-secondary"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteHabit} 
+                  className="btn-primary"
+                  style={{ 
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                  }}
+                >
+                  <FiTrash2 style={{ marginRight: '8px' }} />
+                  Delete Habit
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
             {/* FOOTER */}
       <footer className="footer-new">
         <div className="footer-container">
