@@ -102,8 +102,8 @@
 .form-textarea-glass:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
 }
 
 .form-input-glass::placeholder,
@@ -147,7 +147,7 @@
   color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
 }
 
 .ai-badge {
@@ -157,6 +157,7 @@
   padding: 2px 8px;
   border-radius: 6px;
   font-weight: 600;
+  margin-left: auto;
 }
 
 .modal-actions-compact {
@@ -188,14 +189,15 @@
 }
 
 .btn-create-glass {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #00ff88 0%, #00d46a 100%);
+  color: #0a0f1a;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  font-weight: 600;
 }
 
 .btn-create-glass:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 255, 136, 0.4);
 }
 
 .btn-cancel-glass:disabled,
