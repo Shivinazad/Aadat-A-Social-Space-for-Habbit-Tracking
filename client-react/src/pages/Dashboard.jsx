@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { celebrateCheckIn } from '../utils/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
-import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap, FiMap } from 'react-icons/fi';
+import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap, FiMap, FiDownload } from 'react-icons/fi';
 import '../home.css';
 
 
@@ -243,6 +243,23 @@ const Dashboard = () => {
 
   const toggleSettingsMenu = (habitId) => {
     setSettingsMenuOpen(settingsMenuOpen === habitId ? null : habitId);
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await habitsAPI.exportCSV();
+      const url = URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my_habits.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Habits exported successfully! 📥');
+    } catch (error) {
+      showToast('Failed to export habits', 'error');
+    }
   };
 
   // Close settings menu when clicking outside
@@ -590,16 +607,18 @@ const Dashboard = () => {
 
                 <motion.div
                   className="action-card"
+                  onClick={handleExportCSV}
+                  style={{ cursor: 'pointer' }}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.4 }}
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 >
-                  <div className="action-icon"><FiTrendingUp /></div>
+                  <div className="action-icon"><FiDownload /></div>
                   <div className="action-content">
-                    <h3>View Analytics</h3>
-                    <p>Track your progress with detailed insights</p>
+                    <h3>Export Habits</h3>
+                    <p>Download your habits as a CSV file</p>
                   </div>
                   <FiArrowRight className="action-arrow" />
                 </motion.div>

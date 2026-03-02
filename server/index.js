@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs'); // Node.js built-in file system module
 const session = require('express-session');
 const passport = require('./config/passport');
 const sequelize = require('./db');
@@ -28,6 +29,17 @@ const PORT = process.env.PORT || 3000;
 // --- MIDDLEWARE ---
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({ extended: true }));
+
+// --- REQUEST LOGGER (fs module - createWriteStream) ---
+// Logs every incoming HTTP request to a file using a writable stream
+const logFilePath = path.join(__dirname, 'access.log');
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // 'a' = append mode
+
+app.use((req, res, next) => {
+    const logEntry = `[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip}\n`;
+    logStream.write(logEntry); // Write each request to access.log
+    next();
+});
 
 // Session middleware (required for passport)
 app.use(session({
@@ -89,6 +101,22 @@ initializeDb().then(() => {
 // --- HEALTH CHECK ENDPOINT ---
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// --- STREAM ACCESS LOG (fs module - createReadStream + pipe) ---
+// Streams the access.log file directly to the response using a readable stream
+app.get('/api/logs/stream', (req, res) => {
+    if (!fs.existsSync(logFilePath)) {
+        return res.status(404).json({ message: 'Log file does not exist yet.' });
+    }
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="access.log"');
+    const readStream = fs.createReadStream(logFilePath); // Create a readable stream from the file
+    readStream.on('error', (err) => {
+        console.error('Error streaming log file:', err);
+        res.status(500).json({ message: 'Failed to stream log file.' });
+    });
+    readStream.pipe(res); // Pipe the file stream directly into the HTTP response
 });
 
 // --- PUBLIC STATS ENDPOINT ---

@@ -67,6 +67,7 @@ export const habitsAPI = {
   update: (id, habitData) => api.put(`/habits/${id}`, habitData),
   delete: (id) => api.delete(`/habits/${id}`),
   generateRoadmap: (data) => api.post('/habits/generate-roadmap', data),
+  exportCSV: () => api.get('/habits/export', { responseType: 'blob' }),
 };
 
 // Posts API

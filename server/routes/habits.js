@@ -1,8 +1,49 @@
 const express = require('express');
+const fs = require('fs');   // Node.js built-in file system module
+const path = require('path'); // Node.js built-in path module
+const os = require('os');     // Node.js built-in OS module (for temp directory)
 const Habit = require('../models/Habit');
 const auth = require('../middleware/auth');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const router = express.Router();
+
+// GET /export - Export user's habits as a downloadable CSV (demonstrates file streaming)
+router.get('/export', auth, async (req, res) => {
+    try {
+        const habits = await Habit.findAll({ where: { userId: req.user.id }, order: [['createdAt', 'ASC']] });
+
+        // Build CSV content
+        const csvLines = ['ID,Title,Category,Current Streak,Created At'];
+        habits.forEach(h => {
+            const title = `"${(h.habitTitle || '').replace(/"/g, '""')}"`;
+            const category = `"${(h.habitCategory || '').replace(/"/g, '""')}"`;
+            csvLines.push(`${h.id},${title},${category},${h.currentStreak || 0},${h.createdAt}`);
+        });
+        const csvContent = csvLines.join('\n');
+
+        // Write CSV to a temporary file using fs (file module)
+        const tmpFile = path.join(os.tmpdir(), `habits_${req.user.id}_${Date.now()}.csv`);
+        fs.writeFileSync(tmpFile, csvContent, 'utf8');
+
+        // Set headers so browser treats it as a file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="my_habits.csv"');
+
+        // Stream the temp file back to the client using fs.createReadStream
+        const readStream = fs.createReadStream(tmpFile);
+        readStream.pipe(res); // Pipe readable stream into the HTTP response (file streaming)
+
+        // Clean up temp file once streaming is done
+        readStream.on('end', () => fs.unlink(tmpFile, () => {}));
+        readStream.on('error', (err) => {
+            console.error('Error streaming CSV:', err);
+            if (!res.headersSent) res.status(500).json({ msg: 'Failed to stream file.' });
+        });
+    } catch (error) {
+        console.error('Error exporting habits:', error);
+        return res.status(500).json({ msg: 'Server error exporting habits.' });
+    }
+});
 
 // GET /
 router.get('/', auth, async (req, res) => {
