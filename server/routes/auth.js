@@ -32,17 +32,13 @@ router.post('/register/send-otp', async (req, res) => {
             return res.status(409).json({ message: 'Username already taken.' });
         }
 
-        // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Hash password before storing
+
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
-        // Delete any existing OTP for this email
+
         await OTP.destroy({ where: { email } });
-        
-        // Store OTP with expiration (10 minutes)
+
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         await OTP.create({
             email,
@@ -52,21 +48,16 @@ router.post('/register/send-otp', async (req, res) => {
             expiresAt,
             verified: false
         });
-        
-        // Respond immediately to avoid timeout
-        res.status(200).json({ 
+
+        res.status(200).json({
             message: 'OTP sent to your email. Please check your inbox.',
             email: email
         });
-        
-        // Send OTP email asynchronously (non-blocking)
+
         sendOTPEmail(email, otp, username)
-            .then(() => {
-                console.log(`✅ OTP email sent successfully to ${email}`);
-            })
+            .then(() => {})
             .catch(emailError => {
-                console.error('❌ Email sending error:', emailError);
-                // Email failed but user can still proceed with OTP
+                console.error('Email sending error:', emailError);
             });
         
     } catch (error) {
@@ -84,8 +75,7 @@ router.post('/register/verify-otp', async (req, res) => {
             return res.status(400).json({ message: 'Email and OTP are required.' });
         }
 
-        // Find OTP record
-        const otpRecord = await OTP.findOne({ 
+        const otpRecord = await OTP.findOne({
             where: { email, otp, verified: false },
             order: [['createdAt', 'DESC']]
         });
@@ -94,23 +84,19 @@ router.post('/register/verify-otp', async (req, res) => {
             return res.status(400).json({ message: 'Invalid OTP code.' });
         }
 
-        // Check if OTP expired
         if (new Date() > otpRecord.expiresAt) {
             await OTP.destroy({ where: { email } });
             return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
         }
 
-        // Create user account
         const newUser = await User.create({
             username: otpRecord.username,
             email: otpRecord.email,
             password: otpRecord.password
         });
 
-        // Mark OTP as verified and delete
         await OTP.destroy({ where: { email } });
 
-        // Generate JWT token
         const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
 
         const userResponse = newUser.toJSON();
@@ -137,8 +123,7 @@ router.post('/register/resend-otp', async (req, res) => {
             return res.status(400).json({ message: 'Email is required.' });
         }
 
-        // Find existing OTP record
-        const existingOTP = await OTP.findOne({ 
+        const existingOTP = await OTP.findOne({
             where: { email, verified: false },
             order: [['createdAt', 'DESC']]
         });
@@ -147,15 +132,12 @@ router.post('/register/resend-otp', async (req, res) => {
             return res.status(404).json({ message: 'No pending registration found for this email.' });
         }
 
-        // Generate new OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Update OTP record
+
         existingOTP.otp = otp;
         existingOTP.expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         await existingOTP.save();
-        
-        // Send new OTP email
+
         try {
             await sendOTPEmail(email, otp, existingOTP.username);
             res.status(200).json({ message: 'New OTP sent successfully to your email.' });
@@ -173,7 +155,6 @@ router.post('/register/resend-otp', async (req, res) => {
     }
 });
 
-// POST /register (Keep old endpoint for backwards compatibility, but it will redirect to OTP flow)
 router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -185,10 +166,9 @@ router.post('/register', async (req, res) => {
             return res.status(409).json({ message: 'Email already in use.' });
         }
         
-        // Redirect to OTP flow
-        return res.status(400).json({ 
+        return res.status(400).json({
             message: 'Please use OTP verification for registration.',
-            requiresOTP: true 
+            requiresOTP: true
         });
     } catch (error) {
         console.error('Registration error:', error);
@@ -200,27 +180,22 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('Login attempt for email:', email);
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required.' });
         }
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            console.log('Invalid password for user:', email);
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
-        console.log('Login successful for user:', email);
         res.status(200).json({ message: 'Login successful!', token: token });
     } catch (error) {
         console.error('Login error:', error);
-        console.error('Error stack:', error.stack);
         res.status(500).json({ message: 'Server error during login.', error: error.message });
     }
 });
@@ -233,7 +208,6 @@ router.put('/profile', auth, async (req, res) => {
         const user = await User.findByPk(userId);
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
 
-        // Check if username is being updated and if it's already taken
         if (username !== undefined && username !== user.username) {
             const existingUser = await User.findOne({ where: { username } });
             if (existingUser && existingUser.id !== userId) {
@@ -287,9 +261,6 @@ router.get('/stats', auth, async (req, res) => {
 
         const habits = await Habit.findAll({ where: { userId } });
 
-        // Calculate current streak (max streak across all habits).
-        // If a habit's last check-in is older than yesterday, the streak is broken
-        // and should be reset to 0. Persist the reset so subsequent reads are correct.
         const yesterday = new Date();
         yesterday.setHours(0, 0, 0, 0);
         yesterday.setDate(yesterday.getDate() - 1);
@@ -301,7 +272,6 @@ router.get('/stats', auth, async (req, res) => {
                 const last = new Date(h.lastCheckinDate);
                 last.setHours(0, 0, 0, 0);
                 if (last.getTime() < yesterday.getTime()) {
-                    // Streak broken; reset and persist if needed
                     if (h.currentStreak !== 0) {
                         h.currentStreak = 0;
                         try { await h.save(); } catch (e) { console.error('Error saving habit streak reset:', e); }
@@ -331,7 +301,7 @@ router.get('/stats', auth, async (req, res) => {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        const totalPossibleCheckins = habits.length * 7; // 7 days * number of habits
+        const totalPossibleCheckins = habits.length * 7;
         const actualCheckins = await Completion.count({
             include: [{
                 model: Habit,
@@ -357,7 +327,6 @@ router.get('/stats', auth, async (req, res) => {
             totalCheckins: actualCheckins
         };
 
-        console.log('User stats for', userId, ':', statsData);
         res.status(200).json(statsData);
     } catch (error) {
         console.error('Error fetching user stats:', error);
@@ -380,12 +349,9 @@ router.get('/me/achievements', auth, async (req, res) => {
     }
 });
 
-// GET /random - Get random users for testimonials
-// IMPORTANT: This must come BEFORE /:id route to avoid conflict
 router.get('/random', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
-        // Use RANDOM() for PostgreSQL (Render) and RAND() for MySQL (local)
         const randomFunc = process.env.NODE_ENV === 'production' ? 'RANDOM()' : 'RAND()';
         const users = await User.findAll({
             attributes: ['username'],

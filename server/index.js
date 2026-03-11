@@ -1,15 +1,13 @@
-// Load environment variables (must be the first line)
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs'); // Node.js built-in file system module
+const fs = require('fs');
 const session = require('express-session');
 const passport = require('./config/passport');
 const sequelize = require('./db');
 
-// Import Route Handlers
 const authRoutes = require('./routes/auth');
 const habitRoutes = require('./routes/habits');
 const postRoutes = require('./routes/posts');
@@ -18,45 +16,34 @@ const notificationRoutes = require('./routes/notifications');
 const achievementRoutes = require('./routes/achievements');
 const inviteRoutes = require('./routes/invite');
 
-// Import Models (to ensure they are registered with Sequelize)
-// Note: Routes import them too, but good to be explicit or ensure sync works.
-// Since we use sequelize.sync(), we need to make sure all models are defined.
-// Requiring the routes should trigger model definitions as they require the models.
-// But to be safe, we can require them here or rely on routes.
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- MIDDLEWARE ---
-app.use(express.json()); // For parsing application/json
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- REQUEST LOGGER (fs module - createWriteStream) ---
-// Logs every incoming HTTP request to a file using a writable stream
 const logFilePath = path.join(__dirname, 'access.log');
-const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // 'a' = append mode
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
 app.use((req, res, next) => {
     const logEntry = `[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip}\n`;
-    logStream.write(logEntry); // Write each request to access.log
+    logStream.write(logEntry);
     next();
 });
 
-// Session middleware (required for passport)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
-// Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// --- CORS CONFIGURATION ---
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
@@ -70,20 +57,16 @@ app.use(cors({
     credentials: true
 }));
 
-// --- DATABASE INITIALIZATION ---
 async function initializeDb() {
     try {
         await sequelize.authenticate();
         const dbType = process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'MySQL';
-        console.log(`Successfully connected to the ${dbType} database! ✅`);
+        console.log(`Connected to ${dbType} database`);
 
-        // In development, force sync to create missing tables
         if (process.env.NODE_ENV === 'production') {
             await sequelize.sync({ alter: true });
-            console.log("All models were synchronized successfully. Sync mode: ALTER TABLE");
         } else {
-            await sequelize.sync({ force: false }); // force: true drops and recreates all tables, use with caution
-            console.log("All models were synchronized successfully. Sync mode: CREATE MISSING TABLES");
+            await sequelize.sync({ force: false });
         }
     } catch (error) {
         console.error('Unable to connect/sync database:', error);
@@ -91,42 +74,35 @@ async function initializeDb() {
     }
 }
 
-// Initialize DB and then start server
 initializeDb().then(() => {
     app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
+        console.log(`Server running on http://localhost:${PORT}`);
     });
 });
 
-// --- HEALTH CHECK ENDPOINT ---
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// --- STREAM ACCESS LOG (fs module - createReadStream + pipe) ---
-// Streams the access.log file directly to the response using a readable stream
 app.get('/api/logs/stream', (req, res) => {
     if (!fs.existsSync(logFilePath)) {
         return res.status(404).json({ message: 'Log file does not exist yet.' });
     }
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Content-Disposition', 'attachment; filename="access.log"');
-    const readStream = fs.createReadStream(logFilePath); // Create a readable stream from the file
+    const readStream = fs.createReadStream(logFilePath);
     readStream.on('error', (err) => {
         console.error('Error streaming log file:', err);
         res.status(500).json({ message: 'Failed to stream log file.' });
     });
-    readStream.pipe(res); // Pipe the file stream directly into the HTTP response
+    readStream.pipe(res);
 });
 
-// --- PUBLIC STATS ENDPOINT ---
-// Kept here for simplicity as it doesn't fit neatly into authenticated routes
 const User = require('./models/User');
 const Habit = require('./models/Habit');
 const Post = require('./models/Post');
 const OTP = require('./models/OTP');
 
-// Support both /api/stats/landing and /api/stats/public for compatibility
 app.get('/api/stats/landing', async (req, res) => {
     try {
         const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
@@ -163,9 +139,8 @@ app.get('/api/stats/public', async (req, res) => {
     }
 });
 
-// --- API ROUTES ---
 app.get('/api', (req, res) => {
-    res.json({ message: "Welcome to the Aadat API! 🎉", version: "1.0.0" });
+    res.json({ message: "Welcome to the Aadat API", version: "1.0.0" });
 });
 
 app.use('/api/users', authRoutes);
@@ -176,13 +151,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/invite', inviteRoutes);
 
-// --- SERVE STATIC FILES IN PRODUCTION ---
 if (process.env.NODE_ENV === 'production') {
-    // Serve any static files
     app.use(express.static(path.join(__dirname, '../client-react/dist')));
-
-    // Handle React routing, return all requests to React app
-    // Use Regex to match all routes that are not API routes (though API routes are handled above)
     app.get(/.*/, (req, res) => {
         res.sendFile(path.join(__dirname, '../client-react/dist', 'index.html'));
     });

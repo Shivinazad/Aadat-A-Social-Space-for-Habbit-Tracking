@@ -1,12 +1,18 @@
-// server/emailService.js
 const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 
-// Initialize SendGrid with API key
 if (process.env.SENDGRID_API_KEY) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
-// Send invitation email using SendGrid HTTP API
+const createGmailTransport = () => nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
 const sendInvitationEmail = async (toEmail, senderName) => {
     try {
         const senderEmail = process.env.SENDGRID_SENDER_EMAIL || 'noreply@yourdomain.com';
@@ -307,9 +313,25 @@ const sendInvitationEmail = async (toEmail, senderName) => {
             `
         };
         
-        const result = await sgMail.send(msg);
-        console.log(`✅ Invitation email sent to ${toEmail} via SendGrid HTTP API`);
-        return { success: true, messageId: result[0].headers['x-message-id'] };
+        if (process.env.SENDGRID_API_KEY) {
+            const result = await sgMail.send(msg);
+            console.log(`✅ Invitation email sent to ${toEmail} via SendGrid`);
+            return { success: true, messageId: result[0].headers['x-message-id'] };
+        } else if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+            const transporter = createGmailTransport();
+            const gmailMsg = {
+                from: `"Aadat" <${process.env.EMAIL_USER}>`,
+                to: msg.to,
+                subject: msg.subject,
+                text: msg.text,
+                html: msg.html
+            };
+            const info = await transporter.sendMail(gmailMsg);
+            console.log(`✅ Invitation email sent to ${toEmail} via Gmail`);
+            return { success: true, messageId: info.messageId };
+        } else {
+            throw new Error('No email service configured (set SENDGRID_API_KEY or EMAIL_USER/EMAIL_PASSWORD)');
+        }
         
     } catch (error) {
         console.error('❌ Error sending invitation email:', error);
@@ -320,7 +342,6 @@ const sendInvitationEmail = async (toEmail, senderName) => {
     }
 };
 
-// Send OTP email using SendGrid HTTP API
 const sendOTPEmail = async (toEmail, otp, username) => {
     try {
         const senderEmail = process.env.SENDGRID_SENDER_EMAIL || 'noreply@yourdomain.com';
@@ -503,9 +524,25 @@ const sendOTPEmail = async (toEmail, otp, username) => {
             `
         };
         
-        const result = await sgMail.send(msg);
-        console.log(`✅ OTP email sent to ${toEmail} via SendGrid HTTP API`);
-        return { success: true, messageId: result[0].headers['x-message-id'] };
+        if (process.env.SENDGRID_API_KEY) {
+            const result = await sgMail.send(msg);
+            console.log(`✅ OTP email sent to ${toEmail} via SendGrid`);
+            return { success: true, messageId: result[0].headers['x-message-id'] };
+        } else if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+            const transporter = createGmailTransport();
+            const gmailMsg = {
+                from: `"Aadat" <${process.env.EMAIL_USER}>`,
+                to: msg.to,
+                subject: msg.subject,
+                text: msg.text,
+                html: msg.html
+            };
+            const info = await transporter.sendMail(gmailMsg);
+            console.log(`✅ OTP email sent to ${toEmail} via Gmail`);
+            return { success: true, messageId: info.messageId };
+        } else {
+            throw new Error('No email service configured (set SENDGRID_API_KEY or EMAIL_USER/EMAIL_PASSWORD)');
+        }
         
     } catch (error) {
         console.error('❌ Error sending OTP email:', error);

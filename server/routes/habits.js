@@ -1,18 +1,16 @@
 const express = require('express');
-const fs = require('fs');   // Node.js built-in file system module
-const path = require('path'); // Node.js built-in path module
-const os = require('os');     // Node.js built-in OS module (for temp directory)
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const Habit = require('../models/Habit');
 const auth = require('../middleware/auth');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const router = express.Router();
 
-// GET /export - Export user's habits as a downloadable CSV (demonstrates file streaming)
 router.get('/export', auth, async (req, res) => {
     try {
         const habits = await Habit.findAll({ where: { userId: req.user.id }, order: [['createdAt', 'ASC']] });
 
-        // Build CSV content
         const csvLines = ['ID,Title,Category,Current Streak,Created At'];
         habits.forEach(h => {
             const title = `"${(h.habitTitle || '').replace(/"/g, '""')}"`;
@@ -21,19 +19,15 @@ router.get('/export', auth, async (req, res) => {
         });
         const csvContent = csvLines.join('\n');
 
-        // Write CSV to a temporary file using fs (file module)
         const tmpFile = path.join(os.tmpdir(), `habits_${req.user.id}_${Date.now()}.csv`);
         fs.writeFileSync(tmpFile, csvContent, 'utf8');
 
-        // Set headers so browser treats it as a file download
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename="my_habits.csv"');
 
-        // Stream the temp file back to the client using fs.createReadStream
         const readStream = fs.createReadStream(tmpFile);
-        readStream.pipe(res); // Pipe readable stream into the HTTP response (file streaming)
+        readStream.pipe(res);
 
-        // Clean up temp file once streaming is done
         readStream.on('end', () => fs.unlink(tmpFile, () => {}));
         readStream.on('error', (err) => {
             console.error('Error streaming CSV:', err);
@@ -75,7 +69,6 @@ router.post('/', auth, async (req, res) => {
             try {
                 const apiKey = process.env.GEMINI_API_KEY;
                 if (apiKey) {
-                    console.log('🤖 Generating roadmap for habit:', habitTitle);
                     const genAI = new GoogleGenerativeAI(apiKey);
                     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
@@ -124,16 +117,12 @@ Return ONLY valid JSON (no markdown, no code blocks):
                     const response = result.response;
                     let text = response.text();
                     
-                    // Clean up response
                     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
                     const parsedData = JSON.parse(text);
-                    // Extract the roadmap array from the response
                     roadmapData = parsedData.roadmap || parsedData;
-                    console.log('✅ Roadmap generated successfully with', roadmapData.length, 'checkpoints');
                 }
             } catch (error) {
                 console.error('Failed to generate roadmap:', error.message);
-                // Continue creating habit without roadmap
             }
         }
 
@@ -153,29 +142,22 @@ Return ONLY valid JSON (no markdown, no code blocks):
     }
 });
 
-// POST /generate-roadmap - Generate AI roadmap
 router.post('/generate-roadmap', auth, async (req, res) => {
     const { description, habitTitle } = req.body;
-    
-    console.log('🤖 Generating roadmap for:', { habitTitle, description: description?.substring(0, 50) });
-    
+
     if (!description) {
         return res.status(400).json({ msg: 'Habit description is required for AI generation.' });
     }
 
     try {
         const apiKey = process.env.GEMINI_API_KEY;
-        console.log('✓ API key exists:', !!apiKey);
-        
+
         if (!apiKey) {
-            return res.status(500).json({ msg: 'AI service not configured. Please add GEMINI_API_KEY to environment variables.' });
+            return res.status(500).json({ msg: 'AI service not configured.' });
         }
 
-        console.log('✓ Creating Gemini AI instance...');
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-        console.log('✓ Sending request to Gemini...');
         const prompt = `You are an expert habit-building coach. A user wants to build this habit: "${habitTitle}"
 
 User's current situation and goal:
@@ -218,30 +200,18 @@ Return ONLY valid JSON (no markdown, no code blocks):
 }`;
 
         const result = await model.generateContent(prompt);
-        console.log('✓ Received response from Gemini');
-        
         const response = result.response;
         let text = response.text();
-        console.log('✓ Response text length:', text.length);
-        
-        // Clean up response - remove markdown code blocks if present
+
         text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        
-        console.log('✓ Parsing JSON...');
         const roadmapData = JSON.parse(text);
-        console.log('✓ Successfully parsed roadmap with', roadmapData.roadmap?.length, 'checkpoints');
-        
+
         return res.status(200).json(roadmapData);
     } catch (error) {
-        console.error('❌ Error generating roadmap:', error);
-        console.error('❌ Error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-        return res.status(500).json({ 
+        console.error('Error generating roadmap:', error);
+        return res.status(500).json({
             msg: 'Failed to generate roadmap. Please try again.',
-            error: error.message 
+            error: error.message
         });
     }
 });

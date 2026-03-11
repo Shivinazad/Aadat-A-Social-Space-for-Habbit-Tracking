@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      setLoading(true); // Ensure loading is true while fetching user
+      setLoading(true);
       fetchUser();
     } else {
       setLoading(false);
@@ -54,8 +54,6 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      console.log('Register response:', response.data);
-      // Auto-login after registration
       return await login({ email: userData.email, password: userData.password });
     } catch (error) {
       console.error('Register error:', error);

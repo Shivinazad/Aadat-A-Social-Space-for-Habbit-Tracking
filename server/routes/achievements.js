@@ -43,17 +43,4 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// GET /users/me/achievements - Get user's unlocked achievements
-// Note: In index.js this was /api/users/me/achievements.
-// If I mount this router at /api/achievements, this route becomes /api/achievements/users/me/achievements.
-// The frontend expects /api/users/me/achievements.
-// I should probably move this route to `auth.js` (users routes) or handle it here and mount it differently.
-// Since it's strictly about achievements, maybe I should keep it here but change the path to just `/me`?
-// If I mount it at `/api/achievements`, then `/me` becomes `/api/achievements/me`.
-// The frontend calls `/api/users/me/achievements`.
-// I will move this route to `auth.js` (or `users.js`) OR I will keep it here and change the frontend (which I shouldn't do if I can avoid it).
-// Actually, `auth.js` handles `/api/users`. So `/me/achievements` fits there as a sub-resource of user.
-// But it's also achievement related.
-// I'll put it in `auth.js` to keep the URL structure `/api/users/...`.
-
 module.exports = router;

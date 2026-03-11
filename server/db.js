@@ -1,5 +1,3 @@
-// server/db.js
-
 const { Sequelize } = require('sequelize');
 
 const isProduction = process.env.NODE_ENV === 'production';

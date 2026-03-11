@@ -10,47 +10,34 @@ router.post('/', auth, async (req, res) => {
         const { email } = req.body;
         const sender = await User.findByPk(req.user.id);
 
-        console.log(`🔍 DEBUG - User ID from token: ${req.user.id}`);
-        console.log(`🔍 DEBUG - Sender from DB:`, { id: sender?.id, username: sender?.username, email: sender?.email });
-
         if (!email) {
             return res.status(400).json({ msg: 'Email address is required.' });
         }
 
-        // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({ msg: 'Invalid email address.' });
         }
 
-        // Check if user already exists with this email
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return res.status(409).json({ msg: 'This user is already on Aadat!' });
         }
 
-        // Check if email credentials are configured (SendGrid or Gmail)
         const emailConfigured = process.env.SENDGRID_API_KEY || (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD);
 
         if (emailConfigured) {
-            // Send the invitation email
             try {
-                console.log(`📤 Sending invitation from user ID: ${req.user.id}, username: ${sender.username}`);
                 await sendInvitationEmail(email, sender.username);
-                console.log(`✅ Invitation email sent from ${sender.username} to ${email}`);
-
                 res.status(200).json({
-                    message: `Invitation sent to ${email}! 📧`,
+                    message: `Invitation sent to ${email}!`,
                     invitedEmail: email,
                     invitedBy: sender.username,
                     emailSent: true
                 });
             } catch (emailError) {
-                console.error('❌ Email sending failed:', emailError.message || emailError);
-
-                // Provide fallback with shareable link
+                console.error('Email sending failed:', emailError.message || emailError);
                 const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
-
                 res.status(200).json({
                     message: `Email service unavailable. Here's your invite link for ${email}`,
                     invitedEmail: email,
@@ -60,13 +47,9 @@ router.post('/', auth, async (req, res) => {
                 });
             }
         } else {
-            // Email not configured - provide shareable link
-            console.log(`📋 Invite link generated: ${sender.username} → ${email} (email service not configured)`);
-
             const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
-
             res.status(200).json({
-                message: `Invite link created for ${email}! 🔗`,
+                message: `Invite link created for ${email}!`,
                 invitedEmail: email,
                 invitedBy: sender.username,
                 inviteLink: `${inviteLink}?invited_by=${encodeURIComponent(sender.username)}`,

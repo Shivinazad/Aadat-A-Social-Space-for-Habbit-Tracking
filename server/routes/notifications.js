@@ -19,7 +19,6 @@ router.get('/', auth, async (req, res) => {
             }]
         });
 
-        // Map to include sender username
         const notificationsWithSender = notifications.map(notification => ({
             id: notification.id,
             type: notification.type,

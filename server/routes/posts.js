@@ -191,7 +191,6 @@ router.get('/', auth, async (req, res) => {
         const userLikes = await Like.findAll({ where: { userId: userId }, attributes: ['postId'] });
         const likedPostIds = new Set(userLikes.map(like => like.postId));
 
-        // Get like counts for all posts
         const postsWithLikeStatus = await Promise.all(posts.map(async (postInstance) => {
             const post = postInstance.get({ plain: true });
             const likeCount = await Like.count({ where: { postId: post.id } });
@@ -215,11 +214,6 @@ router.get('/user/:userId', auth, async (req, res) => {
         const targetUserId = parseInt(req.params.userId);
         const currentUserId = req.user.id;
 
-        console.log('=== FETCHING USER POSTS ===');
-        console.log('Target user ID:', targetUserId);
-        console.log('Current user ID:', currentUserId);
-
-        // Fetch posts for the target user
         const posts = await Post.findAll({
             where: { userId: targetUserId },
             order: [['createdAt', 'DESC']],
@@ -229,16 +223,13 @@ router.get('/user/:userId', auth, async (req, res) => {
             ]
         });
 
-        console.log(`Found ${posts.length} posts for user ${targetUserId}`);
 
-        // Add like information
         const userLikes = await Like.findAll({
             where: { userId: currentUserId },
             attributes: ['postId']
         });
         const likedPostIds = new Set(userLikes.map(like => like.postId));
 
-        // Get like counts for all posts
         const postsWithLikeStatus = await Promise.all(posts.map(async (postInstance) => {
             const post = postInstance.get({ plain: true });
             const likeCount = await Like.count({ where: { postId: post.id } });
@@ -252,7 +243,6 @@ router.get('/user/:userId', auth, async (req, res) => {
         return res.status(200).json(postsWithLikeStatus);
     } catch (error) {
         console.error('Error fetching user posts:', error);
-        console.error('Full error:', error);
         return res.status(500).json({ msg: 'Server error fetching user posts.' });
     }
 });
@@ -271,12 +261,11 @@ router.post('/:id/like', auth, async (req, res) => {
             return res.status(404).json({ msg: 'Post not found.' });
         }
         await Like.create({ userId: likerUserId, postId: postId });
-        const author = await User.findByPk(post.userId); // Ensure post model includes userId
+        const author = await User.findByPk(post.userId);
         if (author) {
-            author.user_xp += 5; // Award XP
+            author.user_xp += 5;
             await author.save();
 
-            // Create notification for post author (if not liking own post)
             if (likerUserId !== post.userId) {
                 const liker = await User.findByPk(likerUserId);
                 await Notification.create({
