@@ -227,23 +227,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👥 Authors
-
-- **Your Name** - Initial work
-
-## 🙏 Acknowledgments
-
-- Inspired by habit tracking apps like Habitica, Streaks, and Done
-- Design inspiration from modern SaaS landing pages
-- Community features inspired by social platforms
 
 ## 📧 Support
 
-For support, email your.email@example.com or create an issue in the repository.
+For support, email shivinazad3@gmail.com or create an issue in the repository.
 
 ---
 
