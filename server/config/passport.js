@@ -2,15 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
 const { UserMongo } = require('../models-mongo');
-
-const engine = 'mongo';
-const isMongo = () => engine === 'mongo';
-
-const findUserById = (id) => (isMongo() ? UserMongo.findById(id) : User.findByPk(id));
-const findUserByEmail = (email) => (isMongo() ? UserMongo.findOne({ email }) : User.findOne({ where: { email } }));
-const createUser = (payload) => (isMongo() ? UserMongo.create(payload) : User.create(payload));
 
 // Serialize user for session
 passport.serializeUser((user, done) => {
@@ -20,7 +12,7 @@ passport.serializeUser((user, done) => {
 // Deserialize user from session
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await findUserById(id);
+        const user = await UserMongo.findById(id);
         done(null, user);
     } catch (error) {
         done(error, null);
@@ -35,7 +27,7 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const email = profile.emails[0].value;
-        let user = await findUserByEmail(email);
+        let user = await UserMongo.findOne({ email });
 
         if (user) {
             return done(null, user);
@@ -43,7 +35,7 @@ passport.use(new GoogleStrategy({
             const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
-            user = await createUser({
+            user = await UserMongo.create({
                 username: profile.displayName || email.split('@')[0],
                 email,
                 password: hashedPassword,
@@ -69,7 +61,7 @@ passport.use(new GitHubStrategy({
             ? profile.emails.find(e => e.primary)?.value || profile.emails[0].value
             : `${profile.username}@github.com`;
 
-        let user = await findUserByEmail(email);
+        let user = await UserMongo.findOne({ email });
 
         if (user) {
             return done(null, user);
@@ -77,7 +69,7 @@ passport.use(new GitHubStrategy({
             const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
-            user = await createUser({
+            user = await UserMongo.create({
                 username: profile.username || profile.displayName || email.split('@')[0],
                 email: email,
                 password: hashedPassword,

@@ -1,7 +1,4 @@
 const express = require('express');
-const Achievement = require('../models/Achievement');
-const UserAchievement = require('../models/UserAchievement');
-const User = require('../models/User');
 const { AchievementMongo, UserAchievementMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const router = express.Router();

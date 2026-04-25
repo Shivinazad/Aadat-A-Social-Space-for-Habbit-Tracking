@@ -1,6 +1,4 @@
 const express = require('express');
-const Notification = require('../models/Notification');
-const User = require('../models/User');
 const { NotificationMongo, UserMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const { emitUserDataChanged } = require('../realtime/socketEvents');

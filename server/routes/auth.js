@@ -1,11 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const OTP = require('../models/OTP');
 const auth = require('../middleware/auth');
 const passport = require('../config/passport');
-const sequelize = require('../db');
 const { sendOTPEmail } = require('../emailService');
 const { getClientUrl } = require('../utils/urls');
 const { emitDataChanged, emitUserDataChanged } = require('../realtime/socketEvents');

@@ -1,5 +1,4 @@
 const express = require('express');
-const User = require('../models/User');
 const { UserMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const { sendInvitationEmail } = require('../emailService');

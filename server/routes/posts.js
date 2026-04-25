@@ -1,13 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Op } = require('sequelize');
-const Post = require('../models/Post');
-const User = require('../models/User');
-const Habit = require('../models/Habit');
-const Like = require('../models/Like');
-const Notification = require('../models/Notification');
-const Achievement = require('../models/Achievement');
-const UserAchievement = require('../models/UserAchievement');
 const auth = require('../middleware/auth');
 const { calculateLevel } = require('../utils/levelUtils');
 const { emitDataChanged, emitUserDataChanged } = require('../realtime/socketEvents');

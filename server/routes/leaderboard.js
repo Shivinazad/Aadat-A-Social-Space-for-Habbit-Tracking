@@ -1,6 +1,4 @@
 const express = require('express');
-const { Op } = require('sequelize');
-const User = require('../models/User');
 const { UserMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const router = express.Router();

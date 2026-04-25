@@ -2,7 +2,6 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const Habit = require('../models/Habit');
 const { HabitMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
