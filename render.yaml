@@ -8,7 +8,7 @@ services:
     name: aadat
     runtime: node
     plan: free
-    buildCommand: cd client-react && npm install && npm run build && cd ../server && npm install
+    buildCommand: cd client-react && npm install --include=dev && npm run build && cd ../server && npm install
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
