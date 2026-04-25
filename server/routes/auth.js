@@ -7,9 +7,55 @@ const auth = require('../middleware/auth');
 const passport = require('../config/passport');
 const sequelize = require('../db');
 const { sendOTPEmail } = require('../emailService');
+const { getClientUrl } = require('../utils/urls');
+const { emitDataChanged, emitUserDataChanged } = require('../realtime/socketEvents');
+const {
+    UserMongo,
+    HabitMongo,
+    OTPMongo,
+    CompletionMongo,
+    AchievementMongo,
+    UserAchievementMongo
+} = require('../models-mongo');
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key_12345';
+const JWT_SECRET = process.env.JWT_SECRET;
+const engine = 'mongo';
+
+const isMongo = () => engine === 'mongo';
+const getUserByEmail = (email) => (isMongo() ? UserMongo.findOne({ email }) : User.findOne({ where: { email } }));
+const getUserByUsername = (username) => (isMongo() ? UserMongo.findOne({ username }) : User.findOne({ where: { username } }));
+const getUserById = (userId) => (isMongo() ? UserMongo.findById(userId) : User.findByPk(userId));
+const createUser = (payload) => (isMongo() ? UserMongo.create(payload) : User.create(payload));
+const getAuthenticatedMongoUser = async (reqUser, projection) => {
+    if (!reqUser) {
+        return null;
+    }
+
+    let byId = null;
+    if (reqUser.id) {
+        const query = UserMongo.findById(reqUser.id);
+        byId = projection ? await query.select(projection) : await query;
+    }
+    if (byId) {
+        return byId;
+    }
+
+    if (reqUser.email) {
+        const query = UserMongo.findOne({ email: reqUser.email });
+        return projection ? query.select(projection) : query;
+    }
+
+    return null;
+};
+const deleteOtpsForEmail = (email) => (isMongo() ? OTPMongo.deleteMany({ email }) : OTP.destroy({ where: { email } }));
+const findOtpRecord = (email, otp) => (isMongo()
+    ? OTPMongo.findOne({ email, otp, verified: false }).sort({ createdAt: -1 })
+    : OTP.findOne({ where: { email, otp, verified: false }, order: [['createdAt', 'DESC']] }));
+const findPendingOtp = (email) => (isMongo()
+    ? OTPMongo.findOne({ email, verified: false }).sort({ createdAt: -1 })
+    : OTP.findOne({ where: { email, verified: false }, order: [['createdAt', 'DESC']] }));
+const saveOtpRecord = async (record) => (isMongo() ? record.save() : record.save());
 
 // POST /register/send-otp - Send OTP for registration
 router.post('/register/send-otp', async (req, res) => {
@@ -21,13 +67,12 @@ router.post('/register/send-otp', async (req, res) => {
         }
 
         // Check if email already exists
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await getUserByEmail(email);
         if (existingUser) {
             return res.status(409).json({ message: 'Email already in use.' });
         }
 
-        // Check if username already exists
-        const existingUsername = await User.findOne({ where: { username } });
+        const existingUsername = await getUserByUsername(username);
         if (existingUsername) {
             return res.status(409).json({ message: 'Username already taken.' });
         }
@@ -37,17 +82,12 @@ router.post('/register/send-otp', async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        await OTP.destroy({ where: { email } });
+        await deleteOtpsForEmail(email);
 
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await OTP.create({
-            email,
-            otp,
-            username,
-            password: hashedPassword,
-            expiresAt,
-            verified: false
-        });
+        await (isMongo()
+            ? OTPMongo.create({ email, otp, username, password: hashedPassword, expiresAt, verified: false })
+            : OTP.create({ email, otp, username, password: hashedPassword, expiresAt, verified: false }));
 
         res.status(200).json({
             message: 'OTP sent to your email. Please check your inbox.',
@@ -75,31 +115,32 @@ router.post('/register/verify-otp', async (req, res) => {
             return res.status(400).json({ message: 'Email and OTP are required.' });
         }
 
-        const otpRecord = await OTP.findOne({
-            where: { email, otp, verified: false },
-            order: [['createdAt', 'DESC']]
-        });
+        const otpRecord = await findOtpRecord(email, otp);
 
         if (!otpRecord) {
             return res.status(400).json({ message: 'Invalid OTP code.' });
         }
 
         if (new Date() > otpRecord.expiresAt) {
-            await OTP.destroy({ where: { email } });
+            await deleteOtpsForEmail(email);
             return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
         }
 
-        const newUser = await User.create({
+        const newUser = await createUser({
             username: otpRecord.username,
             email: otpRecord.email,
             password: otpRecord.password
         });
 
-        await OTP.destroy({ where: { email } });
+        await deleteOtpsForEmail(email);
 
-        const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign(
+            { id: newUser.id || newUser._id, email: newUser.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
 
-        const userResponse = newUser.toJSON();
+        const userResponse = isMongo() ? newUser.toObject() : newUser.toJSON();
         delete userResponse.password;
 
         res.status(201).json({ 
@@ -123,10 +164,7 @@ router.post('/register/resend-otp', async (req, res) => {
             return res.status(400).json({ message: 'Email is required.' });
         }
 
-        const existingOTP = await OTP.findOne({
-            where: { email, verified: false },
-            order: [['createdAt', 'DESC']]
-        });
+        const existingOTP = await findPendingOtp(email);
 
         if (!existingOTP) {
             return res.status(404).json({ message: 'No pending registration found for this email.' });
@@ -136,7 +174,7 @@ router.post('/register/resend-otp', async (req, res) => {
 
         existingOTP.otp = otp;
         existingOTP.expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await existingOTP.save();
+        await saveOtpRecord(existingOTP);
 
         try {
             await sendOTPEmail(email, otp, existingOTP.username);
@@ -161,7 +199,7 @@ router.post('/register', async (req, res) => {
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Username, email, and password are required.' });
         }
-        const existingUser = await User.findOne({ where: { email: email } });
+        const existingUser = await getUserByEmail(email);
         if (existingUser) {
             return res.status(409).json({ message: 'Email already in use.' });
         }
@@ -184,7 +222,7 @@ router.post('/login', async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required.' });
         }
-        const user = await User.findOne({ where: { email } });
+        const user = await getUserByEmail(email);
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
@@ -192,7 +230,7 @@ router.post('/login', async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid credentials.' });
         }
-        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user.id || user._id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
         res.status(200).json({ message: 'Login successful!', token: token });
     } catch (error) {
         console.error('Login error:', error);
@@ -205,12 +243,15 @@ router.put('/profile', auth, async (req, res) => {
     try {
         const { communities, avatar, bio, username } = req.body;
         const userId = req.user.id;
-        const user = await User.findByPk(userId);
+        const user = isMongo()
+            ? await getAuthenticatedMongoUser(req.user)
+            : await getUserById(userId);
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
 
         if (username !== undefined && username !== user.username) {
-            const existingUser = await User.findOne({ where: { username } });
-            if (existingUser && existingUser.id !== userId) {
+            const existingUser = await getUserByUsername(username);
+            const existingId = existingUser?.id || existingUser?._id;
+            if (existingUser && existingId.toString() !== userId.toString()) {
                 return res.status(409).json({ msg: 'Username already taken.' });
             }
             user.username = username;
@@ -221,6 +262,8 @@ router.put('/profile', auth, async (req, res) => {
         if (bio !== undefined) user.bio = bio;
 
         await user.save();
+        emitDataChanged({ scope: 'profile', action: 'updated', userId: (user.id || user._id).toString() });
+        emitUserDataChanged((user.id || user._id).toString(), { scope: 'profile', action: 'self-updated' });
         res.status(200).json({
             message: 'Profile updated successfully!',
             id: user.id,
@@ -242,7 +285,9 @@ router.put('/profile', auth, async (req, res) => {
 router.get('/me', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findByPk(userId, { attributes: ['id', 'username', 'email', 'user_level', 'user_xp', 'communities', 'avatar', 'bio'] });
+        const user = isMongo()
+            ? await getAuthenticatedMongoUser(req.user, 'username email user_level user_xp communities avatar bio')
+            : await User.findByPk(userId, { attributes: ['id', 'username', 'email', 'user_level', 'user_xp', 'communities', 'avatar', 'bio'] });
         if (!user) { return res.status(404).json({ msg: 'User not found.' }); }
         res.status(200).json(user);
     } catch (error) {
@@ -255,6 +300,54 @@ router.get('/me', auth, async (req, res) => {
 router.get('/stats', auth, async (req, res) => {
     try {
         const userId = req.user.id;
+
+        if (isMongo()) {
+            const currentUser = await getAuthenticatedMongoUser(req.user);
+            if (!currentUser) {
+                return res.status(404).json({ msg: 'User not found.' });
+            }
+
+            const mongoUserId = currentUser._id;
+            const habits = await HabitMongo.find({ userId: mongoUserId }).lean();
+            const habitIds = habits.map((habit) => habit._id);
+
+            const yesterday = new Date();
+            yesterday.setHours(0, 0, 0, 0);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const effectiveStreaks = habits.map((habit) => {
+                if (!habit.lastCheckinDate) {
+                    return 0;
+                }
+                const last = new Date(habit.lastCheckinDate);
+                last.setHours(0, 0, 0, 0);
+                return last.getTime() < yesterday.getTime() ? 0 : (habit.currentStreak || 0);
+            });
+
+            const currentStreak = effectiveStreaks.length > 0 ? Math.max(...effectiveStreaks) : 0;
+            const longestStreak = habits.length > 0 ? Math.max(...habits.map((habit) => habit.longestStreak || 0)) : 0;
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const actualCheckins = habitIds.length === 0
+                ? 0
+                : await CompletionMongo.countDocuments({
+                    HabitId: { $in: habitIds },
+                    date: { $gte: oneWeekAgo }
+                });
+            const totalPossibleCheckins = habits.length * 7;
+            const completionRate = totalPossibleCheckins > 0
+                ? Math.round((actualCheckins / totalPossibleCheckins) * 100)
+                : 0;
+
+            return res.status(200).json({
+                currentStreak,
+                longestStreak,
+                completionRate,
+                totalHabits: habits.length,
+                totalCheckins: actualCheckins
+            });
+        }
+
         const Habit = require('../models/Habit');
         const Completion = require('../models/Completion');
         const { Op } = require('sequelize');
@@ -338,6 +431,15 @@ router.get('/stats', auth, async (req, res) => {
 router.get('/me/achievements', auth, async (req, res) => {
     try {
         const userId = req.user.id;
+        if (isMongo()) {
+            const userAchievements = await UserAchievementMongo.find({ userId }).populate('achievementId', 'name displayName description icon').lean();
+            const achievements = userAchievements.map((entry) => ({
+                ...(entry.achievementId || {}),
+                unlockedAt: entry.unlockedAt
+            }));
+            return res.status(200).json(achievements);
+        }
+
         const Achievement = require('../models/Achievement');
         const userWithAchievements = await User.findByPk(userId, { include: [{ model: Achievement, through: { attributes: ['unlockedAt'] }, attributes: ['id', 'name', 'displayName', 'description', 'icon'] }] });
         if (!userWithAchievements) { return res.status(404).json({ msg: 'User not found.' }); }
@@ -353,6 +455,11 @@ router.get('/random', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
         const randomFunc = process.env.NODE_ENV === 'production' ? 'RANDOM()' : 'RAND()';
+        if (isMongo()) {
+            const users = await UserMongo.aggregate([{ $sample: { size: limit } }, { $project: { username: 1, _id: 0 } }]);
+            return res.json(users);
+        }
+
         const users = await User.findAll({
             attributes: ['username'],
             order: sequelize.literal(randomFunc),
@@ -479,20 +586,24 @@ router.get('/auth/google/callback',
     passport.authenticate('google', { session: false }),
     (req, res) => {
         try {
-            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            const frontendURL = getClientUrl();
             
             if (!req.user) {
                 return res.redirect(`${frontendURL}/login?error=google-auth-failed`);
             }
             
             // Generate JWT token for the user
-            const token = jwt.sign({ id: req.user.id, email: req.user.email }, JWT_SECRET, { expiresIn: '7d' });
+            const token = jwt.sign(
+                { id: req.user.id || req.user._id, email: req.user.email },
+                JWT_SECRET,
+                { expiresIn: '7d' }
+            );
             
             // Redirect to frontend with token
             res.redirect(`${frontendURL}/auth/callback?token=${token}`);
         } catch (error) {
             console.error('Error in Google OAuth callback:', error);
-            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            const frontendURL = getClientUrl();
             res.redirect(`${frontendURL}/login?error=auth-failed`);
         }
     }
@@ -508,20 +619,24 @@ router.get('/auth/github/callback',
     passport.authenticate('github', { session: false }),
     (req, res) => {
         try {
-            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            const frontendURL = getClientUrl();
             
             if (!req.user) {
                 return res.redirect(`${frontendURL}/login?error=github-auth-failed`);
             }
             
             // Generate JWT token for the user
-            const token = jwt.sign({ id: req.user.id, email: req.user.email }, JWT_SECRET, { expiresIn: '7d' });
+            const token = jwt.sign(
+                { id: req.user.id || req.user._id, email: req.user.email },
+                JWT_SECRET,
+                { expiresIn: '7d' }
+            );
             
             // Redirect to frontend with token
             res.redirect(`${frontendURL}/auth/callback?token=${token}`);
         } catch (error) {
             console.error('Error in GitHub OAuth callback:', error);
-            const frontendURL = process.env.CLIENT_URL || 'http://localhost:5173';
+            const frontendURL = getClientUrl();
             res.redirect(`${frontendURL}/login?error=auth-failed`);
         }
     }

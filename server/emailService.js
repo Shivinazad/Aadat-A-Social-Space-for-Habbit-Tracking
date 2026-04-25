@@ -1,5 +1,6 @@
 const sgMail = require('@sendgrid/mail');
 const nodemailer = require('nodemailer');
+const { getClientUrl } = require('./utils/urls');
 
 if (process.env.SENDGRID_API_KEY) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -25,7 +26,7 @@ const sendInvitationEmail = async (toEmail, senderName) => {
             },
             replyTo: senderEmail,
             subject: `${senderName} invited you to Aadat`,
-            text: `Hi there!\n\n${senderName} has invited you to join Aadat, a habit-tracking platform where you can build better habits together.\n\nJoin now: ${process.env.CLIENT_URL || 'http://localhost:5173'}\n\nBest regards,\nAadat Team`,
+            text: `Hi there!\n\n${senderName} has invited you to join Aadat, a habit-tracking platform where you can build better habits together.\n\nJoin now: ${getClientUrl()}\n\nBest regards,\nAadat Team`,
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -250,7 +251,7 @@ const sendInvitationEmail = async (toEmail, senderName) => {
                             
                             <!-- CTA Button -->
                             <div class="cta-container">
-                                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}?invited_by=${encodeURIComponent(senderName)}" class="cta-button">
+                                <a href="${getClientUrl()}?invited_by=${encodeURIComponent(senderName)}" class="cta-button">
                                     🚀 Join Aadat Now
                                 </a>
                             </div>

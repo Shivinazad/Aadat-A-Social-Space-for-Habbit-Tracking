@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiHeart, FiMessageCircle } from 'react-icons/fi';
+import { subscribeToDataChanges } from '../services/socket';
 import '../home.css';
 
 const Community = () => {
@@ -16,9 +17,23 @@ const Community = () => {
     completionRate: 0
   });
 
+  const getPostId = (post) => post?.id || post?._id;
+
   useEffect(() => {
     fetchPosts();
     fetchStats();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+      if (['posts', 'likes', 'habits'].includes(event.scope)) {
+        fetchPosts();
+        fetchStats();
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   const fetchPosts = async () => {
@@ -46,7 +61,7 @@ const Community = () => {
       await postsAPI.like(postId);
       // Update the post in the local state
       setPosts(posts.map(post => 
-        post.id === postId 
+        String(getPostId(post)) === String(postId)
           ? { 
               ...post, 
               isLikedByCurrentUser: true,
@@ -142,9 +157,11 @@ const Community = () => {
                 </div>
               ) : (
                 posts.map((post, index) => {
-                  const authorUsername = post.User?.username || 'Unknown User';
-                  const authorAvatar = post.User?.avatar || '👤';
-                  const habitTitle = post.Habit?.habitTitle || 'General Post';
+                  const author = post.userId || post.User;
+                  const habit = post.habitId || post.Habit;
+                  const authorUsername = author?.username || 'Unknown User';
+                  const authorAvatar = author?.avatar || '👤';
+                  const habitTitle = habit?.habitTitle || 'General Post';
                   const isLiked = post.isLikedByCurrentUser;
 
                   // Render avatar: show image if URL, emoji/text otherwise
@@ -164,7 +181,7 @@ const Community = () => {
 
                   return (
                     <motion.div 
-                      key={post.id} 
+                      key={getPostId(post)} 
                       className="post-card"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -176,8 +193,8 @@ const Community = () => {
                           <div className="post-avatar">{renderAvatar(authorAvatar)}</div>
                           <div className="post-meta">
                             <div className="post-author-name">
-                              {post.User ? (
-                                <Link to={`/profile/${post.User.id || post.User._id}`} className="author-link">{authorUsername}</Link>
+                              {author ? (
+                                <Link to={`/profile/${author.id || author._id}`} className="author-link">{authorUsername}</Link>
                               ) : (
                                 authorUsername
                               )}
@@ -198,7 +215,7 @@ const Community = () => {
                       <div className="post-actions">
                         <motion.button 
                           className={`btn-like ${isLiked ? 'liked' : ''}`}
-                          onClick={() => !isLiked && handleLike(post.id)}
+                          onClick={() => !isLiked && handleLike(getPostId(post))}
                           disabled={isLiked}
                           whileHover={{ scale: isLiked ? 1 : 1.05 }}
                           whileTap={{ scale: isLiked ? 1 : 0.95 }}

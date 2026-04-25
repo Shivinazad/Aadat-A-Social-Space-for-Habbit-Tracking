@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { habitsAPI } from '../services/api';
+import { subscribeToDataChanges } from '../services/socket';
 import RoadmapDisplay from '../components/RoadmapDisplay';
 import Navbar from '../components/Navbar';
 import { FiArrowLeft, FiMapPin, FiChevronDown } from 'react-icons/fi';
@@ -15,14 +16,27 @@ const Roadmap = () => {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const getHabitId = (habit) => habit?._id?.toString?.() || habit?.id?.toString?.() || habit?.id || habit?._id;
+
   useEffect(() => {
     fetchHabits();
   }, []);
 
   useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+      if (event.scope === 'habits') {
+        fetchHabits();
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
     // If habitId is provided, select that habit
     if (habitId && habits.length > 0) {
-      const habit = habits.find(h => h.id === parseInt(habitId));
+      const habit = habits.find(h => String(getHabitId(h)) === String(habitId));
       if (habit) {
         setSelectedHabit(habit);
       }
@@ -40,7 +54,7 @@ const Roadmap = () => {
       
       // Auto-select habit if habitId provided
       if (habitId) {
-        const habit = habitsWithRoadmaps.find(h => h.id === parseInt(habitId));
+        const habit = habitsWithRoadmaps.find(h => String(getHabitId(h)) === String(habitId));
         if (habit) {
           setSelectedHabit(habit);
         } else if (habitsWithRoadmaps.length > 0) {
@@ -60,7 +74,7 @@ const Roadmap = () => {
     setSelectedHabit(habit);
     setShowDropdown(false);
     // Update URL without full page reload
-    window.history.pushState({}, '', `/roadmap/${habit.id}`);
+    window.history.pushState({}, '', `/roadmap/${getHabitId(habit)}`);
   };
 
   if (loading) {
@@ -117,8 +131,8 @@ const Roadmap = () => {
           <div className="sidebar-habits-list">
             {habits.map((habit) => (
               <motion.div
-                key={habit.id}
-                className={`sidebar-habit-card ${selectedHabit?.id === habit.id ? 'active' : ''}`}
+                key={getHabitId(habit)}
+                className={`sidebar-habit-card ${String(getHabitId(selectedHabit)) === String(getHabitId(habit)) ? 'active' : ''}`}
                 onClick={() => handleHabitSelect(habit)}
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
@@ -133,7 +147,7 @@ const Roadmap = () => {
                     <span>{habit.roadmap?.length || 0} checkpoints</span>
                   </div>
                 </div>
-                {selectedHabit?.id === habit.id && (
+                {String(getHabitId(selectedHabit)) === String(getHabitId(habit)) && (
                   <div className="sidebar-active-indicator" />
                 )}
               </motion.div>
@@ -145,14 +159,14 @@ const Roadmap = () => {
         <div className="roadmap-main-area">
           {selectedHabit && (
             <motion.div
-              key={selectedHabit.id}
+              key={getHabitId(selectedHabit)}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
             >
               <RoadmapDisplay 
                 roadmap={selectedHabit.roadmap}
-                habitId={selectedHabit.id}
+                habitId={getHabitId(selectedHabit)}
                 aiDescription={selectedHabit.aiDescription}
               />
             </motion.div>

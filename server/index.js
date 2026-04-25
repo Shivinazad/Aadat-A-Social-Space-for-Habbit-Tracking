@@ -1,12 +1,17 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const { Server } = require('socket.io');
 const passport = require('./config/passport');
-const sequelize = require('./db');
+const connectMongo = require('./mongo/connectMongo');
+const defaultAchievements = require('./constants/defaultAchievements');
+const { setIo } = require('./realtime/socketEvents');
 
 const authRoutes = require('./routes/auth');
 const habitRoutes = require('./routes/habits');
@@ -15,19 +20,25 @@ const leaderboardRoutes = require('./routes/leaderboard');
 const notificationRoutes = require('./routes/notifications');
 const achievementRoutes = require('./routes/achievements');
 const inviteRoutes = require('./routes/invite');
+const { UserMongo, HabitMongo, PostMongo, AchievementMongo } = require('./models-mongo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+    console.error('FATAL: JWT_SECRET environment variable is not set.');
+    process.exit(1);
+}
+const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+const renderUrl = process.env.RENDER_EXTERNAL_URL || null;
+const isServerless = !!process.env.VERCEL;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const logFilePath = path.join(__dirname, 'access.log');
-const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
-
+// Request logging (stdout only — compatible with all hosts)
 app.use((req, res, next) => {
-    const logEntry = `[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip}\n`;
-    logStream.write(logEntry);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
 
@@ -48,7 +59,8 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
-    'https://aadat-app.onrender.com',
+    vercelUrl,
+    renderUrl,
     process.env.CLIENT_URL
 ].filter(Boolean);
 
@@ -59,85 +71,93 @@ app.use(cors({
 
 async function initializeDb() {
     try {
-        await sequelize.authenticate();
-        const dbType = process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'MySQL';
-        console.log(`Connected to ${dbType} database`);
-
-        if (process.env.NODE_ENV === 'production') {
-            await sequelize.sync({ alter: true });
-        } else {
-            await sequelize.sync({ force: false });
-        }
+        await connectMongo();
+        await Promise.all(defaultAchievements.map((achievement) =>
+            AchievementMongo.updateOne(
+                { name: achievement.name },
+                { $setOnInsert: achievement },
+                { upsert: true }
+            )
+        ));
+        console.log('Connected to MongoDB');
     } catch (error) {
-        console.error('Unable to connect/sync database:', error);
+        console.error('Unable to initialize database:', error);
         process.exit(1);
     }
 }
 
-initializeDb().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
+if (!isServerless) {
+    initializeDb().then(() => {
+        const server = http.createServer(app);
+        const io = new Server(server, {
+            cors: {
+                origin: allowedOrigins,
+                credentials: true
+            }
+        });
+
+        io.use((socket, next) => {
+            const authHeader = socket.handshake.headers?.authorization;
+            const bearerToken = authHeader && authHeader.startsWith('Bearer ')
+                ? authHeader.slice(7)
+                : null;
+            const token = socket.handshake.auth?.token || bearerToken;
+
+            if (!token) {
+                return next();
+            }
+
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded?.id) {
+                    socket.data.userId = decoded.id.toString();
+                }
+                return next();
+            } catch (_error) {
+                return next();
+            }
+        });
+
+        io.on('connection', (socket) => {
+            if (socket.data.userId) {
+                socket.join(`user:${socket.data.userId}`);
+            }
+        });
+
+        setIo(io);
+
+        server.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
     });
-});
+} else {
+    initializeDb();
+}
 
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/logs/stream', (req, res) => {
-    if (!fs.existsSync(logFilePath)) {
-        return res.status(404).json({ message: 'Log file does not exist yet.' });
-    }
-    res.setHeader('Content-Type', 'text/plain');
-    res.setHeader('Content-Disposition', 'attachment; filename="access.log"');
-    const readStream = fs.createReadStream(logFilePath);
-    readStream.on('error', (err) => {
-        console.error('Error streaming log file:', err);
-        res.status(500).json({ message: 'Failed to stream log file.' });
-    });
-    readStream.pipe(res);
-});
+const countUsers = () => UserMongo.countDocuments();
+const countHabits = () => HabitMongo.countDocuments();
+const countCheckins = () => PostMongo.countDocuments();
 
-const User = require('./models/User');
-const Habit = require('./models/Habit');
-const Post = require('./models/Post');
-const OTP = require('./models/OTP');
-
-app.get('/api/stats/landing', async (req, res) => {
+const handleStatsRequest = async (req, res) => {
     try {
         const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
-            User.count(),
-            Habit.count(),
-            Post.count()
+            countUsers(),
+            countHabits(),
+            countCheckins()
         ]);
-        res.json({
-            totalUsers,
-            totalHabits,
-            totalCheckins
-        });
+        res.json({ totalUsers, totalHabits, totalCheckins });
     } catch (error) {
         console.error('Error fetching public stats:', error);
         res.status(500).json({ message: 'Failed to fetch statistics' });
     }
-});
+};
 
-app.get('/api/stats/public', async (req, res) => {
-    try {
-        const [totalUsers, totalHabits, totalCheckins] = await Promise.all([
-            User.count(),
-            Habit.count(),
-            Post.count()
-        ]);
-        res.json({
-            totalUsers,
-            totalHabits,
-            totalCheckins
-        });
-    } catch (error) {
-        console.error('Error fetching public stats:', error);
-        res.status(500).json({ message: 'Failed to fetch statistics' });
-    }
-});
+app.get('/api/stats/landing', handleStatsRequest);
+app.get('/api/stats/public', handleStatsRequest);
 
 app.get('/api', (req, res) => {
     res.json({ message: "Welcome to the Aadat API", version: "1.0.0" });
@@ -157,3 +177,5 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, '../client-react/dist', 'index.html'));
     });
 }
+
+module.exports = app;

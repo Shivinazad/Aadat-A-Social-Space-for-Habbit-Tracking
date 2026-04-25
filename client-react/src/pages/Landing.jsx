@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiArrowRight, FiPlay, FiCheck, FiTrendingUp, FiUsers, FiAward, FiZap, FiSun, FiMoon, FiBell, FiTarget, FiActivity, FiStar } from 'react-icons/fi';
 import api from '../services/api';
+import { subscribeToDataChanges } from '../services/socket';
 
 const Landing = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -100,6 +101,43 @@ const Landing = () => {
     // Refresh activities every 30 seconds
     const interval = setInterval(fetchActivities, 30000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const refreshStats = async () => {
+      try {
+        const response = await api.get('/stats/public');
+        setStats(response.data);
+      } catch (error) {
+        console.error('Failed to refresh stats:', error);
+      }
+    };
+
+    const refreshActivities = async () => {
+      try {
+        const response = await api.get('/posts/recent?limit=5');
+        if (response.data && Array.isArray(response.data)) {
+          setRecentActivities(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to refresh activities:', error);
+      }
+    };
+
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+
+      if (['posts', 'likes'].includes(event.scope)) {
+        refreshActivities();
+        refreshStats();
+      }
+
+      if (event.scope === 'habits') {
+        refreshStats();
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -511,6 +549,8 @@ const Landing = () => {
             <div className="feed-items">
               {recentActivities.length > 0 ? (
                 recentActivities.map((activity, index) => {
+                  const author = activity.userId || activity.User;
+                  const habit = activity.habitId || activity.Habit;
                   const timeAgo = () => {
                     const seconds = Math.floor((new Date() - new Date(activity.createdAt)) / 1000);
                     if (seconds < 60) return `${seconds}s ago`;
@@ -532,10 +572,10 @@ const Landing = () => {
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
                     >
-                      <div className="feed-avatar">{getInitials(activity.User?.username || 'User')}</div>
+                      <div className="feed-avatar">{getInitials(author?.username || 'User')}</div>
                       <div className="feed-content">
-                        <span className="feed-name">{activity.User?.username || 'Anonymous'}</span>
-                        <span className="feed-action">{activity.content} {activity.Habit ? `on "${activity.Habit.habitTitle}"` : ''}</span>
+                        <span className="feed-name">{author?.username || 'Anonymous'}</span>
+                        <span className="feed-action">{activity.content} {habit ? `on "${habit.habitTitle}"` : ''}</span>
                       </div>
                       <span className="feed-time">{timeAgo()}</span>
                     </motion.div>

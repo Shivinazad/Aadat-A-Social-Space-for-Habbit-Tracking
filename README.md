@@ -22,8 +22,7 @@
 
 ### Prerequisites
 - Node.js 18+ 
-- MySQL (for local development)
-- PostgreSQL (for Render deployment)
+- MongoDB Atlas or local MongoDB
 
 ### Local Development
 
@@ -35,27 +34,21 @@ cd aadat-app
 
 2. **Set up the database**
 ```bash
-# Create MySQL database
-mysql -u root -p
-CREATE DATABASE aadat_db;
-exit
+# Create a MongoDB Atlas cluster or start local MongoDB
 ```
 
 3. **Configure environment variables**
 ```bash
 cd server
 cp .env.example .env
-# Edit .env with your database password
+# Edit .env with your MongoDB URI and app secrets
 ```
 
-4. **Install dependencies and seed database**
+4. **Install dependencies and start backend**
 ```bash
 # Install server dependencies
 cd server
 npm install
-
-# Seed achievements
-npm run seed
 
 # Start backend (Terminal 1)
 npm run dev
@@ -88,7 +81,8 @@ aadat-app/
 │   ├── package.json
 │   └── vite.config.js
 ├── server/               # Express backend
-│   ├── models/           # Sequelize models
+│   ├── models/           # Legacy Sequelize models kept during transition
+│   ├── models-mongo/     # MongoDB/Mongoose models
 │   │   ├── User.js
 │   │   ├── Habit.js
 │   │   ├── Post.js
@@ -100,7 +94,7 @@ aadat-app/
 │   ├── seed.js          # Database seeding
 │   └── package.json
 ├── DEPLOYMENT_PLAN.md   # Complete project plan
-├── RENDER_DEPLOYMENT.md # Render deployment guide
+├── vercel.json          # Vercel deployment config
 └── README.md            # This file
 ```
 
@@ -116,8 +110,9 @@ aadat-app/
 ### Backend
 - **Node.js** - Runtime
 - **Express 5** - Web framework
-- **Sequelize** - ORM
-- **MySQL/PostgreSQL** - Database
+- **MongoDB Atlas** - Production database
+- **Mongoose** - MongoDB ODM
+- **Sequelize** - Legacy ORM retained only for historical model files
 - **JWT** - Authentication
 - **Bcrypt** - Password hashing
 - **Nodemailer** - Email invitations
@@ -125,25 +120,25 @@ aadat-app/
 
 ## 🌐 Deployment
 
-### Deploy to Render (Free)
+### Deploy to Vercel
 
-Complete step-by-step guide available in [`RENDER_DEPLOYMENT.md`](./RENDER_DEPLOYMENT.md)
+Use MongoDB Atlas for the database and deploy the app through Vercel.
 
 Quick summary:
 1. Push code to GitHub
-2. Create PostgreSQL database on Render
-3. Create Web Service connected to your repo
-4. Set environment variables
-5. Deploy! 🚀
+2. Create a MongoDB Atlas cluster
+3. Set the server and client environment variables
+4. Deploy the repository to Vercel
+5. Verify `/health` and the `/api` routes
 
 Build Command:
 ```bash
-cd client-react && npm install && npm run build && cd ../server && npm install
+cd client-react && npm install && npm run build
 ```
 
 Start Command:
 ```bash
-cd server && npm start
+node server/index.js
 ```
 
 ## 📚 API Documentation
@@ -180,18 +175,26 @@ cd server && npm start
 
 ### Server (.env)
 ```env
-DATABASE_URL=<postgres-url>        # For production
-DB_NAME=aadat_db                   # For local MySQL
-DB_USER=root                       # For local MySQL
-DB_PASSWORD=your_password          # For local MySQL
-DB_HOST=localhost                  # For local MySQL
+MONGODB_URI=<mongo-atlas-uri>      # For MongoDB Atlas
+DB_ENGINE=mongo                    # Use MongoDB migration path
 JWT_SECRET=your_secret_key
 NODE_ENV=production
 PORT=3000
-CLIENT_URL=https://your-app.onrender.com
+CLIENT_URL=https://your-app.vercel.app
+GOOGLE_CALLBACK_URL=https://your-app.vercel.app/api/users/auth/google/callback
+GITHUB_CALLBACK_URL=https://your-app.vercel.app/api/users/auth/github/callback
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
 GEMINI_API_KEY=your_gemini_api_key
+```
+
+### Client (.env)
+```env
+VITE_API_BASE_URL=https://your-app.vercel.app
 ```
 
 ## 🧪 Testing

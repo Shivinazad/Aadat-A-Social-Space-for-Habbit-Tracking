@@ -8,6 +8,7 @@ import { celebrateCheckIn } from '../utils/confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiPlus, FiCheck, FiX, FiEdit2, FiTrash2, FiMoreVertical, FiArrowRight, FiTrendingUp, FiAward, FiUsers, FiZap, FiMap, FiDownload } from 'react-icons/fi';
+import { subscribeToDataChanges } from '../services/socket';
 import '../home.css';
 
 
@@ -33,6 +34,9 @@ const Dashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [habitToDelete, setHabitToDelete] = useState(null);
 
+  const getHabitId = (habit) => habit?._id?.toString?.() || habit?.id?.toString?.() || habit?.id || habit?._id;
+  const getUserId = (targetUser) => targetUser?.id || targetUser?._id;
+
   // Ensure user is loaded after OAuth login
   useEffect(() => {
     if (!user) {
@@ -45,25 +49,29 @@ const Dashboard = () => {
     fetchWeeklyStats();
   }, []);
 
-  // Poll the authenticated user's profile periodically so UI (XP bar, level)
-  // updates soon after server-side XP changes without requiring a full page reload.
   useEffect(() => {
-    // Only poll when user is present (authenticated)
-    if (!user?.id) return;
+    const currentUserId = getUserId(user);
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
 
-    const POLL_INTERVAL = 10000; // 10s
-    const interval = setInterval(() => {
-      fetchUser();
-    }, POLL_INTERVAL);
+      const isCurrentUserEvent = !event.userId || String(event.userId) === String(currentUserId);
+      if (!isCurrentUserEvent) return;
 
-    return () => clearInterval(interval);
-  }, [user?.id, fetchUser]);
+      if (['posts', 'likes', 'habits', 'dashboard', 'notifications'].includes(event.scope)) {
+        fetchHabits();
+        fetchWeeklyStats();
+        fetchUser();
+      }
+    });
+
+    return unsubscribe;
+  }, [user, fetchUser]);
 
   const fetchHabits = async () => {
     try {
       const response = await habitsAPI.getAll();
       console.log('📋 Fetched habits:', response.data.map(h => ({ 
-        id: h.id, 
+        id: getHabitId(h), 
         title: h.habitTitle, 
         hasRoadmap: !!h.roadmap,
         roadmapLength: h.roadmap ? (Array.isArray(h.roadmap) ? h.roadmap.length : 'not array') : 0
@@ -78,7 +86,8 @@ const Dashboard = () => {
 
   const fetchWeeklyStats = async () => {
     try {
-      if (!user?.id) {
+      const currentUserId = getUserId(user);
+      if (!currentUserId) {
         console.warn('User not loaded yet, skipping weekly stats fetch');
         return;
       }
@@ -90,13 +99,15 @@ const Dashboard = () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      const weeklyPosts = posts.filter(post =>
-        new Date(post.createdAt) >= oneWeekAgo &&
-        post.userId === user.id
-      );
+      const weeklyPosts = posts.filter(post => {
+        const postUserId = typeof post.userId === 'object'
+          ? (post.userId?._id || post.userId?.id || post.userId)
+          : post.userId;
+        return new Date(post.createdAt) >= oneWeekAgo && String(postUserId) === String(currentUserId);
+      });
 
       // Calculate unique habits completed this week
-      const uniqueHabits = new Set(weeklyPosts.map(post => post.habitId));
+      const uniqueHabits = new Set(weeklyPosts.map(post => String(post.habitId?._id || post.habitId?.id || post.habitId)));
       const totalHabits = habits.length;
       // If we don't yet know the user's habits, avoid reporting >100%.
       // When totalHabits is 0 (no habits), successRate should be 0.
@@ -132,7 +143,7 @@ const Dashboard = () => {
     try {
       await postsAPI.create({
         content: checkinContent,
-        habitId: currentHabit.id,
+        habitId: getHabitId(currentHabit),
       });
       setShowCheckinModal(false);
       celebrateCheckIn(); // Trigger celebration animation
@@ -202,9 +213,9 @@ const Dashboard = () => {
     if (!habitToDelete) return;
 
     try {
-      await habitsAPI.delete(habitToDelete.id);
+      await habitsAPI.delete(getHabitId(habitToDelete));
       // Remove roadmap progress from localStorage
-      localStorage.removeItem(`roadmap_progress_${habitToDelete.id}`);
+      localStorage.removeItem(`roadmap_progress_${getHabitId(habitToDelete)}`);
       setShowDeleteModal(false);
       setHabitToDelete(null);
       showToast('Habit deleted successfully');
@@ -215,7 +226,7 @@ const Dashboard = () => {
   };
 
   const openEditModal = (habit) => {
-    setEditHabit({ habitTitle: habit.habitTitle, habitCategory: habit.habitCategory || '', id: habit.id });
+    setEditHabit({ habitTitle: habit.habitTitle, habitCategory: habit.habitCategory || '', id: getHabitId(habit) });
     setShowEditHabitModal(true);
     setSettingsMenuOpen(null);
   };
@@ -228,7 +239,7 @@ const Dashboard = () => {
     }
 
     try {
-      await habitsAPI.update(editHabit.id, {
+      await habitsAPI.update(getHabitId(editHabit), {
         habitTitle: editHabit.habitTitle,
         habitCategory: editHabit.habitCategory
       });
@@ -456,6 +467,7 @@ const Dashboard = () => {
                   </motion.div>
                 ) : (
                   habits.map((habit, index) => {
+                    const habitId = getHabitId(habit);
                     const lastCheckin = habit.lastCheckinDate ? new Date(habit.lastCheckinDate) : null;
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -467,9 +479,9 @@ const Dashboard = () => {
 
                     return (
                       <motion.div
-                        key={habit.id}
+                        key={habitId}
                         className="habit-item"
-                        style={{ zIndex: settingsMenuOpen === habit.id ? 50 : 1, position: 'relative' }}
+                        style={{ zIndex: settingsMenuOpen === habitId ? 50 : 1, position: 'relative' }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -491,9 +503,9 @@ const Dashboard = () => {
                           )}
                         </div>
                         <span className="streak-count">🔥 {habit.currentStreak} days</span>
-                        {habit.roadmap && habit.roadmap.length > 0 && (
+                        {((Array.isArray(habit.roadmap) && habit.roadmap.length > 0) || (!Array.isArray(habit.roadmap) && habit.roadmap)) && (
                           <Link 
-                            to={`/roadmap/${habit.id}`} 
+                            to={`/roadmap/${habitId}`} 
                             className="btn btn-secondary btn-roadmap"
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -512,13 +524,13 @@ const Dashboard = () => {
                             className="settings-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleSettingsMenu(habit.id);
+                              toggleSettingsMenu(habitId);
                             }}
                           >
                             <FiMoreVertical />
                           </button>
                           <AnimatePresence>
-                            {settingsMenuOpen === habit.id && (
+                            {settingsMenuOpen === habitId && (
                               <motion.div
                                 className="settings-menu"
                                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
@@ -528,7 +540,7 @@ const Dashboard = () => {
                               >
                                 <button
                                   className="settings-menu-item"
-                                  onClick={() => openEditModal(habit)}
+                                    onClick={() => openEditModal(habit)}
                                 >
                                   <FiEdit2 />
                                   Edit Habit
@@ -656,7 +668,7 @@ const Dashboard = () => {
                 <div className="avatar-circle">{getAvatarElement()}</div>
                 <div className="profile-info">
                   <h3 className="profile-name">{user?.username}</h3>
-                  <Link to={`/profile/${user?.id}`} className="view-profile-link">View profile →</Link>
+                  <Link to={`/profile/${getUserId(user)}`} className="view-profile-link">View profile →</Link>
                 </div>
               </div>
 

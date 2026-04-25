@@ -29,9 +29,10 @@
    - Name: "Aadat Web Client"
    - Authorized JavaScript origins:
      - `http://localhost:5173`
-     - `http://localhost:3000`
+       - `https://your-app.vercel.app`
    - Authorized redirect URIs:
      - `http://localhost:3000/api/users/auth/google/callback`
+       - `https://your-app.vercel.app/api/users/auth/google/callback`
    - Click "Create"
 
 5. **Copy Credentials**:
@@ -50,7 +51,9 @@
    - Click "New OAuth App"
    - Application name: "Aadat"
    - Homepage URL: `http://localhost:5173`
+   - Homepage URL: `https://your-app.vercel.app`
    - Authorization callback URL: `http://localhost:3000/api/users/auth/github/callback`
+   - Authorization callback URL: `https://your-app.vercel.app/api/users/auth/github/callback`
    - Click "Register application"
 
 3. **Generate Client Secret**:
@@ -67,7 +70,7 @@
 
 ## Production Setup
 
-When deploying to production (e.g., Render):
+When deploying to production on Vercel:
 
 1. **Update Redirect URLs**:
    - Google Console: Add `https://your-domain.com/api/users/auth/google/callback`
@@ -78,7 +81,7 @@ When deploying to production (e.g., Render):
    - Update `GOOGLE_CALLBACK_URL` and `GITHUB_CALLBACK_URL` in env vars
 
 3. **Update Frontend**:
-   - In `Login.jsx`, update the OAuth button URLs to use the production API URL
+   - In `Login.jsx`, keep OAuth button URLs pointed at the shared API origin
 
 ## Testing
 

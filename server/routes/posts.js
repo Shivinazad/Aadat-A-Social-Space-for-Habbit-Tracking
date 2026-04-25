@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { Op } = require('sequelize');
 const Post = require('../models/Post');
 const User = require('../models/User');
@@ -9,12 +10,42 @@ const Achievement = require('../models/Achievement');
 const UserAchievement = require('../models/UserAchievement');
 const auth = require('../middleware/auth');
 const { calculateLevel } = require('../utils/levelUtils');
+const { emitDataChanged, emitUserDataChanged } = require('../realtime/socketEvents');
+const {
+    PostMongo,
+    UserMongo,
+    HabitMongo,
+    LikeMongo,
+    NotificationMongo,
+    AchievementMongo,
+    UserAchievementMongo
+} = require('../models-mongo');
 const router = express.Router();
+const engine = 'mongo';
+
+const isMongo = () => engine === 'mongo';
+const toStringId = (value) => (value && value.toString ? value.toString() : value);
+
+const populateRecentPostsMongo = (limit) => PostMongo.find()
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate('userId', 'id username')
+    .populate('habitId', 'id habitTitle');
+
+const populateFeedPostsMongo = () => PostMongo.find()
+    .sort({ createdAt: -1 })
+    .populate('userId', 'id username avatar')
+    .populate('habitId', 'id habitTitle');
 
 // GET /recent - Get Recent Posts (Public endpoint for landing page)
 router.get('/recent', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
+        if (isMongo()) {
+            const posts = await populateRecentPostsMongo(limit);
+            return res.status(200).json(posts);
+        }
+
         const posts = await Post.findAll({
             limit,
             order: [['createdAt', 'DESC']],
@@ -41,6 +72,17 @@ router.get('/stats/community', auth, async (req, res) => {
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+
+        if (isMongo()) {
+            const activeMembers = await HabitMongo.distinct('userId').then((ids) => ids.length);
+            const postsToday = await PostMongo.countDocuments({ createdAt: { $gte: today } });
+            const usersCheckedInToday = await PostMongo.distinct('userId', { createdAt: { $gte: today } }).then((ids) => ids.length);
+            const completionRate = activeMembers > 0
+                ? Math.round((usersCheckedInToday / activeMembers) * 100)
+                : 0;
+
+            return res.status(200).json({ activeMembers, postsToday, completionRate });
+        }
 
         // Count active members (users with at least one habit)
         const activeMembers = await User.count({
@@ -94,6 +136,92 @@ router.post('/', auth, async (req, res) => {
 
     let awardedAchievements = [];
     try {
+        if (isMongo()) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const existingCheckin = await PostMongo.findOne({
+                userId,
+                habitId,
+                createdAt: { $gte: today, $lt: tomorrow }
+            });
+
+            if (existingCheckin) {
+                return res.status(400).json({ msg: 'You can only check in once per day for each habit. Come back tomorrow! ⏰' });
+            }
+
+            const newPost = await PostMongo.create({ content, habitId, userId });
+            const habit = await HabitMongo.findById(habitId);
+            let currentStreak = 0;
+
+            if (habit && toStringId(habit.userId) === toStringId(userId)) {
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                if (habit.lastCheckinDate) {
+                    const lastCheckin = new Date(habit.lastCheckinDate);
+                    lastCheckin.setHours(0, 0, 0, 0);
+
+                    if (lastCheckin.getTime() === yesterday.getTime()) {
+                        habit.currentStreak += 1;
+                    } else if (lastCheckin.getTime() < yesterday.getTime()) {
+                        habit.currentStreak = 1;
+                    }
+                } else {
+                    habit.currentStreak = 1;
+                }
+
+                currentStreak = habit.currentStreak;
+                if (habit.currentStreak > habit.longestStreak) {
+                    habit.longestStreak = habit.currentStreak;
+                }
+                habit.lastCheckinDate = new Date();
+                await habit.save();
+            }
+
+            const user = await UserMongo.findById(userId);
+            if (user) {
+                user.user_xp += 10;
+                user.user_level = calculateLevel(user.user_xp);
+                await user.save();
+            }
+
+            try {
+                const firstPostAch = await AchievementMongo.findOne({ name: 'first_post' });
+                if (firstPostAch && !(await UserAchievementMongo.findOne({ userId, achievementId: firstPostAch._id }))) {
+                    await UserAchievementMongo.create({ userId, achievementId: firstPostAch._id });
+                    awardedAchievements.push(firstPostAch);
+                }
+
+                if (currentStreak >= 3) {
+                    const streak3Ach = await AchievementMongo.findOne({ name: 'streak_3_day' });
+                    if (streak3Ach && !(await UserAchievementMongo.findOne({ userId, achievementId: streak3Ach._id }))) {
+                        await UserAchievementMongo.create({ userId, achievementId: streak3Ach._id });
+                        awardedAchievements.push(streak3Ach);
+                    }
+                }
+            } catch (achieveError) {
+                console.error('Error checking/awarding achievements:', achieveError);
+            }
+
+            emitDataChanged({
+                scope: 'posts',
+                action: 'created',
+                postId: newPost._id?.toString?.(),
+                habitId: toStringId(habitId),
+                userId: toStringId(userId)
+            });
+            emitUserDataChanged(userId, {
+                scope: 'dashboard',
+                action: 'checkin-created',
+                habitId: toStringId(habitId)
+            });
+
+            return res.status(201).json({ message: 'Check-in successful!', post: newPost, habit, awardedAchievements });
+        }
+
         // Check if user already checked in today for this habit
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -170,6 +298,19 @@ router.post('/', auth, async (req, res) => {
             }
         } catch (achieveError) { console.error("Error checking/awarding achievements:", achieveError); }
 
+        emitDataChanged({
+            scope: 'posts',
+            action: 'created',
+            postId: newPost.id,
+            habitId: habitId,
+            userId: userId
+        });
+        emitUserDataChanged(userId, {
+            scope: 'dashboard',
+            action: 'checkin-created',
+            habitId: habitId
+        });
+
         return res.status(201).json({ message: 'Check-in successful!', post: newPost, habit: habit, awardedAchievements: awardedAchievements });
     } catch (error) {
         console.error('Error creating post:', error);
@@ -181,6 +322,24 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     try {
         const userId = req.user.id;
+        if (isMongo()) {
+            const posts = await populateFeedPostsMongo();
+            const userLikes = await LikeMongo.find({ userId }, { postId: 1 }).lean();
+            const likedPostIds = new Set(userLikes.map((like) => toStringId(like.postId)));
+
+            const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
+                const plain = post.toObject();
+                const likeCount = await LikeMongo.countDocuments({ postId: plain._id });
+                return {
+                    ...plain,
+                    isLikedByCurrentUser: likedPostIds.has(toStringId(plain._id)),
+                    likeCount
+                };
+            }));
+
+            return res.status(200).json(postsWithLikeStatus);
+        }
+
         const posts = await Post.findAll({
             order: [['createdAt', 'DESC']],
             include: [
@@ -211,8 +370,30 @@ router.get('/', auth, async (req, res) => {
 // GET /user/:userId - Get Posts for a specific user
 router.get('/user/:userId', auth, async (req, res) => {
     try {
-        const targetUserId = parseInt(req.params.userId);
+        const targetUserId = req.params.userId;
         const currentUserId = req.user.id;
+
+        if (isMongo()) {
+            const posts = await PostMongo.find({ userId: targetUserId })
+                .sort({ createdAt: -1 })
+                .populate('userId', 'id username avatar')
+                .populate('habitId', 'id habitTitle');
+
+            const userLikes = await LikeMongo.find({ userId: currentUserId }, { postId: 1 }).lean();
+            const likedPostIds = new Set(userLikes.map((like) => toStringId(like.postId)));
+
+            const postsWithLikeStatus = await Promise.all(posts.map(async (post) => {
+                const plain = post.toObject();
+                const likeCount = await LikeMongo.countDocuments({ postId: plain._id });
+                return {
+                    ...plain,
+                    isLikedByCurrentUser: likedPostIds.has(toStringId(plain._id)),
+                    likeCount
+                };
+            }));
+
+            return res.status(200).json(postsWithLikeStatus);
+        }
 
         const posts = await Post.findAll({
             where: { userId: targetUserId },
@@ -252,6 +433,57 @@ router.post('/:id/like', auth, async (req, res) => {
     const postId = req.params.id;
     const likerUserId = req.user.id;
     try {
+        if (isMongo()) {
+            if (!mongoose.Types.ObjectId.isValid(postId)) {
+                return res.status(400).json({ msg: 'Invalid post id.' });
+            }
+
+            const existingLike = await LikeMongo.findOne({ userId: likerUserId, postId });
+            if (existingLike) {
+                return res.status(409).json({ msg: 'You have already liked this post.' });
+            }
+
+            const post = await PostMongo.findById(postId);
+            if (!post) {
+                return res.status(404).json({ msg: 'Post not found.' });
+            }
+
+            await LikeMongo.create({ userId: likerUserId, postId });
+
+            const author = await UserMongo.findById(post.userId);
+            if (author) {
+                author.user_xp += 5;
+                await author.save();
+
+                if (toStringId(likerUserId) !== toStringId(post.userId)) {
+                    await NotificationMongo.create({
+                        userId: post.userId,
+                        senderId: likerUserId,
+                        type: 'like',
+                        message: 'liked your post',
+                        postId,
+                        read: false
+                    });
+                }
+            }
+
+            emitDataChanged({
+                scope: 'likes',
+                action: 'created',
+                postId,
+                userId: toStringId(likerUserId),
+                targetUserId: toStringId(post.userId)
+            });
+            emitUserDataChanged(post.userId, {
+                scope: 'notifications',
+                action: 'new-like',
+                postId,
+                senderId: toStringId(likerUserId)
+            });
+
+            return res.status(200).json({ message: 'Post liked successfully! Author awarded XP.' });
+        }
+
         const existingLike = await Like.findOne({ where: { userId: likerUserId, postId: postId } });
         if (existingLike) {
             return res.status(409).json({ msg: 'You have already liked this post.' });
@@ -278,6 +510,19 @@ router.post('/:id/like', auth, async (req, res) => {
                 });
             }
         }
+        emitDataChanged({
+            scope: 'likes',
+            action: 'created',
+            postId,
+            userId: likerUserId,
+            targetUserId: post.userId
+        });
+        emitUserDataChanged(post.userId, {
+            scope: 'notifications',
+            action: 'new-like',
+            postId,
+            senderId: likerUserId
+        });
         return res.status(200).json({ message: 'Post liked successfully! Author awarded XP.' });
     } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {

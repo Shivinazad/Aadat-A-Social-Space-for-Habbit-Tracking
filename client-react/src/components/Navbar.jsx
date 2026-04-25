@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { notificationsAPI } from '../services/api';
+import { subscribeToDataChanges } from '../services/socket';
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -12,10 +13,28 @@ const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const notificationRef = useRef(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const getUserId = (targetUser) => targetUser?.id || targetUser?._id;
 
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+
+      const currentUserId = getUserId(user);
+      if (event.userId && String(event.userId) !== String(currentUserId)) {
+        return;
+      }
+
+      if (['notifications', 'likes', 'posts'].includes(event.scope)) {
+        fetchNotifications();
+      }
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   useEffect(() => {
     document.body.classList.toggle('light-mode', theme === 'light');

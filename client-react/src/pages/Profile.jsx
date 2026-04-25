@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { achievementsAPI, postsAPI, authAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import { subscribeToDataChanges } from '../services/socket';
 import '../home.css';
 import { useParams } from 'react-router-dom';
 
@@ -11,7 +12,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const params = useParams();
   const viewingUserId = params.id;
-  const isOwnProfile = !viewingUserId || String(viewingUserId) === String(user?.id);
+  const getUserId = (targetUser) => targetUser?.id || targetUser?._id;
+  const getPostId = (post) => post?.id || post?._id;
+  const isOwnProfile = !viewingUserId || String(viewingUserId) === String(getUserId(user));
   const [achievements, setAchievements] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +32,7 @@ const Profile = () => {
 
   useEffect(() => {
     // Decide which user's data to load: current user or a public user by id
-    const targetId = viewingUserId || user?.id;
+    const targetId = viewingUserId || getUserId(user);
     if (viewingUserId) {
       fetchViewedUser(viewingUserId);
     } else {
@@ -40,6 +43,27 @@ const Profile = () => {
       fetchPosts(targetId);
       fetchStats(targetId);
     }
+  }, [user, viewingUserId]);
+
+  useEffect(() => {
+    const targetId = viewingUserId || getUserId(user);
+    if (!targetId) return undefined;
+
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+
+      if (event.userId && String(event.userId) !== String(targetId)) {
+        return;
+      }
+
+      if (['posts', 'likes', 'habits', 'dashboard', 'profile', 'achievements'].includes(event.scope)) {
+        fetchPosts();
+        fetchStats(targetId);
+        fetchAchievements(targetId);
+      }
+    });
+
+    return unsubscribe;
   }, [user, viewingUserId]);
 
   const fetchViewedUser = async (id) => {
@@ -115,7 +139,7 @@ const Profile = () => {
 
   const fetchPosts = async () => {
     try {
-      const targetId = viewingUserId || user.id;
+      const targetId = viewingUserId || getUserId(user);
       console.log('Fetching posts for user:', targetId);
       const response = await postsAPI.getUserPosts(targetId);
       console.log('Posts API response:', response);
@@ -131,14 +155,15 @@ const Profile = () => {
         setPosts(sortedPosts);
         // If we're viewing another user's profile but `viewedUser` wasn't set (server fetch may have failed),
         // use the author info attached to posts as a reliable fallback
-        if (viewingUserId && (!viewedUser || !viewedUser.id) && sortedPosts.length > 0 && sortedPosts[0].User) {
+        const firstPostAuthor = sortedPosts[0]?.userId || sortedPosts[0]?.User;
+        if (viewingUserId && !getUserId(viewedUser) && sortedPosts.length > 0 && firstPostAuthor) {
           // Use the author info from the post as an immediate fallback so the UI
           // shows a username/avatar quickly, but then try to fetch the full
           // public profile (which includes `user_xp` and `user_level`) so the
           // Total XP and Level cards show correct values.
-          setViewedUser(sortedPosts[0].User);
+          setViewedUser(firstPostAuthor);
           try {
-            const fullProfile = await authAPI.getUserById(sortedPosts[0].User.id);
+            const fullProfile = await authAPI.getUserById(getUserId(firstPostAuthor));
             if (fullProfile && fullProfile.data) {
               setViewedUser(prev => ({ ...prev, ...fullProfile.data }));
             }
@@ -162,7 +187,7 @@ const Profile = () => {
       await postsAPI.like(postId);
       // Update the post in the local state
       setPosts(posts.map(post => 
-        post.id === postId 
+        String(getPostId(post)) === String(postId)
           ? { 
               ...post, 
               isLikedByCurrentUser: true,
@@ -368,57 +393,62 @@ const Profile = () => {
                   </p>
                 </div>
               ) : (
-                posts.map((post) => (
-                  <div key={post.id} className="post-card">
-                    <div className="post-header">
-                      <div className="post-author-info">
-                        <div className="post-avatar">{getAvatarElement(post.User || viewedUser)}</div>
-                        <div className="post-meta">
-                          <div className="post-author-name">{post.User?.username || viewedUser?.username || user?.username}</div>
-                          <div className="post-date">
-                            {new Date(post.createdAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                posts.map((post) => {
+                  const author = post.userId || post.User;
+                  const habit = post.habitId || post.Habit;
+
+                  return (
+                    <div key={getPostId(post)} className="post-card">
+                      <div className="post-header">
+                        <div className="post-author-info">
+                          <div className="post-avatar">{getAvatarElement(author || viewedUser)}</div>
+                          <div className="post-meta">
+                            <div className="post-author-name">{author?.username || viewedUser?.username || user?.username}</div>
+                            <div className="post-date">
+                              {new Date(post.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
                           </div>
                         </div>
+                        {habit && (
+                          <div className="post-habit-badge">
+                            🎯 {habit.habitTitle}
+                          </div>
+                        )}
                       </div>
-                      {post.Habit && (
-                        <div className="post-habit-badge">
-                          🎯 {post.Habit.habitTitle}
+                      {post.content && (
+                        <div className="post-content">
+                          <p>{post.content}</p>
                         </div>
                       )}
-                    </div>
-                    {post.content && (
-                      <div className="post-content">
-                        <p>{post.content}</p>
+                      <div className="post-actions">
+                        <button 
+                          className={`btn-like ${post.isLikedByCurrentUser ? 'liked' : ''}`}
+                          onClick={() => !post.isLikedByCurrentUser && handleLike(getPostId(post))}
+                          disabled={post.isLikedByCurrentUser}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path 
+                              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
+                              stroke="currentColor" 
+                              strokeWidth="1.5" 
+                              fill={post.isLikedByCurrentUser ? 'currentColor' : 'none'}
+                            />
+                          </svg>
+                          {post.isLikedByCurrentUser ? 'Liked' : 'Like'}
+                        </button>
+                        <span className="post-stat">
+                          ❤️ {post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}
+                        </span>
                       </div>
-                    )}
-                    <div className="post-actions">
-                      <button 
-                        className={`btn-like ${post.isLikedByCurrentUser ? 'liked' : ''}`}
-                        onClick={() => !post.isLikedByCurrentUser && handleLike(post.id)}
-                        disabled={post.isLikedByCurrentUser}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path 
-                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
-                            stroke="currentColor" 
-                            strokeWidth="1.5" 
-                            fill={post.isLikedByCurrentUser ? 'currentColor' : 'none'}
-                          />
-                        </svg>
-                        {post.isLikedByCurrentUser ? 'Liked' : 'Like'}
-                      </button>
-                      <span className="post-stat">
-                        ❤️ {post.likeCount || 0} {post.likeCount === 1 ? 'like' : 'likes'}
-                      </span>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </section>

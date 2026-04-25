@@ -3,6 +3,14 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const { UserMongo } = require('../models-mongo');
+
+const engine = 'mongo';
+const isMongo = () => engine === 'mongo';
+
+const findUserById = (id) => (isMongo() ? UserMongo.findById(id) : User.findByPk(id));
+const findUserByEmail = (email) => (isMongo() ? UserMongo.findOne({ email }) : User.findOne({ where: { email } }));
+const createUser = (payload) => (isMongo() ? UserMongo.create(payload) : User.create(payload));
 
 // Serialize user for session
 passport.serializeUser((user, done) => {
@@ -12,7 +20,7 @@ passport.serializeUser((user, done) => {
 // Deserialize user from session
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await User.findByPk(id);
+        const user = await findUserById(id);
         done(null, user);
     } catch (error) {
         done(error, null);
@@ -26,20 +34,18 @@ passport.use(new GoogleStrategy({
     callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/users/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Check if user exists
-        let user = await User.findOne({ where: { email: profile.emails[0].value } });
+        const email = profile.emails[0].value;
+        let user = await findUserByEmail(email);
 
         if (user) {
-            // User exists, return user
             return done(null, user);
         } else {
-            // Create new user with hashed password
             const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
-            user = await User.create({
-                username: profile.displayName || profile.emails[0].value.split('@')[0],
-                email: profile.emails[0].value,
+            user = await createUser({
+                username: profile.displayName || email.split('@')[0],
+                email,
                 password: hashedPassword,
                 avatar: profile.photos[0]?.value || null
             });
@@ -59,23 +65,19 @@ passport.use(new GitHubStrategy({
     scope: ['user:email']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Get primary email from GitHub profile
         const email = profile.emails && profile.emails.length > 0 
             ? profile.emails.find(e => e.primary)?.value || profile.emails[0].value
-            : `${profile.username}@github.com`; // Fallback if no email
+            : `${profile.username}@github.com`;
 
-        // Check if user exists
-        let user = await User.findOne({ where: { email } });
+        let user = await findUserByEmail(email);
 
         if (user) {
-            // User exists, return user
             return done(null, user);
         } else {
-            // Create new user with hashed password
             const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             
-            user = await User.create({
+            user = await createUser({
                 username: profile.username || profile.displayName || email.split('@')[0],
                 email: email,
                 password: hashedPassword,

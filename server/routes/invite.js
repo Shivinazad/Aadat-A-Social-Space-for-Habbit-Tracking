@@ -1,14 +1,24 @@
 const express = require('express');
 const User = require('../models/User');
+const { UserMongo } = require('../models-mongo');
 const auth = require('../middleware/auth');
 const { sendInvitationEmail } = require('../emailService');
+const { getClientUrl } = require('../utils/urls');
 const router = express.Router();
+const engine = 'mongo';
+
+const findSenderById = (id) => (engine === 'mongo' ? UserMongo.findById(id) : User.findByPk(id));
+const findUserByEmail = (email) => (engine === 'mongo' ? UserMongo.findOne({ email }) : User.findOne({ where: { email } }));
 
 // POST / - Send email invitation
 router.post('/', auth, async (req, res) => {
     try {
         const { email } = req.body;
-        const sender = await User.findByPk(req.user.id);
+        const sender = await findSenderById(req.user.id);
+
+        if (!sender) {
+            return res.status(404).json({ msg: 'Sender not found.' });
+        }
 
         if (!email) {
             return res.status(400).json({ msg: 'Email address is required.' });
@@ -19,7 +29,7 @@ router.post('/', auth, async (req, res) => {
             return res.status(400).json({ msg: 'Invalid email address.' });
         }
 
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await findUserByEmail(email);
         if (existingUser) {
             return res.status(409).json({ msg: 'This user is already on Aadat!' });
         }
@@ -37,7 +47,7 @@ router.post('/', auth, async (req, res) => {
                 });
             } catch (emailError) {
                 console.error('Email sending failed:', emailError.message || emailError);
-                const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
+                const inviteLink = getClientUrl();
                 res.status(200).json({
                     message: `Email service unavailable. Here's your invite link for ${email}`,
                     invitedEmail: email,
@@ -47,7 +57,7 @@ router.post('/', auth, async (req, res) => {
                 });
             }
         } else {
-            const inviteLink = process.env.CLIENT_URL || 'http://localhost:5173';
+            const inviteLink = getClientUrl();
             res.status(200).json({
                 message: `Invite link created for ${email}!`,
                 invitedEmail: email,

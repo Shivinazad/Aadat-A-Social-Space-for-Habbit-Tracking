@@ -7,6 +7,8 @@ import { FiArrowRight, FiMail, FiLock, FiUser, FiCheck, FiAlertCircle, FiSun, Fi
 import axios from 'axios';
 import '../Login.css';
 
+const API_ORIGIN = import.meta.env.PROD ? '' : 'http://localhost:3000';
+
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showOTPVerification, setShowOTPVerification] = useState(false);
@@ -31,9 +33,7 @@ const Login = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Use VITE_API_URL for production (Render) consistency. Fallback to localhost in dev.
-        const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
-        const response = await axios.get(`${API_BASE_URL}/api/stats/public`);
+        const response = await axios.get(`${API_ORIGIN}/api/stats/public`);
 
         // Defensive: ensure the response is an object with numeric fields.
         const data = response?.data;
@@ -133,8 +133,7 @@ const Login = () => {
         navigate('/dashboard');
       } else {
         // Send OTP for registration
-        const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
-        const response = await axios.post(`${API_BASE_URL}/api/users/register/send-otp`, {
+        const response = await axios.post(`${API_ORIGIN}/api/users/register/send-otp`, {
           username: formData.username,
           email: formData.email,
           password: formData.password,
@@ -167,8 +166,7 @@ const Login = () => {
     setSuccess('');
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
-      const response = await axios.post(`${API_BASE_URL}/api/users/register/verify-otp`, {
+      const response = await axios.post(`${API_ORIGIN}/api/users/register/verify-otp`, {
         email: otpData.email,
         otp: otpData.otp,
       });
@@ -197,8 +195,7 @@ const Login = () => {
     setSuccess('');
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
-      const response = await axios.post(`${API_BASE_URL}/api/users/register/resend-otp`, {
+      const response = await axios.post(`${API_ORIGIN}/api/users/register/resend-otp`, {
         email: otpData.email,
       });
       
@@ -689,13 +686,12 @@ const Login = () => {
 
 
               <div className="social-buttons">
-                {/** Use VITE_API_URL for Render/production, fallback to localhost for dev */}
+                {/** Use the shared API base for production or local dev */}
                 {(() => {
-                  const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://aadat-app.onrender.com' : 'http://localhost:3000');
                   return <>
                     <motion.button
                       className="social-btn"
-                      onClick={() => window.location.href = `${API_URL}/api/users/auth/google`}
+                      onClick={() => window.location.href = `${API_ORIGIN}/api/users/auth/google`}
                       whileTap={{ scale: 0.98 }}
                     >
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -705,7 +701,7 @@ const Login = () => {
                     </motion.button>
                     <motion.button
                       className="social-btn"
-                      onClick={() => window.location.href = `${API_URL}/api/users/auth/github`}
+                      onClick={() => window.location.href = `${API_ORIGIN}/api/users/auth/github`}
                       whileTap={{ scale: 0.98 }}
                     >
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">

@@ -5,14 +5,27 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { FiAward, FiTrendingUp } from 'react-icons/fi';
+import { subscribeToDataChanges } from '../services/socket';
 import '../home.css';
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const getUserId = (targetUser) => targetUser?.id || targetUser?._id;
 
   useEffect(() => {
     fetchLeaderboard();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (!event?.scope) return;
+      if (['posts', 'likes', 'habits', 'dashboard', 'profile'].includes(event.scope)) {
+        fetchLeaderboard();
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   const fetchLeaderboard = async () => {
@@ -197,7 +210,7 @@ const Leaderboard = () => {
                   ) : (
                     leaderboard.map((user, index) => (
                       <motion.tr 
-                        key={user.id}
+                        key={getUserId(user)}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: 0.8 + (index * 0.05) }}

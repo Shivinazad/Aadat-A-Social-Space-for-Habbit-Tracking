@@ -101,7 +101,7 @@ Aadat/
 
 ### **Database**
 - **Development:** MySQL (localhost)
-- **Production:** PostgreSQL (Render)
+- **Production:** MongoDB Atlas
 
 ---
 
@@ -232,7 +232,7 @@ Post ──1:M──> Notification
      'http://localhost:5173',
      'http://localhost:5174',
      'http://localhost:3000',
-     'https://aadat-app.onrender.com',
+    'https://your-app.vercel.app',
      process.env.CLIENT_URL
    ]
    ```
@@ -611,7 +611,7 @@ Scope: user:email
 
 ## 🚀 Deployment Configuration
 
-### **Platform:** Render (Free Tier)
+### **Platform:** Vercel + MongoDB Atlas
 
 ### **Services:**
 1. **PostgreSQL Database**
@@ -637,7 +637,7 @@ cd server && npm start
 DATABASE_URL=<postgresql-connection-string>
 JWT_SECRET=<strong-secret-key>
 NODE_ENV=production
-CLIENT_URL=https://aadat-app.onrender.com
+CLIENT_URL=https://your-app.vercel.app
 EMAIL_USER=<gmail-address>
 EMAIL_PASSWORD=<gmail-app-password>
 GOOGLE_CLIENT_ID=<optional>
@@ -659,7 +659,7 @@ app.get(/.*/, (req, res) => {
 
 ### **Database Seeding:**
 ```bash
-# After deployment, run in Render Shell:
+# After deployment, run in your deployment shell:
 cd server
 node seed.js
 ```
@@ -810,7 +810,7 @@ This project demonstrates proficiency in:
 
 ## 🎯 Conclusion
 
-**Aadat** is a well-architected, feature-rich habit tracking application with strong social and gamification elements. The codebase demonstrates solid full-stack development practices with modern technologies. The project is production-ready and deployed on Render.
+**Aadat** is a well-architected, feature-rich habit tracking application with strong social and gamification elements. The codebase demonstrates solid full-stack development practices with modern technologies. The project is production-ready and deployed on the configured hosting platform.
 
 ### **Key Takeaways:**
 1. ✅ Clean separation between frontend and backend

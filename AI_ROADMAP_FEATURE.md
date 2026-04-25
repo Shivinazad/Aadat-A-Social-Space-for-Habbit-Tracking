@@ -232,19 +232,13 @@ Look for: `"All models were synchronized successfully"`
 
 ---
 
-## 🚀 Deployment (Render)
+## 🚀 Deployment
 
-### **Update Environment Variables on Render:**
+### **Update Environment Variables**
 
-1. Go to Render Dashboard
-2. Select your `aadat-app` service
-3. Go to **Environment** tab
-4. Add new variable:
-   ```
-   GEMINI_API_KEY = your_actual_gemini_api_key
-   ```
-5. Click **Save Changes**
-6. Service will auto-deploy
+1. Add your production variables in the hosting platform dashboard.
+2. Ensure `GEMINI_API_KEY` is set for the server environment.
+3. Redeploy after saving the changes.
 
 ---
 
