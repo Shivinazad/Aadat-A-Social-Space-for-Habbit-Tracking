@@ -25,18 +25,16 @@ const AuthCallback = () => {
       if (token) {
         localStorage.setItem('token', token);
         if (setToken) setToken(token);
-        if (fetchUser) {
-          try {
-            await fetchUser();
-          } catch (e) {
-            // ignore
-          }
+        try {
+          if (fetchUser) await fetchUser();
+        } catch (e) {
+          // ignore - dashboard will retry
         }
         setLoading(false);
-        window.location.href = '/dashboard';
+        navigate('/dashboard', { replace: true });
       } else {
         setLoading(false);
-        navigate('/login?error=no-token');
+        navigate('/login?error=no-token', { replace: true });
       }
     };
 
