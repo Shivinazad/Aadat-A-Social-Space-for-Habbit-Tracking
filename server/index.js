@@ -128,6 +128,17 @@ if (!isServerless) {
 
         server.listen(PORT, () => {
             console.log(`Server running on http://localhost:${PORT}`);
+
+            // Keep-alive: ping own /health endpoint every 14 min to prevent Render free-tier spin-down
+            if (renderUrl) {
+                const PING_INTERVAL = 14 * 60 * 1000;
+                setInterval(() => {
+                    fetch(`${renderUrl}/health`)
+                        .then(res => console.log(`[keep-alive] ping → ${res.status}`))
+                        .catch(err => console.error('[keep-alive] ping failed:', err.message));
+                }, PING_INTERVAL);
+                console.log(`[keep-alive] pinging ${renderUrl}/health every 14 min`);
+            }
         });
     });
 } else {
