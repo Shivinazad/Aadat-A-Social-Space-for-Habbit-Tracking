@@ -118,8 +118,8 @@ const EditProfile = () => {
   const handleCancel = async () => {
     // Ensure all changes are saved before navigating
     await fetchUser();
-    // Navigate to profile page with user ID to force refresh
-    navigate(`/profile/${user?.id}`, { replace: true });
+    // Navigate to own profile (no ID) so Profile page loads authenticated user's data
+    navigate('/profile', { replace: true });
   };
 
   return (
