@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const auth = require('../middleware/auth');
 const { calculateLevel } = require('../utils/levelUtils');
 const { emitDataChanged, emitUserDataChanged } = require('../realtime/socketEvents');
+const UserService = require('../services/UserService');
 const {
     PostMongo,
     UserMongo,
@@ -173,11 +174,8 @@ router.post('/', auth, async (req, res) => {
                 await habit.save();
             }
 
-            const user = await UserMongo.findById(userId);
-            if (user) {
-                user.user_xp += 10;
-                user.user_level = calculateLevel(user.user_xp);
-                await user.save();
+            if (userId) {
+                await UserService.awardXP(userId, 10);
             }
 
             try {
@@ -267,11 +265,8 @@ router.post('/', auth, async (req, res) => {
             habit.lastCheckinDate = new Date();
             await habit.save();
         }
-        const user = await User.findByPk(userId);
-        if (user) {
-            user.user_xp += 10;
-            user.user_level = calculateLevel(user.user_xp);
-            await user.save();
+        if (userId) {
+            await UserService.awardXP(userId, 10);
         }
 
         // Achievement Check Logic
@@ -444,8 +439,7 @@ router.post('/:id/like', auth, async (req, res) => {
 
             const author = await UserMongo.findById(post.userId);
             if (author) {
-                author.user_xp += 5;
-                await author.save();
+                await UserService.awardXP(post.userId, 5);
 
                 if (toStringId(likerUserId) !== toStringId(post.userId)) {
                     await NotificationMongo.create({
@@ -487,8 +481,7 @@ router.post('/:id/like', auth, async (req, res) => {
         await Like.create({ userId: likerUserId, postId: postId });
         const author = await User.findByPk(post.userId);
         if (author) {
-            author.user_xp += 5;
-            await author.save();
+            await UserService.awardXP(post.userId, 5);
 
             if (likerUserId !== post.userId) {
                 const liker = await User.findByPk(likerUserId);
