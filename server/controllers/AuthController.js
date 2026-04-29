@@ -1,0 +1,82 @@
+const bcrypt = require('bcrypt');
+const AuthService = require('../services/AuthService');
+const UserService = require('../services/UserService');
+const { sendOTPEmail } = require('../emailService');
+const { UserMongo, HabitMongo, CompletionMongo } = require('../models-mongo');
+
+class AuthController {
+    static async sendOTP(req, res) {
+        try {
+            const { username, email, password } = req.body;
+            if (!username || !email || !password) return res.status(400).json({ message: 'Missing fields' });
+            const existingUser = await AuthService.getUserByEmail(email);
+            if (existingUser) return res.status(409).json({ message: 'Email in use' });
+            const existingUsername = await AuthService.getUserByUsername(username);
+            if (existingUsername) return res.status(409).json({ message: 'Username taken' });
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await AuthService.createOTP(email, otp, username, hashedPassword);
+            res.status(200).json({ message: 'OTP sent', email });
+            sendOTPEmail(email, otp, username).catch(err => console.error('OTP error:', err));
+        } catch (error) {
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+
+    static async verifyOTP(req, res) {
+        try {
+            const { email, otp } = req.body;
+            const otpRecord = await AuthService.verifyOTP(email, otp);
+            if (!otpRecord || new Date() > otpRecord.expiresAt) return res.status(400).json({ message: 'Invalid OTP' });
+            const user = await AuthService.createUser({ username: otpRecord.username, email: otpRecord.email, password: otpRecord.password });
+            otpRecord.verified = true;
+            await otpRecord.save();
+            const token = AuthService.generateToken(user);
+            res.status(201).json({ token, user: { id: user._id, username: user.username } });
+        } catch (error) {
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+
+    static async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            const user = await AuthService.getUserByEmail(email);
+            if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ message: 'Invalid credentials' });
+            const token = AuthService.generateToken(user);
+            res.status(200).json({ token, user: { id: user._id, username: user.username } });
+        } catch (error) {
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+
+    static async getProfile(req, res) {
+        try {
+            const user = await UserService.getProfile(req.user.id);
+            if (!user) return res.status(404).json({ message: 'User not found' });
+            res.json(user);
+        } catch (error) {
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+
+    static async updateProfile(req, res) {
+        try {
+            const { username, avatar, bio } = req.body;
+            const user = await UserMongo.findById(req.user.id);
+            if (!user) return res.status(404).json({ message: 'User not found' });
+            if (username && username !== user.username) {
+                if (await AuthService.getUserByUsername(username)) return res.status(409).json({ message: 'Username taken' });
+                user.username = username;
+            }
+            if (avatar) user.avatar = avatar;
+            if (bio !== undefined) user.bio = bio;
+            await user.save();
+            res.json({ message: 'Profile updated', user });
+        } catch (error) {
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+}
+
+module.exports = AuthController;
